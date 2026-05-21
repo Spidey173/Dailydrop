@@ -1,0 +1,1562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DailyDrop — Fresh Groceries Delivered in 10 Minutes</title>
+  <meta name="description" content="Order fresh groceries, vegetables, dairy, snacks and household essentials. Delivered to your door in 10 minutes.">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="icon" type="image/png" href="./static/logo1.webp">
+  <link rel="stylesheet" href="./design-system.css">
+  <script>
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+
+  <style>
+    /* ── INDEX PAGE PREMIUM OVERRIDES ── */
+
+  body { background: var(--surface-1); overflow-x: hidden; }
+
+  /* ── HERO SLIDER ── */
+  .hero-slider {
+    position: relative;
+    height: 70vh;
+    max-height: 680px;
+    min-height: 420px;
+    overflow: hidden;
+    margin: var(--space-5);
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-xl), 0 8px 32px rgba(0,0,0,0.06);
+    border: 1px solid var(--border);
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transform: scale(1.02);
+    transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1), transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+  }
+
+  .slide.active {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+  }
+
+  .slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  .slide::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    transition: background var(--duration-base) var(--ease-out);
+  }
+
+  [data-theme="light"] .slide::after {
+    background: linear-gradient(
+      105deg,
+      rgba(15, 23, 42, 0.25) 0%,
+      rgba(15, 23, 42, 0.12) 50%,
+      rgba(15, 23, 42, 0.02) 100%
+    );
+  }
+
+  [data-theme="dark"] .slide::after {
+    background: linear-gradient(
+      105deg,
+      rgba(15, 23, 42, 0.8) 0%,
+      rgba(15, 23, 42, 0.45) 50%,
+      rgba(15, 23, 42, 0.15) 100%
+    );
+  }
+
+  .slide-content {
+    position: absolute;
+    bottom: var(--space-10);
+    left: var(--space-10);
+    z-index: 3;
+    max-width: 520px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: var(--space-8);
+    border-radius: var(--radius-2xl);
+    transition: background var(--duration-base) var(--ease-out), 
+                border-color var(--duration-base) var(--ease-out), 
+                box-shadow var(--duration-base) var(--ease-out);
+  }
+
+  [data-theme="light"] .slide-content {
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.65);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.02);
+    color: #0f172a;
+  }
+
+  [data-theme="dark"] .slide-content {
+    background: rgba(15, 23, 42, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    color: #f8fafc;
+  }
+
+  .slide-content h2 {
+    font-family: var(--font);
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    margin: 0 0 var(--space-4) 0;
+    transition: color var(--duration-base) var(--ease-out);
+  }
+
+  [data-theme="light"] .slide-content h2 {
+    color: #0f172a;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  }
+
+  [data-theme="dark"] .slide-content h2 {
+    color: #f8fafc;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35), 0 0 20px rgba(22, 163, 74, 0.12);
+  }
+
+  .slide-content p {
+    font-family: var(--font);
+    font-size: var(--text-sm);
+    line-height: 1.65;
+    margin: 0 0 var(--space-6) 0;
+    transition: color var(--duration-base) var(--ease-out);
+  }
+
+  [data-theme="light"] .slide-content p {
+    color: #334155;
+  }
+
+  [data-theme="dark"] .slide-content p {
+    color: #cbd5e1;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  }
+
+  .slide-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 12px 28px;
+    border-radius: var(--radius-full);
+    font-family: var(--font);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-bold);
+    letter-spacing: 0.01em;
+    text-decoration: none;
+    transform: translateY(14px);
+    opacity: 0;
+    transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.3s,
+                opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.3s,
+                background-color var(--duration-base) var(--ease-out),
+                color var(--duration-base) var(--ease-out),
+                box-shadow var(--duration-base) var(--ease-out);
+  }
+
+  [data-theme="light"] .slide-btn {
+    background: #0f172a;
+    color: white;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.15);
+  }
+
+  [data-theme="dark"] .slide-btn {
+    background: white;
+    color: #0f172a;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+  }
+
+  .slide.active .slide-btn {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  .slide-btn:hover {
+    background: var(--brand);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-brand);
+  }
+
+
+  .slider-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 var(--space-6);
+    z-index: 3;
+    pointer-events: none;
+  }
+
+  .slider-arrow {
+    width: 42px;
+    height: 42px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: white;
+    border-radius: 50%;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    cursor: pointer;
+    transition: all 0.25s var(--ease-out);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    pointer-events: all;
+  }
+
+  .slider-arrow:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: scale(1.08);
+  }
+
+  .slider-dots {
+    position: absolute;
+    bottom: var(--space-6);
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: var(--space-2);
+    z-index: 3;
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-full);
+    background: rgba(255, 255, 255, 0.35);
+    cursor: pointer;
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .dot.active {
+    background: white;
+    width: 26px;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+  }
+
+  /* ── CATEGORIES SECTION ── */
+  .categories-section {
+    background: var(--surface-0);
+    padding: var(--space-12) 0;
+    margin-top: var(--space-8);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .categories-section .container {
+    max-width: var(--container-xl);
+    margin: 0 auto;
+    padding: 0 var(--space-6);
+  }
+
+  .section-title {
+    font-size: var(--text-2xl);
+    font-weight: var(--weight-bold);
+    color: var(--text-primary);
+    letter-spacing: -0.4px;
+    margin-bottom: var(--space-6);
+    padding-bottom: 0;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .section-title::before {
+    content: '';
+    width: 4px;
+    height: 22px;
+    background: linear-gradient(to bottom, var(--brand), var(--brand-dark));
+    border-radius: var(--radius-full);
+    display: inline-block;
+  }
+
+  .categories-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-5);
+  }
+
+  .category-card {
+    display: block;
+    background: var(--surface-0);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-card);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    text-decoration: none;
+    color: var(--text-primary);
+    cursor: pointer;
+  }
+
+  .category-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--border-brand);
+  }
+
+  .image-container {
+    position: relative;
+    height: 160px;
+    overflow: hidden;
+    background: var(--surface-2);
+  }
+
+  .category-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .category-card:hover img { transform: scale(1.06); }
+
+  .category-card h3 {
+    padding: var(--space-4);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semi);
+    color: var(--text-primary);
+    text-align: center;
+    background: var(--surface-0);
+    border-top: 1px solid var(--border);
+    transition: color 0.2s;
+    margin: 0;
+    font-family: var(--font);
+  }
+
+  .category-card:hover h3 { color: var(--brand); }
+
+  /* ── PRODUCTS SECTION ── */
+  .products-container {
+    max-width: var(--container-xl);
+    margin: 0 auto;
+    padding: 0 var(--space-6);
+  }
+
+  .products-title {
+    font-family: var(--font);
+    font-size: var(--text-2xl);
+    font-weight: var(--weight-bold);
+    color: var(--text-primary);
+    letter-spacing: -0.4px;
+    margin: var(--space-12) 0 var(--space-6);
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .products-title::before {
+    content: '';
+    width: 4px;
+    height: 22px;
+    background: linear-gradient(to bottom, var(--brand), var(--brand-dark));
+    border-radius: var(--radius-full);
+    display: inline-block;
+  }
+
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: var(--space-5);
+    padding-bottom: var(--space-8);
+  }
+
+  .product-card {
+    background: var(--surface-0);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: var(--shadow-card);
+  }
+
+  .product-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--border-brand);
+  }
+
+  .product-image {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: contain;
+    padding: var(--space-4);
+    background: var(--surface-2);
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .product-card:hover .product-image { transform: scale(1.04); }
+
+  .product-details {
+    padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+  }
+
+  .product-title {
+    font-family: var(--font);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-bold);
+    color: var(--text-primary);
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .product-category {
+    font-family: var(--font);
+    font-size: 10px;
+    color: var(--text-muted);
+    font-weight: var(--weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .product-pricing {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 2px;
+  }
+
+  .current-price {
+    font-family: var(--font);
+    font-size: var(--text-base);
+    font-weight: var(--weight-bold);
+    color: var(--brand);
+    letter-spacing: -0.2px;
+  }
+
+  .original-price {
+    font-family: var(--font);
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    text-decoration: line-through;
+    font-weight: var(--weight-medium);
+  }
+
+  .discount {
+    font-size: 10px;
+    font-weight: var(--weight-bold);
+    color: var(--brand);
+    background: var(--brand-lighter);
+    padding: 2px 7px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--brand-light);
+    font-family: var(--font);
+  }
+
+  .add-to-cart-btn {
+    margin-top: auto;
+    width: 100%;
+    padding: 10px;
+    background: var(--brand-lighter);
+    color: var(--brand);
+    border: 1.5px solid var(--brand-light);
+    border-radius: var(--radius-md);
+    font-family: var(--font);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semi);
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: all 0.22s var(--ease-out);
+    margin-top: var(--space-3);
+  }
+
+  .add-to-cart-btn:hover {
+    background: var(--brand);
+    color: white;
+    border-color: var(--brand);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-brand);
+  }
+
+  /* Search results */
+  .search-results-container {
+    max-width: var(--container-xl);
+    margin: 0 auto;
+    padding: 0 var(--space-6);
+  }
+
+  .no-results {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: var(--space-16);
+    color: var(--text-muted);
+  }
+
+  .no-results i {
+    font-size: 2.5rem;
+    display: block;
+    margin-bottom: var(--space-4);
+    opacity: 0.35;
+  }
+
+  .no-results p {
+    font-size: var(--text-lg);
+    font-weight: var(--weight-medium);
+    font-family: var(--font);
+  }
+
+  /* Scroll to top */
+  .scroll-to-top {
+    position: fixed;
+    bottom: var(--space-6);
+    right: var(--space-6);
+    width: 44px;
+    height: 44px;
+    background: var(--brand);
+    color: white;
+    border-radius: 50%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--text-base);
+    box-shadow: 0 4px 16px rgba(22,163,74,0.35);
+    transition: all 0.25s var(--ease-out);
+    z-index: 999;
+    border: none;
+    cursor: pointer;
+  }
+
+  .scroll-to-top.show { display: flex; }
+  .scroll-to-top:hover { background: var(--brand-dark); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(22,163,74,0.4); }
+
+  /* ── FOOTER ── */
+  .footer {
+    background: var(--surface-dark);
+    color: var(--text-on-dark);
+    padding: var(--space-16) 0 0;
+    margin-top: var(--space-16);
+  }
+
+  .footer .container {
+    max-width: var(--container-2xl);
+    margin: 0 auto;
+    padding: 0 var(--space-8);
+  }
+
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: var(--space-10);
+    padding-bottom: var(--space-10);
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+  }
+
+  .footer-column { min-width: 0; }
+
+  .footer-title {
+    font-family: var(--font);
+    font-size: var(--text-xs);
+    font-weight: var(--weight-semi);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.38);
+    margin-bottom: var(--space-5);
+    position: static;
+    padding-bottom: 0;
+  }
+
+  .footer-title::after { display: none; }
+
+  .footer-column:first-child .footer-title {
+    font-size: var(--text-xl);
+    font-weight: var(--weight-bold);
+    color: white;
+    letter-spacing: -0.3px;
+    text-transform: none;
+    margin-bottom: var(--space-4);
+  }
+
+  .footer-description {
+    font-family: var(--font);
+    font-size: var(--text-sm);
+    color: rgba(255,255,255,0.48);
+    line-height: 1.75;
+    max-width: 280px;
+    margin: 0;
+  }
+
+  .footer-links, .footer-contact {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .footer-links a {
+    font-family: var(--font);
+    font-size: var(--text-sm);
+    color: rgba(255,255,255,0.58);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .footer-links a:hover { color: var(--brand-light); }
+
+  .footer-contact li {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    font-family: var(--font);
+    font-size: var(--text-sm);
+    color: rgba(255,255,255,0.58);
+    line-height: 1.5;
+  }
+
+  .footer-contact i {
+    color: var(--brand);
+    width: 14px;
+    flex-shrink: 0;
+    margin-top: 3px;
+  }
+
+  .footer-bottom {
+    padding: var(--space-5) 0;
+    text-align: center;
+    font-family: var(--font);
+    font-size: var(--text-xs);
+    color: rgba(255,255,255,0.28);
+    border-top: none;
+    margin-top: 0;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 1024px) {
+    .categories-grid { grid-template-columns: repeat(3, 1fr); }
+    .footer-grid { grid-template-columns: 1fr 1fr; gap: var(--space-8); }
+  }
+
+  @media (max-width: 768px) {
+    .navbar { padding: 0 var(--space-4); gap: var(--space-3); }
+    .hero-slider { margin: var(--space-3); height: 58vw; min-height: 300px; border-radius: var(--radius-xl); }
+    .slide-content {
+      bottom: var(--space-6);
+      left: var(--space-6);
+      right: var(--space-6);
+      max-width: none;
+      padding: var(--space-6);
+      border-radius: var(--radius-xl);
+    }
+    .slide-content p { display: none; }
+    .categories-grid { grid-template-columns: repeat(3, 1fr); }
+    .products-container, .search-results-container { padding: 0 var(--space-4); }
+    .footer .container { padding: 0 var(--space-5); }
+    .footer-grid { grid-template-columns: 1fr 1fr; gap: var(--space-6); }
+    .slider-arrow { width: 36px; height: 36px; font-size: 0.9rem; }
+    .hero-slider { margin-top: 0; }
+  }
+
+  @media (max-width: 480px) {
+    .hero-slider { margin: var(--space-2); height: 62vw; border-radius: var(--radius-lg); }
+    .slide-content {
+      bottom: var(--space-4);
+      left: var(--space-4);
+      right: var(--space-4);
+      padding: var(--space-4) var(--space-5);
+      border-radius: var(--radius-lg);
+    }
+    .slide-content h2 {
+      font-size: 1.45rem;
+      margin-bottom: var(--space-2);
+    }
+    .slide-btn {
+      padding: 10px 20px;
+      font-size: var(--text-xs);
+    }
+    .categories-grid { grid-template-columns: repeat(2, 1fr); gap: var(--space-3); }
+    .footer-grid { grid-template-columns: 1fr; }
+    .search-bar { max-width: 150px; }
+    .orders-link span { display: none; }
+    .products-grid { grid-template-columns: repeat(2, 1fr); gap: var(--space-3); }
+    .image-container { height: 140px; }
+  }
+
+  @keyframes slideIn {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  </style>
+</head>
+<body>
+  <nav class="ds-nav">
+    <div class="ds-nav-inner">
+      <a href="index.html" class="ds-logo">
+        <div class="ds-logo-icon">🛒</div>
+        <div class="ds-logo-text">Daily<span>Drop</span></div>
+      </a>
+      <div class="ds-search">
+        <i class="fas fa-search ds-search-icon"></i>
+        <input type="text" id="searchInput" placeholder="Search products, categories..." />
+      </div>
+      <div class="ds-nav-actions" id="navActions">
+        <button class="theme-toggle-pill" id="theme-toggle" aria-label="Toggle theme">
+          <span class="theme-toggle-pill-thumb"></span>
+          <span class="theme-toggle-pill-icon light-icon"><i class="fas fa-sun"></i></span>
+          <span class="theme-toggle-pill-icon dark-icon"><i class="fas fa-moon"></i></span>
+        </button>
+        <a href="orders.html" class="btn-nav"><i class="fas fa-box"></i> <span>My Orders</span></a>
+        <a href="cart.html" class="btn-cart">
+          <i class="fas fa-shopping-bag"></i> Cart
+          <span class="cart-badge" id="cart-count">0</span>
+        </a>
+      </div>
+    </div>
+  </nav>
+      <section class="search-results-container" style="display: none;">
+        <h2 class="products-title">Search Results</h2>
+        <div class="products-grid" id="search-results-grid"></div>
+      </section>
+  <!-- Hero Slider -->
+  <div class="hero-slider">
+    <div class="slide active">
+      <img src="./static/slider/Vegetables.png" alt="Vegetables">
+      <div class="slide-content">
+        <h2>Fresh veggies, great deals!</h2>
+        <p>Experience the finest, farm-fresh vegetables, rich in flavor and nutrition every day!</p>
+        <a href="Vegetables.html" class="slide-btn">Explore Now</a>
+      </div>
+    </div>
+    <div class="slide">
+      <img src="./static/slider/dairy and breakfast.png" alt="Dairy and Breakfast">
+      <div class="slide-content">
+        <h2>Fresh dairy, perfect breakfasts!</h2>
+        <p>Discover rich, creamy dairy products and wholesome breakfast essentials to start your day right!</p>
+        <a href="dairy_breakfast.html" class="slide-btn">See What's Fresh</a>
+      </div>
+    </div>
+    <div class="slide">
+      <img src="./static/slider/snacks and beverages.png" alt="Snacks and Beverages">
+      <div class="slide-content">
+        <h2>Delicious snacks, refreshing beverages!</h2>
+        <p>Indulge in tasty snacks and refreshing beverages that are perfect for any time of the day!</p>
+        <a href="snacks_beverages.html" class="slide-btn">Find Your Favorites</a>
+      </div>
+    </div>
+    <div class="slide">
+      <img src="./static/slider/babycare.png" alt="Babycare">
+      <div class="slide-content">
+        <h2>Gentle care for your little one!</h2>
+        <p>Discover premium baby care products that nurture and protect your baby's delicate skin and health.</p>
+        <a href="baby_care.html" class="slide-btn">Shop Now</a>
+      </div>
+    </div>
+    <div class="slider-nav">
+      <button class="slider-arrow prev">←</button>
+      <button class="slider-arrow next">→</button>
+    </div>
+    <div class="slider-dots"></div>
+  </div>
+
+
+  <!-- Categories Section -->
+<section class="categories-section">
+  <div class="container">
+    <h2 class="section-title">Shop by Category</h2>
+    <div class="categories-grid">
+      <!-- Fruits & Vegetables -->
+      <a href="Vegetables.html" class="category-card">
+        <div class="image-container">
+          <img src="./static/image/vegetables.jpg" alt="Fruits & Vegetables">
+        </div>
+        <h3>Fruits & Vegetables</h3>
+      </a>
+
+      <!-- Dairy & Breakfast -->
+      <a href="dairy_breakfast.html" class="category-card">
+        <div class="image-container">
+          <img src="./static/image/dairy.jpg" alt="Dairy & Breakfast">
+        </div>
+        <h3>Dairy & Breakfast</h3>
+      </a>
+
+            <!-- Snacks & Beverages -->
+      <a href="snacks_beverages.html" class="category-card">
+        <div class="image-container">
+          <img src="./static/image/snaks.jpeg" alt="Snacks & Beverages">
+        </div>
+        <h3>Snacks & Beverages</h3>
+      </a>
+
+
+      <!-- Baby Care -->
+      <a href="baby_care.html" class="category-card">
+        <div class="image-container">
+          <img src="./static/image/baby.png" alt="Baby Care">
+        </div>
+        <h3>Baby Care</h3>
+      </a>
+
+
+
+
+      <!-- Personal Care -->
+      <a href="personal_care.html" class="category-card">
+        <div class="image-container">
+          <img src="./static/image/personalcare.jpg" alt="Personal Care">
+        </div>
+        <h3>Personal Care</h3>
+      </a>
+
+      <!-- Household Items -->
+      <a href="household_items.html" class="category-card">
+        <div class="image-container">
+          <img src="./static/image/household.jpeg" alt="Household Items">
+        </div>
+        <h3>Household Items</h3>
+      </a>
+
+
+
+      <!-- Home & Kitchen -->
+      <a href="home_kitchen.html" class="category-card">
+        <div class="image-container">
+          <img src="./static/image/kitchen.jpeg" alt="Home & Kitchen">
+        </div>
+        <h3>Home & Kitchen</h3>
+      </a>
+
+            <!-- Electronics -->
+      <a href="Grocery.html" class="category-card">
+        <div class="image-container">
+          <img src="./static/image/grocery.jpeg" alt="Grocery">
+        </div>
+        <h3>Grocery</h3>
+      </a>
+
+
+    </div>
+  </div>
+</section>
+<br>
+<br><section class="products-container active" id="all">
+  <h2 class="products-title">Popular Products</h2>
+  <div class="products-grid">
+
+    <!-- Tomato -->
+    <div class="product-card" data-title="Tomato" data-category="Fruits & Vegetables">
+      <img src="./static/FruitsandVegetables/Tomato.jpg" alt="Tomato" class="product-image" />
+      <div class="product-details">
+        <div class="product-title">Tomato (1kg)</div>
+        <div class="product-category">Fruits & Vegetables</div>
+        <div class="product-pricing">
+          <span class="current-price">Rs.50</span>
+          <span class="original-price">Rs.63</span>
+          <span class="discount">20% OFF</span>
+        </div>
+        <button class="add-to-cart-btn" onclick="addToCart('Tomato', 50, './static/FruitsandVegetables/Tomato.jpg')">ADD</button>
+      </div>
+    </div>
+
+    <!-- Brinjal -->
+    <div class="product-card" data-title="Brinjal" data-category="Fruits & Vegetables">
+      <img src="./static/FruitsandVegetables/Brinjal.jpeg" alt="Brinjal" class="product-image" />
+      <div class="product-details">
+        <div class="product-title">Brinjal (1kg)</div>
+        <div class="product-category">Fruits & Vegetables</div>
+        <div class="product-pricing">
+          <span class="current-price">Rs.50</span>
+          <span class="original-price">Rs.63</span>
+          <span class="discount">20% OFF</span>
+        </div>
+        <button class="add-to-cart-btn" onclick="addToCart('Brinjal', 50, './static/FruitsandVegetables/Brinjal.jpeg')">ADD</button>
+      </div>
+    </div>
+
+    <!-- Apples -->
+    <div class="product-card" data-title="Apples" data-category="Fruits & Vegetables">
+      <img src="./static/FruitsandVegetables/Apples.jpeg" alt="Apples" class="product-image" />
+      <div class="product-details">
+        <div class="product-title">Apples (1kg)</div>
+        <div class="product-category">Fruits & Vegetables</div>
+        <div class="product-pricing">
+          <span class="current-price">Rs.70</span>
+          <span class="original-price">Rs.88</span>
+          <span class="discount">20% OFF</span>
+        </div>
+        <button class="add-to-cart-btn" onclick="addToCart('Apples', 70, './static/FruitsandVegetables/Apples.jpeg')">ADD</button>
+      </div>
+    </div>
+
+    <!-- Capsicum -->
+    <div class="product-card" data-title="Capsicum" data-category="Fruits & Vegetables">
+      <img src="./static/FruitsandVegetables/Capsicum.jpeg" alt="Capsicum" class="product-image" />
+      <div class="product-details">
+        <div class="product-title">Capsicum (1kg)</div>
+        <div class="product-category">Fruits & Vegetables</div>
+        <div class="product-pricing">
+          <span class="current-price">Rs.40</span>
+          <span class="original-price">Rs.50</span>
+          <span class="discount">20% OFF</span>
+        </div>
+        <button class="add-to-cart-btn" onclick="addToCart('Capsicum', 40, './static/FruitsandVegetables/Capsicum.jpeg')">ADD</button>
+      </div>
+    </div>
+
+    <!-- Cauliflower -->
+    <div class="product-card" data-title="Cauliflower" data-category="Fruits & Vegetables">
+      <img src="./static/FruitsandVegetables/Cauliflower.jpeg" alt="Cauliflower" class="product-image" />
+      <div class="product-details">
+        <div class="product-title">Cauliflower (1 pc)</div>
+        <div class="product-category">Fruits & Vegetables</div>
+        <div class="product-pricing">
+          <span class="current-price">Rs.60</span>
+          <span class="original-price">Rs.75</span>
+          <span class="discount">20% OFF</span>
+        </div>
+        <button class="add-to-cart-btn" onclick="addToCart('Cauliflower', 60, './static/FruitsandVegetables/Cauliflower.jpeg')">ADD</button>
+      </div>
+    </div>
+
+    <!-- Brocolli -->
+    <div class="product-card" data-title="Brocolli" data-category="Fruits & Vegetables">
+      <img src="./static/FruitsandVegetables/Brocolli.jpeg" alt="Brocolli" class="product-image" />
+      <div class="product-details">
+        <div class="product-title">Brocolli (1 pc)</div>
+        <div class="product-category">Fruits & Vegetables</div>
+        <div class="product-pricing">
+          <span class="current-price">Rs.40</span>
+          <span class="original-price">Rs.50</span>
+          <span class="discount">20% OFF</span>
+        </div>
+        <button class="add-to-cart-btn" onclick="addToCart('Brocolli', 40, './static/FruitsandVegetables/Brocolli.jpeg')">ADD</button>
+      </div>
+    </div>
+
+    <!-- Pineapple -->
+    <div class="product-card" data-title="Pineapple" data-category="Fruits & Vegetables">
+      <img src="./static/FruitsandVegetables/Pineapple.jpeg" alt="Pineapple" class="product-image" />
+      <div class="product-details">
+        <div class="product-title">Pineapple (1 pc)</div>
+        <div class="product-category">Fruits & Vegetables</div>
+        <div class="product-pricing">
+          <span class="current-price">Rs.60</span>
+          <span class="original-price">Rs.75</span>
+          <span class="discount">20% OFF</span>
+        </div>
+        <button class="add-to-cart-btn" onclick="addToCart('Pineapple', 60, './static/FruitsandVegetables/Pineapple.jpeg')">ADD</button>
+      </div>
+    </div>
+
+    <!-- Kiwi (premium) -->
+    <div class="product-card" data-title="Kiwi" data-category="Fruits & Vegetables">
+      <img src="./static/FruitsandVegetables/Kiwi.jpeg" alt="Kiwi" class="product-image" />
+      <div class="product-details">
+        <div class="product-title">Kiwi (Premium, 500g)</div>
+        <div class="product-category">Fruits & Vegetables</div>
+        <div class="product-pricing">
+          <span class="current-price">Rs.100</span>
+          <span class="original-price">Rs.125</span>
+          <span class="discount">20% OFF</span>
+        </div>
+        <button class="add-to-cart-btn" onclick="addToCart('Kiwi', 100, './static/FruitsandVegetables/Kiwi.jpeg')">ADD</button>
+      </div>
+    </div>
+
+    <!-- Green apple -->
+    <div class="product-card" data-title="Green apple" data-category="Fruits & Vegetables">
+      <img src="./static/FruitsandVegetables/Green apple.jpeg" alt="Green apple" class="product-image" />
+      <div class="product-details">
+        <div class="product-title">Green Apple (1kg)</div>
+        <div class="product-category">Fruits & Vegetables</div>
+        <div class="product-pricing">
+          <span class="current-price">Rs.40</span>
+          <span class="original-price">Rs.50</span>
+          <span class="discount">20% OFF</span>
+        </div>
+        <button class="add-to-cart-btn" onclick="addToCart('Green apple', 40, './static/FruitsandVegetables/Green apple.jpeg')">ADD</button>
+      </div>
+    </div>
+
+    <!-- Bananas -->
+    <div class="product-card" data-title="Bananas" data-category="Fruits & Vegetables">
+      <img src="./static/FruitsandVegetables/Bananas.jpeg" alt="Bananas" class="product-image" />
+      <div class="product-details">
+        <div class="product-title">Bananas (1 dozen)</div>
+        <div class="product-category">Fruits & Vegetables</div>
+        <div class="product-pricing">
+          <span class="current-price">Rs.40</span>
+          <span class="original-price">Rs.50</span>
+          <span class="discount">20% OFF</span>
+        </div>
+        <button class="add-to-cart-btn" onclick="addToCart('Bananas', 40, './static/FruitsandVegetables/Bananas.jpeg')">ADD</button>
+      </div>
+    </div>
+
+    <!-- Blueberry Cinnamon Flax (Dairy & Breakfast) -->
+<div class="product-card" data-title="Blueberry cinnamon flax" data-category="Dairy & Breakfast">
+  <img src="./static/Dairy and breakfast/Blueberry cinnamon flax.jpeg" alt="Blueberry cinnamon flax" class="product-image" />
+  <div class="product-details">
+    <div class="product-title">Blueberry Cinnamon Flax (1 pack)</div>
+    <div class="product-category">Dairy & Breakfast</div>
+    <div class="product-pricing">
+      <span class="current-price">Rs.50</span>
+    </div>
+    <button class="add-to-cart-btn" onclick="addToCart('Blueberry cinnamon flax', 50, './static/Dairy and breakfast/Blueberry cinnamon flax.jpeg')">ADD</button>
+  </div>
+</div>
+
+<!-- Chopper (Home and Kitchen) -->
+<div class="product-card" data-title="Chopper" data-category="Home and Kitchen">
+  <img src="./static/kitchen/Chopper.jpeg" alt="Chopper" class="product-image" />
+  <div class="product-details">
+    <div class="product-title">Vegetable Chopper</div>
+    <div class="product-category">Home and Kitchen</div>
+    <div class="product-pricing">
+      <span class="current-price">Rs.250</span>
+    </div>
+    <button class="add-to-cart-btn" onclick="addToCart('Chopper', 250, './static/kitchen/Chopper.jpeg')">ADD</button>
+  </div>
+</div>
+
+<!-- Fairy (House Hold) -->
+<div class="product-card" data-title="Fairy" data-category="House Hold">
+  <img src="./static/household/Fairy.jpeg" alt="Fairy" class="product-image" />
+  <div class="product-details">
+    <div class="product-title">Fairy Dishwash Liquid (500ml)</div>
+    <div class="product-category">House Hold</div>
+    <div class="product-pricing">
+      <span class="current-price">Rs.90</span>
+    </div>
+    <button class="add-to-cart-btn" onclick="addToCart('Fairy', 90, './static/household/Fairy.jpeg')">ADD</button>
+  </div>
+</div>
+
+<!-- Baby Biscuits (Baby Care) -->
+<div class="product-card" data-title="Baby biscuits" data-category="Baby Care">
+  <img src="./static/Baby Care/Baby biscuits.jpeg" alt="Baby biscuits" class="product-image" />
+  <div class="product-details">
+    <div class="product-title">Baby Biscuits (1 pack)</div>
+    <div class="product-category">Baby Care</div>
+    <div class="product-pricing">
+      <span class="current-price">Rs.75</span>
+    </div>
+    <button class="add-to-cart-btn" onclick="addToCart('Baby biscuits', 75, './static/Baby Care/Baby biscuits.jpeg')">ADD</button>
+  </div>
+</div>
+
+
+    <!-- Amul Lassi -->
+    <div class="product-card" data-title="Amul lassi" data-category="Dairy & Breakfast">
+      <img src="./static/Dairy and breakfast/Amul lassi.jpeg" alt="Amul lassi" class="product-image" />
+      <div class="product-details">
+        <div class="product-title">Amul Lassi (1 unit)</div>
+        <div class="product-category">Dairy & Breakfast</div>
+        <div class="product-pricing">
+          <span class="current-price">Rs.20</span>
+        </div>
+        <button class="add-to-cart-btn" onclick="addToCart('Amul lassi', 20, './static/Dairy and breakfast/Amul lassi.jpeg')">ADD</button>
+      </div>
+    </div>
+
+    <!-- Milk -->
+    <div class="product-card" data-title="Milk" data-category="Dairy & Breakfast">
+      <img src="./static/Dairy and breakfast/milk.webp" alt="Milk" class="product-image" />
+      <div class="product-details">
+        <div class="product-title">Milk (500ml)</div>
+        <div class="product-category">Dairy & Breakfast</div>
+        <div class="product-pricing">
+          <span class="current-price">Rs.20</span>
+        </div>
+        <button class="add-to-cart-btn" onclick="addToCart('Milk', 20, './static/Dairy and breakfast/milk.webp')">ADD</button>
+      </div>
+    </div>
+
+    <!-- Bread -->
+    <div class="product-card" data-title="Bread" data-category="Dairy & Breakfast">
+      <img src="./static/Dairy and breakfast/Bread.jpeg" alt="Bread" class="product-image" />
+      <div class="product-details">
+        <div class="product-title">Bread (400g)</div>
+        <div class="product-category">Dairy & Breakfast</div>
+        <div class="product-pricing">
+          <span class="current-price">Rs.50</span>
+        </div>
+        <button class="add-to-cart-btn" onclick="addToCart('Bread', 50, './static/Dairy and breakfast/Bread.jpeg')">ADD</button>
+      </div>
+    </div>
+
+    <!-- Butter -->
+    <div class="product-card" data-title="Butter" data-category="Dairy & Breakfast">
+      <img src="./static/Dairy and breakfast/Butter.jpeg" alt="Butter" class="product-image" />
+      <div class="product-details">
+        <div class="product-title">Butter (100g)</div>
+        <div class="product-category">Dairy & Breakfast</div>
+        <div class="product-pricing">
+          <span class="current-price">Rs.50</span>
+        </div>
+        <button class="add-to-cart-btn" onclick="addToCart('Butter', 50, './static/Dairy and breakfast/Butter.jpeg')">ADD</button>
+      </div>
+    </div>
+
+    <!-- Cheese slice -->
+    <div class="product-card" data-title="Cheese slice" data-category="Dairy & Breakfast">
+      <img src="./static/Dairy and breakfast/Cheese slice.jpeg" alt="Cheese slice" class="product-image" />
+      <div class="product-details">
+        <div class="product-title">Cheese Slice (5 pcs)</div>
+        <div class="product-category">Dairy & Breakfast</div>
+        <div class="product-pricing">
+          <span class="current-price">Rs.70</span>
+        </div>
+        <button class="add-to-cart-btn" onclick="addToCart('Cheese slice', 70, './static/Dairy and breakfast/Cheese slice.jpeg')">ADD</button>
+      </div>
+    </div>
+
+    <!-- Gulab Jamun -->
+    <div class="product-card" data-title="Gulab jamun" data-category="Dairy & Breakfast">
+      <img src="./static/Dairy and breakfast/Gulab jamun.jpeg" alt="Gulab jamun" class="product-image" />
+      <div class="product-details">
+        <div class="product-title">Gulab Jamun (250g)</div>
+        <div class="product-category">Dairy & Breakfast</div>
+        <div class="product-pricing">
+          <span class="current-price">Rs.75</span>
+        </div>
+        <button class="add-to-cart-btn" onclick="addToCart('Gulab jamun', 75, './static/Dairy and breakfast/Gulab jamun.jpeg')">ADD</button>
+      </div>
+    </div>
+
+    <!-- Horlicks -->
+    <div class="product-card" data-title="Horlicks" data-category="Dairy & Breakfast">
+      <img src="./static/Dairy and breakfast/Horlicks.jpeg" alt="Horlicks" class="product-image" />
+      <div class="product-details">
+        <div class="product-title">Horlicks (200g)</div>
+        <div class="product-category">Dairy & Breakfast</div>
+        <div class="product-pricing">
+          <span class="current-price">Rs.55</span>
+        </div>
+        <button class="add-to-cart-btn" onclick="addToCart('Horlicks', 55, './static/Dairy and breakfast/Horlicks.jpeg')">ADD</button>
+      </div>
+    </div>
+
+    <!-- Dove soap (Personal Care) -->
+    <div class="product-card" data-title="Dove soap" data-category="personal care">
+      <img src="./static/personal care/Dove soap.jpeg" alt="Dove soap" class="product-image" />
+      <div class="product-details">
+        <div class="product-title">Dove Soap (100g)</div>
+        <div class="product-category">Personal Care</div>
+        <div class="product-pricing">
+          <span class="current-price">Rs.50</span>
+        </div>
+        <button class="add-to-cart-btn" onclick="addToCart('Dove soap', 50, './static/personal care/Dove soap.jpeg')">ADD</button>
+      </div>
+    </div>
+
+    <!-- Face mask (Personal Care) -->
+    <div class="product-card" data-title="Facemask" data-category="personal care">
+      <img src="./static/personal care/Facemask.jpeg" alt="Facemask" class="product-image" />
+      <div class="product-details">
+        <div class="product-title">Face Mask (Pack of 2)</div>
+        <div class="product-category">Personal Care</div>
+        <div class="product-pricing">
+          <span class="current-price">Rs.100</span>
+        </div>
+        <button class="add-to-cart-btn" onclick="addToCart('Facemask', 100, './static/personal care/Facemask.jpeg')">ADD</button>
+      </div>
+    </div>
+
+    <!-- Colgate toothpaste -->
+    <div class="product-card" data-title="Colgate toothpast" data-category="personal care">
+      <img src="./static/personal care/Colgate toothpast.jpeg" alt="Colgate toothpaste" class="product-image" />
+      <div class="product-details">
+        <div class="product-title">Colgate Toothpaste (100g)</div>
+        <div class="product-category">Personal Care</div>
+        <div class="product-pricing">
+          <span class="current-price">Rs.70</span>
+        </div>
+        <button class="add-to-cart-btn" onclick="addToCart('Colgate toothpast', 70, './static/personal care/Colgate toothpast.jpeg')">ADD</button>
+      </div>
+    </div>
+
+    <!-- Kitkat (Snacks) -->
+    <div class="product-card" data-title="Kitkat" data-category="Snacks and Beverages">
+      <img src="./static/Snacks/kitkat.jpeg" alt="Kitkat" class="product-image" />
+      <div class="product-details">
+        <div class="product-title">Kitkat (1 bar)</div>
+        <div class="product-category">Snacks & Beverages</div>
+        <div class="product-pricing">
+          <span class="current-price">Rs.20</span>
+        </div>
+        <button class="add-to-cart-btn" onclick="addToCart('Kitkat', 20, './static/Snacks/kitkat.jpeg')">ADD</button>
+      </div>
+    </div>
+
+    <!-- Kurkure (Snacks) -->
+    <div class="product-card" data-title="Kurkure" data-category="Snacks and Beverages">
+      <img src="./static/Snacks/kurkure.jpeg" alt="Kurkure" class="product-image" />
+      <div class="product-details">
+        <div class="product-title">Kurkure (100g)</div>
+        <div class="product-category">Snacks & Beverages</div>
+        <div class="product-pricing">
+          <span class="current-price">Rs.20</span>
+        </div>
+        <button class="add-to-cart-btn" onclick="addToCart('Kurkure', 20, './static/Snacks/kurkure.jpeg')">ADD</button>
+      </div>
+    </div>
+
+    <!-- Fanta -->
+    <div class="product-card" data-title="Fanta" data-category="Snacks and Beverages">
+      <img src="./static/Snacks/Fanta.jpeg" alt="Fanta" class="product-image" />
+      <div class="product-details">
+        <div class="product-title">Fanta (350ml)</div>
+        <div class="product-category">Snacks & Beverages</div>
+        <div class="product-pricing">
+          <span class="current-price">Rs.50</span>
+        </div>
+        <button class="add-to-cart-btn" onclick="addToCart('Fanta', 50, './static/Snacks/Fanta.jpeg')">ADD</button>
+      </div>
+    </div>
+
+    <!-- Pampers (Baby Care) -->
+    <div class="product-card" data-title="Pampers" data-category="Baby Care">
+      <img src="./static/Baby Care/Pampers.jpeg" alt="Pampers" class="product-image" />
+      <div class="product-details">
+        <div class="product-title">Pampers (Small Pack)</div>
+        <div class="product-category">Baby Care</div>
+        <div class="product-pricing">
+          <span class="current-price">Rs.200</span>
+        </div>
+        <button class="add-to-cart-btn" onclick="addToCart('Pampers', 200, './static/Baby Care/Pampers.jpeg')">ADD</button>
+      </div>
+    </div>
+
+    <!-- Jeera Powder (Grocery) -->
+    <div class="product-card" data-title="Jeera powder" data-category="Grocery">
+      <img src="./static/Grocery/Jeera powder.jpeg" alt="Jeera Powder" class="product-image" />
+      <div class="product-details">
+        <div class="product-title">Jeera Powder (200g)</div>
+        <div class="product-category">Grocery</div>
+        <div class="product-pricing">
+          <span class="current-price">Rs.250</span>
+        </div>
+        <button class="add-to-cart-btn" onclick="addToCart('Jeera powder', 250, './static/Grocery/Jeera powder.jpeg')">ADD</button>
+      </div>
+    </div>
+
+    <!-- Attack (House Hold) -->
+    <div class="product-card" data-title="Attack" data-category="House Hold">
+      <img src="./static/household/Attack.jpeg" alt="Attack" class="product-image" />
+      <div class="product-details">
+        <div class="product-title">Attack Detergent (500g)</div>
+        <div class="product-category">House Hold</div>
+        <div class="product-pricing">
+          <span class="current-price">Rs.200</span>
+        </div>
+        <button class="add-to-cart-btn" onclick="addToCart('Attack', 200, './static/household/Attack.jpeg')">ADD</button>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+  <button class="scroll-to-top" onclick="scrollToTop()">↑</button>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <!-- Column 1 - Brand -->
+      <div class="footer-column">
+        <h3 class="footer-title">🛒 DailyDrop</h3>
+        <p class="footer-description">Your one-stop solution for quick delivery of fresh groceries, daily essentials and more — delivered in 10 minutes.</p>
+      </div>
+
+      <!-- Column 2 - Quick Links -->
+      <div class="footer-column">
+        <h3 class="footer-title">Company</h3>
+        <ul class="footer-links">
+          <li><a href="about_us.html">About Us</a></li>
+          <li><a href="contact_us.html">Contact Us</a></li>
+          <li><a href="faqs.html">FAQs</a></li>
+          <li><a href="terms.html">Terms & Conditions</a></li>
+          <li><a href="privacy.html">Privacy Policy</a></li>
+        </ul>
+      </div>
+
+      <!-- Column 3 - Categories -->
+      <div class="footer-column">
+        <h3 class="footer-title">Categories</h3>
+        <ul class="footer-links">
+          <li><a href="Grocery.html">Groceries</a></li>
+          <li><a href="personal_care.html">Personal Care</a></li>
+          <li><a href="household_items.html">Household Items</a></li>
+          <li><a href="home_kitchen.html">Home & Kitchen</a></li>
+          <li><a href="baby_care.html">Baby Products</a></li>
+        </ul>
+      </div>
+
+      <!-- Column 4 - Contact -->
+      <div class="footer-column">
+        <h3 class="footer-title">Contact</h3>
+        <ul class="footer-contact">
+          <li><i class="fas fa-map-marker-alt"></i>Horticulture, Chitradurga, Karnataka</li>
+          <li><i class="fas fa-phone"></i>+91 78292 83748</li>
+          <li><i class="fas fa-envelope"></i>support@dailydrop.com</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>© 2025 DailyDrop. All Rights Reserved. Made with ❤️ for fast grocery delivery.</p>
+    </div>
+  </div>
+</footer>
+
+
+
+<script>
+let cart = JSON.parse(localStorage.getItem('cart')) || [];
+cart = cart.map(item => ({
+  ...item,
+  quantity: Number(item.quantity) || 1
+}));
+localStorage.setItem('cart', JSON.stringify(cart));
+// Add this to index.html's script
+window.addEventListener('storage', () => {
+  updateCartCount();
+});
+
+function addToCart(productName, productPrice, productImage) {
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+    const existingItem = cart.find(item => item.name === productName);
+
+    if (existingItem) {
+        existingItem.quantity += 1;
+    } else {
+        cart.push({
+            name: productName,
+            price: productPrice,
+            image: productImage,
+            quantity: 1
+        });
+    }
+
+    localStorage.setItem('cart', JSON.stringify(cart));
+    updateCartCount();
+    showAddedToCartAlert(productName);
+}
+
+function showAddedToCartAlert(name) {
+    const msg = document.createElement('div');
+    msg.innerHTML = `<i class="fas fa-check-circle"></i> &nbsp;<strong>${name}</strong> added to cart!`;
+    Object.assign(msg.style, {
+        position: 'fixed', bottom: '24px', right: '24px', zIndex: 9999,
+        background: 'var(--brand)', color: 'white', padding: '12px 20px',
+        borderRadius: '12px', fontFamily: 'var(--font)', fontSize: '0.875rem',
+        boxShadow: '0 8px 28px rgba(22,163,74,0.4)', display: 'flex',
+        alignItems: 'center', gap: '8px', animation: 'slideIn 0.3s ease',
+        fontWeight: '500', maxWidth: '340px'
+    });
+    document.body.appendChild(msg);
+    setTimeout(() => msg.remove(), 3000);
+}
+
+// Modify the updateCartCount() function in both pages to be identical
+function updateCartCount() {
+  const cart = JSON.parse(localStorage.getItem('cart')) || [];
+  const count = cart.reduce((total, item) => total + (item.quantity || 1), 0);
+  document.getElementById('cart-count').textContent = count;
+}
+
+
+    // Slider Functionality
+    const slides = document.querySelectorAll('.slide');
+    const dotsContainer = document.querySelector('.slider-dots');
+    const prevButton = document.querySelector('.prev');
+    const nextButton = document.querySelector('.next');
+    let currentSlide = 0;
+    let autoSlideInterval;
+
+    // Create dots
+    slides.forEach((_, index) => {
+      const dot = document.createElement('div');
+      dot.classList.add('dot');
+      if (index === 0) dot.classList.add('active');
+      dot.addEventListener('click', () => goToSlide(index));
+      dotsContainer.appendChild(dot);
+    });
+
+    function goToSlide(index) {
+      slides[currentSlide].classList.remove('active');
+      dotsContainer.children[currentSlide].classList.remove('active');
+      currentSlide = (index + slides.length) % slides.length;
+      slides[currentSlide].classList.add('active');
+      dotsContainer.children[currentSlide].classList.add('active');
+    }
+
+    function nextSlide() {
+      goToSlide(currentSlide + 1);
+    }
+
+    function prevSlide() {
+      goToSlide(currentSlide - 1);
+    }
+
+    prevButton.addEventListener('click', prevSlide);
+    nextButton.addEventListener('click', nextSlide);
+
+    function startAutoSlide() {
+      autoSlideInterval = setInterval(nextSlide, 2500);
+    }
+
+    function stopAutoSlide() {
+      clearInterval(autoSlideInterval);
+    }
+
+    const heroSlider = document.querySelector('.hero-slider');
+    startAutoSlide();
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') prevSlide();
+      if (e.key === 'ArrowRight') nextSlide();
+    });
+
+
+// Search Functionality
+const searchInput = document.getElementById('searchInput');
+const searchResultsContainer = document.querySelector('.search-results-container');
+const searchResultsGrid = document.getElementById('search-results-grid');
+const allSections = document.querySelectorAll('.hero-slider, .categories-section, .products-container');
+const allProducts = document.querySelectorAll('.product-card');
+
+// Replace existing search functionality with this
+searchInput.addEventListener('input', function() {
+  const searchTerm = this.value.trim().toLowerCase();
+  searchResultsGrid.innerHTML = '';
+
+  if (!searchTerm) {
+    searchResultsContainer.style.display = 'none';
+    allSections.forEach(section => section.style.display = '');
+    document.querySelector('.products-container.active').style.display = 'block';
+    return;
+  }
+
+  allSections.forEach(section => section.style.display = 'none');
+  searchResultsContainer.style.display = 'block';
+
+  const filteredProducts = window.productsDB.filter(product =>
+    product.title.toLowerCase().includes(searchTerm)
+  );
+
+  if (filteredProducts.length === 0) {
+    searchResultsGrid.innerHTML = `
+      <div class="no-results">
+        <i class="fas fa-search"></i>
+        <p>No products found for "${searchTerm}"</p>
+      </div>
+    `;
+    return;
+  }
+
+  filteredProducts.forEach(product => {
+    const productCard = document.createElement('div');
+    productCard.className = 'product-card';
+    productCard.innerHTML = `
+      <img src="${product.image}" alt="${product.title}" class="product-image" />
+      <div class="product-details">
+        <div class="product-title">${product.title}</div>
+        <div class="product-category">${product.category}</div>
+        <div class="product-pricing">
+          <span class="current-price">Rs.${product.price}</span>
+          ${product.discount ? `
+            <span class="original-price">Rs.${Math.round(product.price/(1-product.discount/100))}</span>
+            <span class="discount">${product.discount}% OFF</span>
+          ` : ''}
+        </div>
+        <button class="add-to-cart-btn">ADD</button>
+      </div>
+    `;
+
+    // Add click handler for dynamically created buttons
+    productCard.querySelector('.add-to-cart-btn').addEventListener('click', () => {
+      addToCart(product.title, product.price, product.image);
+    });
+
+    searchResultsGrid.appendChild(productCard);
+  });
+});
+
+// Category Filtering
+const categories = document.querySelectorAll('.category-card');
+const productContainers = document.querySelectorAll('.products-container');
+
+// Scroll to Top
+const scrollButton = document.querySelector('.scroll-to-top');
+
+window.addEventListener('scroll', () => {
+  window.pageYOffset > 300
+    ? scrollButton.classList.add('show')
+    : scrollButton.classList.remove('show');
+});
+
+scrollButton.addEventListener('click', scrollToTop);
+
+function scrollToTop() {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  });
+}
+
+// Initialize cart count on page load
+function initializePage() {
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+    const count = cart.reduce((total, item) => total + (item.quantity || 1), 0);
+    document.getElementById('cart-count').textContent = count;
+}
+
+// Call this when the page loads
+document.addEventListener('DOMContentLoaded', initializePage);
+
+// Initialize cart count on page load
+updateCartCount();
+
+// Theme Toggle Logic
+(function() {
+  const toggleBtn = document.getElementById('theme-toggle');
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+    });
+  }
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'theme') {
+      document.documentElement.setAttribute('data-theme', e.newValue);
+    }
+  });
+})();
+</script>
+<script src="products-db.js"></script>
+</body>
+</html>

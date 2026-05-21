@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Personal Care — DailyDrop</title>
+  <meta name="description" content="Premium personal care products and essentials delivered in minutes by DailyDrop.">
+  <link rel="icon" type="image/png" href="./static/logo1.webp">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="./design-system.css">
+  <script>
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+
+
+  <style>
+    body {
+      background: var(--surface-1);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .page-hero {
+      background: linear-gradient(135deg, var(--surface-dark) 0%, var(--surface-dark-2) 100%);
+      padding: var(--space-12) 0;
+      position: relative;
+      overflow: hidden;
+      color: var(--text-on-dark);
+      margin-bottom: var(--space-8);
+    }
+
+    .page-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 80% 50%, var(--brand-glow-lg) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .page-hero-inner {
+      position: relative;
+      z-index: 1;
+    }
+
+    .breadcrumb {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+      margin-bottom: var(--space-3);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .breadcrumb a {
+      color: var(--text-muted);
+      transition: color var(--duration-fast);
+    }
+
+    .breadcrumb a:hover {
+      color: var(--brand);
+    }
+
+    .breadcrumb i {
+      font-size: 9px;
+    }
+
+    .page-hero h1 {
+      font-size: var(--text-4xl);
+      font-weight: var(--weight-bold);
+      letter-spacing: -0.8px;
+      margin-bottom: var(--space-2);
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      color: var(--surface-0);
+    }
+
+    .page-hero h1 span {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      background: var(--brand-glow);
+      border: 1px solid var(--border-brand);
+      border-radius: var(--radius-md);
+      font-size: var(--text-2xl);
+    }
+
+    .page-hero p {
+      font-size: var(--text-base);
+      color: var(--text-muted);
+    }
+
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: var(--space-6);
+    }
+
+    @media (max-width: 768px) {
+      .products-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-4);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .products-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-4);
+      }
+    }
+
+    @keyframes slideIn {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="ds-nav">
+    <div class="ds-nav-inner">
+      <a href="index.html" class="ds-logo">
+        <div class="ds-logo-icon">🛒</div>
+        <div class="ds-logo-text">Daily<span>Drop</span></div>
+      </a>
+      <div class="ds-search">
+        <i class="fas fa-search ds-search-icon"></i>
+        <input type="text" id="searchInput" placeholder="Search in Personal Care..." />
+      </div>
+      <div class="ds-nav-actions">
+        <button class="theme-toggle-pill" id="theme-toggle" aria-label="Toggle theme">
+          <span class="theme-toggle-pill-thumb"></span>
+          <span class="theme-toggle-pill-icon light-icon"><i class="fas fa-sun"></i></span>
+          <span class="theme-toggle-pill-icon dark-icon"><i class="fas fa-moon"></i></span>
+        </button>
+        <a href="index.html" class="btn-nav"><i class="fas fa-home"></i> Home</a>
+        <a href="cart.html" class="btn-cart">
+          <i class="fas fa-shopping-bag"></i> Cart
+          <span class="cart-badge" id="cart-count">0</span>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Page Hero -->
+  <div class="page-hero">
+    <div class="container">
+      <div class="page-hero-inner">
+        <div class="breadcrumb">
+          <a href="index.html">Home</a>
+          <i class="fas fa-chevron-right"></i>
+          <span>Personal Care</span>
+        </div>
+        <h1><span>🧼</span> Personal Care</h1>
+        <p>Premium personal care products and essentials delivered in minutes</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Products Grid -->
+  <section class="container section-sm" style="flex: 1;">
+    <div class="products-grid" id="productsGrid">
+      <!-- Dynamically loaded products -->
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="ds-footer">
+    <div class="container">
+      <div style="text-align: center; padding: var(--space-8) 0; color: var(--text-muted); font-size: var(--text-xs); border-top: 1px solid rgba(255,255,255,0.06);">
+        &copy; 2026 DailyDrop. All rights reserved.
+      </div>
+    </div>
+  </footer>
+
+  <script src="products-db.js"></script>
+  <script>
+    // Update cart count
+    function updateCartCount() {
+      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+      const count = cart.reduce((total, item) => total + (item.quantity || 1), 0);
+      const el = document.getElementById('cart-count');
+      if (el) el.textContent = count;
+    }
+
+    function addToCart(productName, productPrice, productImage) {
+      let cart = JSON.parse(localStorage.getItem('cart')) || [];
+      const existingItem = cart.find(item => item.name === productName);
+      if (existingItem) {
+        existingItem.quantity += 1;
+      } else {
+        cart.push({ name: productName, price: productPrice, image: productImage, quantity: 1 });
+      }
+      localStorage.setItem('cart', JSON.stringify(cart));
+      updateCartCount();
+      showAlert(productName);
+    }
+
+    function showAlert(name) {
+      const msg = document.createElement('div');
+      msg.innerHTML = `<i class="fas fa-check-circle"></i> &nbsp;<strong>${name}</strong> added to cart!`;
+      Object.assign(msg.style, {
+        position: 'fixed', bottom: '24px', right: '24px', zIndex: 9999,
+        background: 'var(--brand)', color: 'white', padding: '12px 20px',
+        borderRadius: '12px', fontFamily: 'var(--font)', fontSize: '0.875rem',
+        boxShadow: '0 8px 28px rgba(22,163,74,0.4)', display: 'flex',
+        alignItems: 'center', gap: '8px', animation: 'slideIn 0.3s ease',
+        fontWeight: '500', maxWidth: '340px'
+      });
+      document.body.appendChild(msg);
+      setTimeout(() => msg.remove(), 3000);
+    }
+
+    // Dynamic product renderer
+    const CATEGORY_NAME = "personal care";
+
+    function renderProducts() {
+      const grid = document.getElementById('productsGrid');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      const products = (window.productsDB || []).filter(p => p.category === CATEGORY_NAME);
+
+      if (products.length === 0) {
+        grid.innerHTML = `
+          <div style="grid-column: 1/-1; text-align: center; padding: var(--space-12) 0; color: var(--text-muted);">
+            <i class="fas fa-info-circle" style="font-size: var(--text-3xl); margin-bottom: var(--space-4); color: var(--brand);"></i>
+            <p>No products found in this category.</p>
+          </div>
+        `;
+        return;
+      }
+
+      products.forEach(product => {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.dataset.title = product.title;
+        card.innerHTML = `
+          <div class="product-card-img-wrap">
+            <img src="${product.image}" alt="${product.title}" class="product-image" onerror="this.src='./static/logo1.webp'" />
+            ${product.discount ? `<span class="product-discount-badge">${product.discount}% OFF</span>` : ''}
+          </div>
+          <div class="product-details">
+            <div class="product-title">${product.title}</div>
+            <div class="product-category">${product.category}</div>
+            <div class="product-pricing">
+              <span class="current-price">Rs.${product.price}</span>
+              ${product.discount ? `
+                <span class="original-price">Rs.${Math.round(product.price / (1 - product.discount / 100))}</span>
+                <span class="discount">${product.discount}% OFF</span>
+              ` : ''}
+            </div>
+            <button class="add-to-cart-btn">ADD</button>
+          </div>
+        `;
+
+        card.querySelector('.add-to-cart-btn').addEventListener('click', (e) => {
+          e.stopPropagation();
+          addToCart(product.title, product.price, product.image);
+        });
+
+        grid.appendChild(card);
+      });
+    }
+
+    // Live search filter
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+      searchInput.addEventListener('input', function() {
+        const term = this.value.trim().toLowerCase();
+        document.querySelectorAll('.product-card').forEach(card => {
+          const name = card.dataset.title.toLowerCase();
+          card.style.display = name.includes(term) ? '' : 'none';
+        });
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderProducts();
+      updateCartCount();
+    });
+
+    // Theme Toggle Logic
+    (function() {
+      const toggleBtn = document.getElementById('theme-toggle');
+      if (toggleBtn) {
+        toggleBtn.addEventListener('click', () => {
+          const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+          const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+          document.documentElement.setAttribute('data-theme', newTheme);
+          localStorage.setItem('theme', newTheme);
+        });
+      }
+      window.addEventListener('storage', (e) => {
+        if (e.key === 'theme') {
+          document.documentElement.setAttribute('data-theme', e.newValue);
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

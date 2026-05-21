@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout — DailyDrop</title>
+  <meta name="description" content="Complete your order checkout on DailyDrop.">
+  <link rel="icon" type="image/png" href="./static/logo1.webp">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="./design-system.css">
+  <script>
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+
+  <style>
+    body {
+      background: var(--surface-1);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── CHECKOUT LAYOUT ── */
+    .checkout-container {
+      max-width: 1080px;
+      margin: var(--space-10) auto var(--space-16);
+      padding: 0 var(--space-6);
+      display: grid;
+      grid-template-columns: 1fr 1.6fr;
+      gap: var(--space-8);
+      align-items: start;
+    }
+
+    /* ── ORDER SUMMARY ── */
+    .order-summary {
+      background: var(--surface-0);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-md);
+      padding: var(--space-6);
+      position: sticky;
+      top: calc(var(--nav-height) + var(--space-5));
+    }
+
+    .order-summary h2 {
+      font-size: var(--text-lg);
+      font-weight: var(--weight-bold);
+      color: var(--text-primary);
+      margin-bottom: var(--space-5);
+      padding-bottom: var(--space-4);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .order-items {
+      max-height: 380px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      padding-right: 4px;
+    }
+
+    .order-items::-webkit-scrollbar { width: 4px; }
+    .order-items::-webkit-scrollbar-track { background: var(--surface-2); border-radius: 4px; }
+    .order-items::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
+
+    .order-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-3);
+      background: var(--surface-1);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+    }
+
+    .order-item img {
+      width: 56px;
+      height: 56px;
+      object-fit: contain;
+      border-radius: var(--radius-sm);
+      background: var(--surface-0);
+      padding: var(--space-1);
+      flex-shrink: 0;
+    }
+
+    .item-info h4 {
+      font-size: var(--text-sm);
+      font-weight: var(--weight-semi);
+      color: var(--text-primary);
+      margin-bottom: 3px;
+      line-height: 1.3;
+    }
+
+    .item-info p {
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+    }
+
+    .order-summary-divider {
+      margin: var(--space-4) 0;
+      border: none;
+      border-top: 1px solid var(--border);
+    }
+
+    .total-price {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: var(--space-4);
+    }
+
+    .total-price span:first-child {
+      font-size: var(--text-base);
+      font-weight: var(--weight-semi);
+      color: var(--text-secondary);
+    }
+
+    .total-price span:last-child {
+      font-size: var(--text-2xl);
+      font-weight: var(--weight-bold);
+      color: var(--brand);
+      letter-spacing: -0.5px;
+    }
+
+    /* ── CHECKOUT FORM ── */
+    .checkout-form {
+      background: var(--surface-0);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-md);
+      padding: var(--space-8);
+    }
+
+    .checkout-form h2 {
+      font-size: var(--text-xl);
+      font-weight: var(--weight-bold);
+      color: var(--text-primary);
+      letter-spacing: -0.3px;
+      margin-bottom: var(--space-6);
+    }
+
+    .form-section-label {
+      font-size: var(--text-xs);
+      font-weight: var(--weight-semi);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: var(--space-4);
+      margin-top: var(--space-6);
+      display: block;
+    }
+
+    .form-group {
+      margin-bottom: var(--space-4);
+    }
+
+    .form-group label {
+      display: block;
+      font-size: var(--text-sm);
+      font-weight: var(--weight-medium);
+      color: var(--text-secondary);
+      margin-bottom: var(--space-2);
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 12px var(--space-4);
+      background: var(--surface-1);
+      border: 1.5px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      font-size: var(--text-base);
+      color: var(--text-primary);
+      font-family: var(--font);
+      outline: none;
+      transition: all 0.22s var(--ease-out);
+      -webkit-appearance: none;
+    }
+
+    .form-input::placeholder { color: var(--text-muted); }
+
+    .form-input:focus {
+      background: var(--surface-0);
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px var(--brand-glow);
+    }
+
+    textarea.form-input {
+      resize: vertical;
+      min-height: 110px;
+      line-height: 1.6;
+    }
+
+    /* ── COD SECTION ── */
+    .cod-section {
+      background: var(--brand-lighter);
+      border: 1.5px solid var(--brand-light);
+      border-radius: var(--radius-lg);
+      padding: var(--space-5);
+      margin: var(--space-6) 0;
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+    }
+
+    .cod-icon {
+      width: 48px;
+      height: 48px;
+      background: var(--brand);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(22,163,74,0.25);
+    }
+
+    .cod-text h3 {
+      font-size: var(--text-base);
+      font-weight: var(--weight-semi);
+      color: var(--text-primary);
+      margin-bottom: 3px;
+    }
+
+    .cod-text p {
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
+    }
+
+    /* ── CONFIRM BUTTON ── */
+    .confirm-btn {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%);
+      color: white;
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: var(--text-base);
+      font-weight: var(--weight-semi);
+      cursor: pointer;
+      box-shadow: var(--shadow-brand);
+      transition: all 0.25s var(--ease-out);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-2);
+      font-family: var(--font);
+      letter-spacing: 0.01em;
+    }
+
+    .confirm-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-brand-lg);
+    }
+
+    .confirm-btn:active { transform: translateY(0); }
+
+    .trust-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-5);
+      margin-top: var(--space-4);
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+    }
+
+    .trust-item { display: flex; align-items: center; gap: 5px; }
+    .trust-item i { color: var(--brand); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      .checkout-container {
+        grid-template-columns: 1fr;
+        gap: var(--space-5);
+        margin-top: var(--space-6);
+      }
+      .order-summary { position: static; }
+      .checkout-form { padding: var(--space-6); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="ds-nav">
+    <div class="ds-nav-inner">
+      <a href="index.html" class="ds-logo">
+        <div class="ds-logo-icon">🛒</div>
+        <div class="ds-logo-text">Daily<span>Drop</span></div>
+      </a>
+      <div class="ds-nav-actions">
+        <button class="theme-toggle-pill" id="theme-toggle" aria-label="Toggle theme">
+          <span class="theme-toggle-pill-thumb"></span>
+          <span class="theme-toggle-pill-icon light-icon"><i class="fas fa-sun"></i></span>
+          <span class="theme-toggle-pill-icon dark-icon"><i class="fas fa-moon"></i></span>
+        </button>
+        <a href="cart.html" class="btn-nav"><i class="fas fa-arrow-left"></i> Back to Cart</a>
+      </div>
+    </div>
+  </nav>
+
+  <main style="flex: 1;">
+    <div class="checkout-container">
+      <!-- Order Summary -->
+      <div class="order-summary">
+        <h2>Order Summary</h2>
+        <div class="order-items" id="orderItems">
+          <!-- Order items loaded here -->
+        </div>
+        <hr class="order-summary-divider">
+        <div class="total-price">
+          <span>Total</span>
+          <span id="orderTotal">Rs.0.00</span>
+        </div>
+      </div>
+
+      <!-- Checkout Form -->
+      <div class="checkout-form">
+        <h2>Delivery Details</h2>
+        <form id="checkoutForm" onsubmit="placeOrder(event)">
+          <span class="form-section-label">Contact Information</span>
+
+          <div class="form-group">
+            <label for="fullName">Full Name</label>
+            <input type="text" class="form-input" id="fullName" required placeholder="e.g. Rahul Sharma">
+          </div>
+
+          <div class="form-group">
+            <label for="phone">Phone Number</label>
+            <input type="tel" class="form-input" id="phone" required placeholder="+91 98XXXXXXXX">
+          </div>
+
+          <span class="form-section-label">Delivery Address</span>
+
+          <div class="form-group">
+            <label for="address">Full Address</label>
+            <textarea class="form-input" id="address" rows="4" required placeholder="House no., Street, Area, City, Pincode"></textarea>
+          </div>
+
+          <!-- Cash on Delivery -->
+          <div class="cod-section">
+            <div class="cod-icon">💵</div>
+            <div class="cod-text">
+              <h3>Cash on Delivery</h3>
+              <p>Pay when your order arrives at your door</p>
+            </div>
+          </div>
+
+          <button type="submit" class="confirm-btn">
+            <i class="fas fa-check-circle"></i>
+            Confirm Order
+          </button>
+
+          <div class="trust-row">
+            <div class="trust-item"><i class="fas fa-shield-alt"></i> Secure Checkout</div>
+            <div class="trust-item"><i class="fas fa-truck"></i> Free Delivery</div>
+            <div class="trust-item"><i class="fas fa-redo"></i> Easy Returns</div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="ds-footer">
+    <div class="container">
+      <div style="text-align: center; padding: var(--space-8) 0; color: var(--text-muted); font-size: var(--text-xs); border-top: 1px solid rgba(255,255,255,0.06);">
+        &copy; 2026 DailyDrop. All rights reserved.
+      </div>
+    </div>
+  </footer>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+    const total = calculateTotal(cart);
+    const orderItemsDiv = document.getElementById('orderItems');
+    const orderTotalSpan = document.getElementById('orderTotal');
+
+    orderItemsDiv.innerHTML = '';
+
+    if (cart.length === 0) {
+      orderItemsDiv.innerHTML = '<p style="color: var(--text-muted); font-size: 0.875rem; text-align: center; padding: 1rem 0;">No items in cart</p>';
+      return;
+    }
+
+    cart.forEach(item => {
+      const itemHTML = `
+        <div class="order-item">
+          <img src="${item.image}" alt="${item.name}">
+          <div class="item-info">
+            <h4>${item.name}</h4>
+            <p>Qty: ${item.quantity} &times; Rs.${item.price.toFixed(2)}</p>
+          </div>
+        </div>
+      `;
+      orderItemsDiv.insertAdjacentHTML('beforeend', itemHTML);
+    });
+
+    orderTotalSpan.textContent = `Rs.${total.toFixed(2)}`;
+  });
+
+  function calculateTotal(items) {
+    return items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  }
+
+  function placeOrder(event) {
+    event.preventDefault();
+
+    const fullName = document.getElementById('fullName').value.trim();
+    const address = document.getElementById('address').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+    const phoneRegex = /^[6-9]\d{9}$/;
+    if (!phoneRegex.test(phone)) {
+      alert("Invalid phone number. It must be 10 digits and start with 6, 7, 8, or 9.");
+      return;
+    }
+
+    if (!fullName || !address || !phone) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    if (cart.length === 0) {
+      alert('Your cart is empty!');
+      return;
+    }
+
+    const orderId = Math.floor(100000 + Math.random() * 900000).toString();
+    const orderData = {
+      order_id: orderId,
+      order_date: new Date().toISOString(),
+      full_name: fullName,
+      phone_number: phone,
+      address: address,
+      products: cart.map(item => ({
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        image_path: item.image
+      })),
+      total_amount: calculateTotal(cart)
+    };
+
+    let orders = JSON.parse(localStorage.getItem('orders')) || [];
+    orders.unshift(orderData);
+    localStorage.setItem('orders', JSON.stringify(orders));
+
+    alert('Order confirmed! You will receive your order in 10 to 15 mins.');
+    localStorage.removeItem('cart');
+    window.location.href = "orders.html";
+  }
+
+  // Theme Toggle Logic
+  (function() {
+    const toggleBtn = document.getElementById('theme-toggle');
+    if (toggleBtn) {
+      toggleBtn.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+      });
+    }
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'theme') {
+        document.documentElement.setAttribute('data-theme', e.newValue);
+      }
+    });
+  })();
+  </script>
+</body>
+</html>

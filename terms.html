@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terms & Conditions — DailyDrop</title>
+  <meta name="description" content="Review DailyDrop's terms and conditions for using our lightning-fast grocery delivery services.">
+  <link rel="icon" type="image/png" href="./static/logo1.webp">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="./design-system.css">
+  <script>
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+
+  <style>
+    body {
+      background: var(--surface-1);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .legal-container {
+      max-width: var(--container-md);
+      margin: var(--space-12) auto;
+      padding: 0 var(--space-6);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-8);
+    }
+
+    .legal-card {
+      background: var(--surface-0);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      padding: var(--space-10);
+      box-shadow: var(--shadow-md);
+    }
+
+    .legal-card h1 {
+      font-size: var(--text-3xl);
+      font-weight: var(--weight-bold);
+      color: var(--text-primary);
+      letter-spacing: -0.8px;
+      margin-bottom: var(--space-6);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: var(--space-4);
+    }
+
+    .legal-card h2 {
+      font-size: var(--text-lg);
+      font-weight: var(--weight-semi);
+      color: var(--brand);
+      margin: var(--space-8) 0 var(--space-3);
+    }
+
+    .legal-card h2:first-of-type {
+      margin-top: 0;
+    }
+
+    .legal-card p {
+      font-size: var(--text-base);
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin-bottom: var(--space-4);
+    }
+
+    .legal-card ul {
+      margin: var(--space-4) 0;
+      padding-left: var(--space-6);
+      color: var(--text-secondary);
+    }
+
+    .legal-card li {
+      margin-bottom: var(--space-2);
+      font-size: var(--text-sm);
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="ds-nav">
+    <div class="ds-nav-inner">
+      <a href="index.html" class="ds-logo">
+        <div class="ds-logo-icon">🛒</div>
+        <div class="ds-logo-text">Daily<span>Drop</span></div>
+      </a>
+      <div class="ds-nav-actions">
+        <button class="theme-toggle-pill" id="theme-toggle" aria-label="Toggle theme">
+          <span class="theme-toggle-pill-thumb"></span>
+          <span class="theme-toggle-pill-icon light-icon"><i class="fas fa-sun"></i></span>
+          <span class="theme-toggle-pill-icon dark-icon"><i class="fas fa-moon"></i></span>
+        </button>
+        <a href="index.html" class="btn-nav"><i class="fas fa-home"></i> Home</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Content -->
+  <main class="legal-container">
+    <div class="legal-card">
+      <h1>Terms & Conditions</h1>
+
+      <h2>1. Acceptance of Terms</h2>
+      <p>By accessing, browsing, or using the DailyDrop platforms and services, you explicitly agree to be bound by these terms and conditions and all policies incorporated herein.</p>
+
+      <h2>2. User Responsibilities</h2>
+      <ul>
+        <li>Users must be 18+ years old to place orders and utilize our services.</li>
+        <li>You must provide completely accurate and current details at all checkouts.</li>
+        <li>Commercial resale or wholesale purchase of any promotional products is strictly prohibited.</li>
+      </ul>
+
+      <h2>3. Order Processing</h2>
+      <p>We reserve the right to cancel, refuse, or limit any order that we suspect is in violation of our fair-use policy, represents a fraudulent transaction, or exhibits incorrect promotional pricing.</p>
+    </div>
+
+    <div class="legal-card">
+      <h2>Returns & Refunds</h2>
+      <p>Given the ultra-fast delivery speed of fresh perishables, any damaged, spoiled, or incorrect items must be reported directly to customer support within 24 hours of delivery to qualify for an immediate credit, exchange, or refund.</p>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="ds-footer">
+    <div class="container">
+      <div style="text-align: center; padding: var(--space-8) 0; color: var(--text-muted); font-size: var(--text-xs); border-top: 1px solid rgba(255,255,255,0.06);">
+        &copy; 2026 DailyDrop. All rights reserved.
+      </div>
+    </div>
+  </footer>
+  <script>
+    // Theme Toggle Logic
+    (function() {
+      const toggleBtn = document.getElementById('theme-toggle');
+      if (toggleBtn) {
+        toggleBtn.addEventListener('click', () => {
+          const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+          const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+          document.documentElement.setAttribute('data-theme', newTheme);
+          localStorage.setItem('theme', newTheme);
+        });
+      }
+      window.addEventListener('storage', (e) => {
+        if (e.key === 'theme') {
+          document.documentElement.setAttribute('data-theme', e.newValue);
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

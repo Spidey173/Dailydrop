@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About Us — DailyDrop</title>
+  <meta name="description" content="Learn more about DailyDrop's mission to deliver daily grocery essentials in minutes.">
+  <link rel="icon" type="image/png" href="./static/logo1.webp">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="./design-system.css">
+  <script>
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+
+  <style>
+    body {
+      background: var(--surface-1);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .about-hero {
+      background: linear-gradient(135deg, var(--surface-dark) 0%, var(--surface-dark-2) 100%);
+      padding: var(--space-20) 0;
+      position: relative;
+      overflow: hidden;
+      color: var(--text-on-dark);
+      text-align: center;
+    }
+
+    .about-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 50%, var(--brand-glow-lg) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .about-hero-inner {
+      position: relative;
+      z-index: 1;
+      max-width: var(--container-md);
+      margin: 0 auto;
+    }
+
+    .about-hero h1 {
+      font-size: var(--text-5xl);
+      font-weight: var(--weight-black);
+      letter-spacing: -1.5px;
+      margin-bottom: var(--space-4);
+      color: var(--surface-0);
+    }
+
+    .about-hero h1 span {
+      color: var(--brand);
+    }
+
+    .about-hero p {
+      font-size: var(--text-lg);
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    .highlight-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      background: var(--brand-glow);
+      border: 1px solid var(--border-brand);
+      color: var(--brand);
+      font-size: var(--text-sm);
+      font-weight: var(--weight-bold);
+      padding: var(--space-2) var(--space-4);
+      border-radius: var(--radius-full);
+      margin-top: var(--space-6);
+      box-shadow: 0 4px 20px var(--brand-glow);
+    }
+
+    .grid-2col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-12);
+      align-items: center;
+    }
+
+    .story-image-placeholder {
+      background: linear-gradient(135deg, var(--brand-glow), rgba(22, 163, 74, 0.05));
+      border: 1px dashed var(--border-brand);
+      border-radius: var(--radius-2xl);
+      aspect-ratio: 4 / 3;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--brand);
+      font-weight: var(--weight-semi);
+      gap: var(--space-3);
+      padding: var(--space-6);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .story-image-placeholder i {
+      font-size: var(--text-5xl);
+      animation: pulse 2s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(1.1); opacity: 1; }
+    }
+
+    .value-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-6);
+    }
+
+    @media (max-width: 992px) {
+      .grid-2col {
+        grid-template-columns: 1fr;
+        gap: var(--space-8);
+      }
+      .value-cards-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-4);
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="ds-nav">
+    <div class="ds-nav-inner">
+      <a href="index.html" class="ds-logo">
+        <div class="ds-logo-icon">🛒</div>
+        <div class="ds-logo-text">Daily<span>Drop</span></div>
+      </a>
+      <div class="ds-nav-actions">
+        <button class="theme-toggle-pill" id="theme-toggle" aria-label="Toggle theme">
+          <span class="theme-toggle-pill-thumb"></span>
+          <span class="theme-toggle-pill-icon light-icon"><i class="fas fa-sun"></i></span>
+          <span class="theme-toggle-pill-icon dark-icon"><i class="fas fa-moon"></i></span>
+        </button>
+        <a href="index.html" class="btn-nav"><i class="fas fa-home"></i> Home</a>
+        <a href="cart.html" class="btn-cart">
+          <i class="fas fa-shopping-bag"></i> Cart
+          <span class="cart-badge" id="cart-count">0</span>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="about-hero">
+    <div class="container">
+      <div class="about-hero-inner">
+        <h1>We Deliver More Than <span>Groceries</span></h1>
+        <p>DailyDrop is redefining convenience with lightning-fast delivery of your daily essentials.</p>
+        <div class="highlight-badge">
+          <i class="fas fa-stopwatch"></i> 10-15 MINUTE DELIVERY GUARANTEE
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Our Story -->
+  <section class="container section">
+    <div class="grid-2col">
+      <div>
+        <div class="section-label">Our Journey</div>
+        <h2 class="section-title">From a Simple Idea to Revolutionizing Daily Shopping</h2>
+        <div style="color: var(--text-secondary); display: flex; flex-direction: column; gap: var(--space-4); margin-top: var(--space-6);">
+          <p>DailyDrop was founded by four friends who were frustrated with the time-consuming process of grocery shopping. We asked ourselves: <strong>what if you could get your daily essentials faster than it takes to brew a cup of coffee?</strong></p>
+          <p>Our mission was clear — to create a service that delivers not just products, but time back to our customers. We built an innovative logistics platform, partnered with local suppliers, and assembled a dedicated team to make the impossible possible.</p>
+          <p>Today, DailyDrop delivers thousands of products to happy customers across the city in just 10-15 minutes. We're more than a delivery service — we're your reliable partner for everyday convenience.</p>
+        </div>
+      </div>
+      <div>
+        <div class="story-image-placeholder">
+          <i class="fas fa-bolt"></i>
+          <span>10-15 Min Superfast Delivery</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Our Core Values -->
+  <section style="background: var(--surface-2); padding: var(--space-20) 0;">
+    <div class="container">
+      <div style="text-align: center; margin-bottom: var(--space-12);">
+        <div class="section-label">Values</div>
+        <h2 class="section-title">Our Core Principles</h2>
+        <p style="color: var(--text-secondary); max-width: var(--container-sm); margin: 0 auto;">These values guide our daily decisions, operational excellence, and customer interactions.</p>
+      </div>
+
+      <div class="value-cards-grid">
+        <!-- Card 1 -->
+        <div class="card" style="display: flex; flex-direction: column; gap: var(--space-4); align-items: flex-start;">
+          <div style="background: var(--brand-glow); border: 1px solid var(--border-brand); color: var(--brand); width: 48px; height: 48px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: var(--text-xl);">
+            <i class="fas fa-bolt"></i>
+          </div>
+          <h3 style="font-weight: var(--weight-bold); font-size: var(--text-lg); color: var(--text-primary);">Lightning Fast</h3>
+          <p style="color: var(--text-secondary); font-size: var(--text-sm); line-height: 1.6;">We've optimized every step of our process to ensure your order arrives in 10-15 minutes. Our riders are strategically located throughout the city to minimize delivery time.</p>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="card" style="display: flex; flex-direction: column; gap: var(--space-4); align-items: flex-start;">
+          <div style="background: var(--brand-glow); border: 1px solid var(--border-brand); color: var(--brand); width: 48px; height: 48px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: var(--text-xl);">
+            <i class="fas fa-leaf"></i>
+          </div>
+          <h3 style="font-weight: var(--weight-bold); font-size: var(--text-lg); color: var(--text-primary);">Fresh & Quality</h3>
+          <p style="color: var(--text-secondary); font-size: var(--text-sm); line-height: 1.6;">We source directly from trusted suppliers and local farmers. Every single product undergoes rigorous quality checks before it's packed and delivered to you.</p>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="card" style="display: flex; flex-direction: column; gap: var(--space-4); align-items: flex-start;">
+          <div style="background: var(--brand-glow); border: 1px solid var(--border-brand); color: var(--brand); width: 48px; height: 48px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: var(--text-xl);">
+            <i class="fas fa-smile"></i>
+          </div>
+          <h3 style="font-weight: var(--weight-bold); font-size: var(--text-lg); color: var(--text-primary);">Customer First</h3>
+          <p style="color: var(--text-secondary); font-size: var(--text-sm); line-height: 1.6;">Your ultimate satisfaction is our priority. Our support team is available 24/7 to ensure a seamless experience with every single order you place.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="container section" style="text-align: center;">
+    <div class="card-glass" style="max-width: var(--container-md); margin: 0 auto; padding: var(--space-12);">
+      <h2 style="font-size: var(--text-3xl); font-weight: var(--weight-bold); margin-bottom: var(--space-4); color: var(--text-primary);">Experience the DailyDrop Difference</h2>
+      <p style="color: var(--text-secondary); max-width: 500px; margin: 0 auto var(--space-8); font-size: var(--text-base);">Join thousands of happy customers who save time every single day with our ultra-fast delivery service.</p>
+      <a href="index.html" class="btn btn-primary btn-lg">Start Shopping Now</a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="ds-footer">
+    <div class="container">
+      <div style="text-align: center; padding: var(--space-8) 0; color: var(--text-muted); font-size: var(--text-xs); border-top: 1px solid rgba(255,255,255,0.06);">
+        &copy; 2026 DailyDrop. All rights reserved.
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    function updateCartCount() {
+      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+      const count = cart.reduce((total, item) => total + (item.quantity || 1), 0);
+      const el = document.getElementById('cart-count');
+      if (el) el.textContent = count;
+    }
+    document.addEventListener('DOMContentLoaded', updateCartCount);
+
+    // Theme Toggle Logic
+    (function() {
+      const toggleBtn = document.getElementById('theme-toggle');
+      if (toggleBtn) {
+        toggleBtn.addEventListener('click', () => {
+          const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+          const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+          document.documentElement.setAttribute('data-theme', newTheme);
+          localStorage.setItem('theme', newTheme);
+        });
+      }
+      window.addEventListener('storage', (e) => {
+        if (e.key === 'theme') {
+          document.documentElement.setAttribute('data-theme', e.newValue);
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
