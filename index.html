@@ -1330,71 +1330,18 @@
   </div>
 </footer>
 
-
-
+<script src="products-db.js"></script>
+<script src="js/cart-system.js" defer></script>
 <script>
-let cart = JSON.parse(localStorage.getItem('cart')) || [];
-cart = cart.map(item => ({
-  ...item,
-  quantity: Number(item.quantity) || 1
-}));
-localStorage.setItem('cart', JSON.stringify(cart));
-// Add this to index.html's script
-window.addEventListener('storage', () => {
-  updateCartCount();
-});
+  // Slider Functionality
+  const slides = document.querySelectorAll('.slide');
+  const dotsContainer = document.querySelector('.slider-dots');
+  const prevButton = document.querySelector('.prev');
+  const nextButton = document.querySelector('.next');
+  let currentSlide = 0;
+  let autoSlideInterval;
 
-function addToCart(productName, productPrice, productImage) {
-    let cart = JSON.parse(localStorage.getItem('cart')) || [];
-    const existingItem = cart.find(item => item.name === productName);
-
-    if (existingItem) {
-        existingItem.quantity += 1;
-    } else {
-        cart.push({
-            name: productName,
-            price: productPrice,
-            image: productImage,
-            quantity: 1
-        });
-    }
-
-    localStorage.setItem('cart', JSON.stringify(cart));
-    updateCartCount();
-    showAddedToCartAlert(productName);
-}
-
-function showAddedToCartAlert(name) {
-    const msg = document.createElement('div');
-    msg.innerHTML = `<i class="fas fa-check-circle"></i> &nbsp;<strong>${name}</strong> added to cart!`;
-    Object.assign(msg.style, {
-        position: 'fixed', bottom: '24px', right: '24px', zIndex: 9999,
-        background: 'var(--brand)', color: 'white', padding: '12px 20px',
-        borderRadius: '12px', fontFamily: 'var(--font)', fontSize: '0.875rem',
-        boxShadow: '0 8px 28px rgba(22,163,74,0.4)', display: 'flex',
-        alignItems: 'center', gap: '8px', animation: 'slideIn 0.3s ease',
-        fontWeight: '500', maxWidth: '340px'
-    });
-    document.body.appendChild(msg);
-    setTimeout(() => msg.remove(), 3000);
-}
-
-// Modify the updateCartCount() function in both pages to be identical
-function updateCartCount() {
-  const cart = JSON.parse(localStorage.getItem('cart')) || [];
-  const count = cart.reduce((total, item) => total + (item.quantity || 1), 0);
-  document.getElementById('cart-count').textContent = count;
-}
-
-
-    // Slider Functionality
-    const slides = document.querySelectorAll('.slide');
-    const dotsContainer = document.querySelector('.slider-dots');
-    const prevButton = document.querySelector('.prev');
-    const nextButton = document.querySelector('.next');
-    let currentSlide = 0;
-    let autoSlideInterval;
-
+  if (slides.length > 0 && dotsContainer) {
     // Create dots
     slides.forEach((_, index) => {
       const dot = document.createElement('div');
@@ -1403,160 +1350,115 @@ function updateCartCount() {
       dot.addEventListener('click', () => goToSlide(index));
       dotsContainer.appendChild(dot);
     });
+  }
 
-    function goToSlide(index) {
-      slides[currentSlide].classList.remove('active');
-      dotsContainer.children[currentSlide].classList.remove('active');
-      currentSlide = (index + slides.length) % slides.length;
-      slides[currentSlide].classList.add('active');
-      dotsContainer.children[currentSlide].classList.add('active');
-    }
+  function goToSlide(index) {
+    if (slides.length === 0 || !dotsContainer) return;
+    slides[currentSlide].classList.remove('active');
+    dotsContainer.children[currentSlide].classList.remove('active');
+    currentSlide = (index + slides.length) % slides.length;
+    slides[currentSlide].classList.add('active');
+    dotsContainer.children[currentSlide].classList.add('active');
+  }
 
-    function nextSlide() {
-      goToSlide(currentSlide + 1);
-    }
+  function nextSlide() {
+    goToSlide(currentSlide + 1);
+  }
 
-    function prevSlide() {
-      goToSlide(currentSlide - 1);
-    }
+  function prevSlide() {
+    goToSlide(currentSlide - 1);
+  }
 
+  if (prevButton && nextButton) {
     prevButton.addEventListener('click', prevSlide);
     nextButton.addEventListener('click', nextSlide);
+  }
 
-    function startAutoSlide() {
-      autoSlideInterval = setInterval(nextSlide, 2500);
-    }
+  function startAutoSlide() {
+    autoSlideInterval = setInterval(nextSlide, 2500);
+  }
 
-    function stopAutoSlide() {
-      clearInterval(autoSlideInterval);
-    }
+  function stopAutoSlide() {
+    clearInterval(autoSlideInterval);
+  }
 
-    const heroSlider = document.querySelector('.hero-slider');
+  const heroSlider = document.querySelector('.hero-slider');
+  if (heroSlider && slides.length > 0) {
     startAutoSlide();
-
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowLeft') prevSlide();
-      if (e.key === 'ArrowRight') nextSlide();
-    });
-
-
-// Search Functionality
-const searchInput = document.getElementById('searchInput');
-const searchResultsContainer = document.querySelector('.search-results-container');
-const searchResultsGrid = document.getElementById('search-results-grid');
-const allSections = document.querySelectorAll('.hero-slider, .categories-section, .products-container');
-const allProducts = document.querySelectorAll('.product-card');
-
-// Replace existing search functionality with this
-searchInput.addEventListener('input', function() {
-  const searchTerm = this.value.trim().toLowerCase();
-  searchResultsGrid.innerHTML = '';
-
-  if (!searchTerm) {
-    searchResultsContainer.style.display = 'none';
-    allSections.forEach(section => section.style.display = '');
-    document.querySelector('.products-container.active').style.display = 'block';
-    return;
   }
 
-  allSections.forEach(section => section.style.display = 'none');
-  searchResultsContainer.style.display = 'block';
-
-  const filteredProducts = window.productsDB.filter(product =>
-    product.title.toLowerCase().includes(searchTerm)
-  );
-
-  if (filteredProducts.length === 0) {
-    searchResultsGrid.innerHTML = `
-      <div class="no-results">
-        <i class="fas fa-search"></i>
-        <p>No products found for "${searchTerm}"</p>
-      </div>
-    `;
-    return;
-  }
-
-  filteredProducts.forEach(product => {
-    const productCard = document.createElement('div');
-    productCard.className = 'product-card';
-    productCard.innerHTML = `
-      <img src="${product.image}" alt="${product.title}" class="product-image" />
-      <div class="product-details">
-        <div class="product-title">${product.title}</div>
-        <div class="product-category">${product.category}</div>
-        <div class="product-pricing">
-          <span class="current-price">Rs.${product.price}</span>
-          ${product.discount ? `
-            <span class="original-price">Rs.${Math.round(product.price/(1-product.discount/100))}</span>
-            <span class="discount">${product.discount}% OFF</span>
-          ` : ''}
-        </div>
-        <button class="add-to-cart-btn">ADD</button>
-      </div>
-    `;
-
-    // Add click handler for dynamically created buttons
-    productCard.querySelector('.add-to-cart-btn').addEventListener('click', () => {
-      addToCart(product.title, product.price, product.image);
-    });
-
-    searchResultsGrid.appendChild(productCard);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') prevSlide();
+    if (e.key === 'ArrowRight') nextSlide();
   });
-});
 
-// Category Filtering
-const categories = document.querySelectorAll('.category-card');
-const productContainers = document.querySelectorAll('.products-container');
+  // Search Functionality
+  document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('searchInput');
+    const searchResultsContainer = document.querySelector('.search-results-container');
+    const searchResultsGrid = document.getElementById('search-results-grid');
+    const allSections = document.querySelectorAll('.hero-slider, .categories-section, .products-container');
 
-// Scroll to Top
-const scrollButton = document.querySelector('.scroll-to-top');
+    if (searchInput && searchResultsContainer && searchResultsGrid) {
+      searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.trim().toLowerCase();
+        searchResultsGrid.innerHTML = '';
 
-window.addEventListener('scroll', () => {
-  window.pageYOffset > 300
-    ? scrollButton.classList.add('show')
-    : scrollButton.classList.remove('show');
-});
+        if (!searchTerm) {
+          searchResultsContainer.style.display = 'none';
+          allSections.forEach(section => section.style.display = '');
+          const activeContainer = document.querySelector('.products-container.active');
+          if (activeContainer) activeContainer.style.display = 'block';
+          return;
+        }
 
-scrollButton.addEventListener('click', scrollToTop);
+        allSections.forEach(section => section.style.display = 'none');
+        searchResultsContainer.style.display = 'block';
 
-function scrollToTop() {
-  window.scrollTo({
-    top: 0,
-    behavior: 'smooth'
-  });
-}
+        const filteredProducts = (window.productsDB || []).filter(product =>
+          product.title.toLowerCase().includes(searchTerm)
+        );
 
-// Initialize cart count on page load
-function initializePage() {
-    let cart = JSON.parse(localStorage.getItem('cart')) || [];
-    const count = cart.reduce((total, item) => total + (item.quantity || 1), 0);
-    document.getElementById('cart-count').textContent = count;
-}
+        if (filteredProducts.length === 0) {
+          searchResultsGrid.innerHTML = `
+            <div class="no-results">
+              <i class="fas fa-search"></i>
+              <p>No products found for "${searchTerm}"</p>
+            </div>
+          `;
+          return;
+        }
 
-// Call this when the page loads
-document.addEventListener('DOMContentLoaded', initializePage);
+        filteredProducts.forEach(product => {
+          const productCard = document.createElement('div');
+          productCard.className = 'product-card';
+          productCard.innerHTML = `
+            <div class="product-card-img-wrap">
+              <img src="${product.image}" alt="${product.title}" class="product-image" onerror="this.src='./static/logo1.webp'" />
+            </div>
+            <div class="product-details">
+              <div class="product-title">${product.title}</div>
+              <div class="product-category">${product.category}</div>
+              <div class="product-pricing">
+                <span class="current-price">Rs.${product.price}</span>
+                ${product.discount ? `
+                  <span class="original-price">Rs.${Math.round(product.price/(1-product.discount/100))}</span>
+                  <span class="discount">${product.discount}% OFF</span>
+                ` : ''}
+              </div>
+              <button class="add-to-cart-btn">ADD</button>
+            </div>
+          `;
 
-// Initialize cart count on page load
-updateCartCount();
+          productCard.querySelector('.add-to-cart-btn').addEventListener('click', () => {
+            addToCart(product.title, product.price, product.image);
+          });
 
-// Theme Toggle Logic
-(function() {
-  const toggleBtn = document.getElementById('theme-toggle');
-  if (toggleBtn) {
-    toggleBtn.addEventListener('click', () => {
-      const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-      document.documentElement.setAttribute('data-theme', newTheme);
-      localStorage.setItem('theme', newTheme);
-    });
-  }
-  window.addEventListener('storage', (e) => {
-    if (e.key === 'theme') {
-      document.documentElement.setAttribute('data-theme', e.newValue);
+          searchResultsGrid.appendChild(productCard);
+        });
+      });
     }
   });
-})();
 </script>
-<script src="products-db.js"></script>
 </body>
 </html>

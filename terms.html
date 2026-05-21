@@ -133,24 +133,6 @@
       </div>
     </div>
   </footer>
-  <script>
-    // Theme Toggle Logic
-    (function() {
-      const toggleBtn = document.getElementById('theme-toggle');
-      if (toggleBtn) {
-        toggleBtn.addEventListener('click', () => {
-          const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-          const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-          document.documentElement.setAttribute('data-theme', newTheme);
-          localStorage.setItem('theme', newTheme);
-        });
-      }
-      window.addEventListener('storage', (e) => {
-        if (e.key === 'theme') {
-          document.documentElement.setAttribute('data-theme', e.newValue);
-        }
-      });
-    })();
-  </script>
+  <script src="js/cart-system.js" defer></script>
 </body>
 </html>

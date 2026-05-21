@@ -395,12 +395,13 @@
     </div>
   </footer>
 
+  <script src="js/cart-system.js" defer></script>
   <script>
   document.addEventListener('DOMContentLoaded', () => {
-    updateCartCount();
     const allOrders = JSON.parse(localStorage.getItem('orders')) || [];
     const userOrders = allOrders;
     const ordersContainer = document.getElementById('ordersContainer');
+    if (!ordersContainer) return;
 
     ordersContainer.innerHTML = '<h2 class="section-title">My Orders</h2>';
 
@@ -432,7 +433,7 @@
             <img src="${product.image_path}" class="product-image" alt="${product.name}" onerror="this.src='./static/logo1.webp'">
             <div class="product-info">
               <div class="product-name">${product.name}</div>
-              <div class="product-price">Rs.${product.price} each</div>
+              <div class="product-price">Rs.${product.price}</div>
             </div>
             <span class="product-quantity">${product.quantity} item${product.quantity > 1 ? 's' : ''}</span>
           </div>
@@ -485,31 +486,6 @@
       ordersContainer.insertAdjacentHTML('beforeend', orderCard);
     });
   });
-
-  function updateCartCount() {
-    const cart = JSON.parse(localStorage.getItem('cart')) || [];
-    const count = cart.reduce((total, item) => total + (item.quantity || 1), 0);
-    const el = document.getElementById('cart-count');
-    if (el) el.textContent = count;
-  }
-
-  // Theme Toggle Logic
-  (function() {
-    const toggleBtn = document.getElementById('theme-toggle');
-    if (toggleBtn) {
-      toggleBtn.addEventListener('click', () => {
-        const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-        document.documentElement.setAttribute('data-theme', newTheme);
-        localStorage.setItem('theme', newTheme);
-      });
-    }
-    window.addEventListener('storage', (e) => {
-      if (e.key === 'theme') {
-        document.documentElement.setAttribute('data-theme', e.newValue);
-      }
-    });
-  })();
   </script>
 </body>
 </html>
