@@ -1,0 +1,8 @@
+# Ignore all HTML, CSS, and JS files from language statistics
+*.html linguist-vendored
+*.css linguist-vendored
+*.js linguist-vendored
+
+# Ignore whole folders
+templates/** linguist-vendored
+static/** linguist-vendored
