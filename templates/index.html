@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daily drop - Quick Delivery E-commerce</title>
+  <!-- Bootstrap, FontAwesome & Google Fonts -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo1.webp') }}">
+
+  <!-- Centralized Premium Styling & Scripts -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
+  <script>window.IS_USER_LOGGED_IN = {{ 'true' if is_logged_in else 'false' }};</script>
+  <script src="{{ url_for('static', filename='js/products.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/cart-helpers.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="{{ url_for('static', filename='js/product-modal.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/command-palette.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/wishlist.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/live-search.js') }}"></script>
+</head>
+
+<body>
+
+    <!-- Animated Glowing Blobs -->
+    <div class="glow-blob glow-blob-1"></div>
+    <div class="glow-blob glow-blob-2"></div>
+    <div class="glow-blob glow-blob-3"></div>
+
+<nav class="navbar">
+    <div class="container navbar-container">
+        <a href="{{ url_for('index') }}" class="logo">
+            <i class="fas fa-shopping-basket"></i> Daily<span>Drop</span>
+        </a>
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Search for products..." autocomplete="off" />
+        </div>
+        <div class="nav-actions">
+            <!-- Conditional login/logout -->
+            {% if 'user_id' in session %}
+<a href="{{ url_for('orders') }}" class="login-btn-outline"><i class="fas fa-box"></i> My Orders</a>
+                <a href="{{ url_for('wishlist') }}" class="wishlist-nav-icon" title="My Wishlist">
+                    <i class="fas fa-heart"></i> <span class="nav-text">Wishlist</span> <span id="wishlist-count" class="wishlist-badge">0</span>
+                </a>
+                <a href="{{ url_for('logout') }}" class="login-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="login-btn"><i class="fas fa-sign-in-alt"></i> Login</a>
+            {% endif %}
+            <!-- Always show cart button -->
+            <a href="{{ url_for('cart') }}" class="cart-icon">
+                <i class="fas fa-shopping-cart"></i> My Cart <span id="cart-count">0</span>
+            </a>
+        </div>
+    </div>
+</nav>
+      <section class="container search-results-container" style="display: none;">
+        <h2 class="products-title">Search Results</h2>
+        <div class="products-grid" id="search-results-grid"></div>
+      </section>
+  <!-- Hero Slider -->
+  <div class="container">
+    <div class="hero-slider">
+      <div class="slide active">
+        <img src="/static/slider/Vegetables.png" alt="Vegetables">
+        <div class="slide-content">
+          <h2>Fresh veggies, great deals!</h2>
+          <p>Experience the finest, farm-fresh vegetables, rich in flavor and nutrition every day!</p>
+          <a href="{{ url_for('vegetables') }}" class="slide-btn">Explore Now</a>
+        </div>
+      </div>
+      <div class="slide">
+        <img src="/static/slider/dairy and breakfast.png" alt="Dairy and Breakfast">
+        <div class="slide-content">
+          <h2>Fresh dairy, perfect breakfasts!</h2>
+          <p>Discover rich, creamy dairy products and wholesome breakfast essentials to start your day right!</p>
+          <a href="{{ url_for('dairy_breakfast') }}" class="slide-btn">See What's Fresh</a>
+        </div>
+      </div>
+      <div class="slide">
+        <img src="/static/slider/snacks.png" alt="Snacks">
+        <div class="slide-content">
+          <h2>Delicious snacks & munchies!</h2>
+          <p>Indulge in crispy chips, sweet chocolates, gourmet cookies, and delightful treats any time!</p>
+          <a href="{{ url_for('snacks') }}" class="slide-btn">Find Your Favorites</a>
+        </div>
+      </div>
+      <div class="slide">
+        <img src="/static/slider/babycare.png" alt="Babycare">
+        <div class="slide-content">
+          <h2>Gentle care for your little one!</h2>
+          <p>Discover premium baby care products that nurture and protect your baby's delicate skin and health.</p>
+          <a href="{{ url_for('baby_care') }}" class="slide-btn">Shop Now</a>
+        </div>
+      </div>
+      <div class="slide">
+        <img src="/static/slider/grocery.png" alt="Grocery">
+        <div class="slide-content">
+          <h2>Gourmet Groceries & Pantry Essentials</h2>
+          <p>Stock your kitchen with premium, handpicked artisanal spices, pantry classics, and organic staples.</p>
+          <a href="{{ url_for('grocery') }}" class="slide-btn">Stock Your Pantry</a>
+        </div>
+      </div>
+      <div class="slide">
+        <img src="/static/slider/beverages.png" alt="Beverages">
+        <div class="slide-content">
+          <h2>Refreshing Beverages & Craft Sodas</h2>
+          <p>Thirst-quenching juices, sparkling waters, gourmet lassis, and artisanal tea blends.</p>
+          <a href="{{ url_for('beverages') }}" class="slide-btn">Explore Refreshments</a>
+        </div>
+      </div>
+      <div class="slide">
+        <img src="/static/slider/frozen_foods.png" alt="Frozen Foods">
+        <div class="slide-content">
+          <h2>Premium Gelatos & Frozen Treats</h2>
+          <p>Indulge in pure bliss with gourmet ice cream cones, creamy pints, and delightful frozen desserts.</p>
+          <a href="{{ url_for('frozen_foods') }}" class="slide-btn">Shop Frozen Foods</a>
+        </div>
+      </div>
+      <div class="slider-nav">
+        <button class="slider-arrow prev">←</button>
+        <button class="slider-arrow next">→</button>
+      </div>
+      <div class="slider-dots"></div>
+    </div>
+  </div>
+
+
+  <!-- Categories Section -->
+<section class="categories-section">
+  <div class="container">
+    <h2 class="section-title">Shop by Category</h2>
+    <div class="categories-grid">
+      <!-- Fruits & Vegetables -->
+      <a href="{{ url_for('vegetables') }}" class="category-card">
+        <div class="image-container">
+          <img src="/static/image/vegetables.jpg" alt="Fruits & Vegetables">
+        </div>
+        <h3>Fruits & Vegetables</h3>
+      </a>
+
+      <!-- Dairy & Breakfast -->
+      <a href="{{ url_for('dairy_breakfast') }}" class="category-card">
+        <div class="image-container">
+          <img src="/static/image/dairy.jpg" alt="Dairy & Breakfast">
+        </div>
+        <h3>Dairy & Breakfast</h3>
+      </a>
+
+            <!-- Snacks -->
+      <a href="{{ url_for('snacks') }}" class="category-card">
+        <div class="image-container">
+          <img src="/static/image/snaks.jpeg" alt="Snacks">
+        </div>
+        <h3>Snacks</h3>
+      </a>
+
+
+      <!-- Baby Care -->
+      <a href="{{ url_for('baby_care') }}" class="category-card">
+        <div class="image-container">
+          <img src="/static/image/baby.png" alt="Baby Care">
+        </div>
+        <h3>Baby Care</h3>
+      </a>
+
+
+
+
+      <!-- Personal Care -->
+      <a href="{{ url_for('personal_care') }}" class="category-card">
+        <div class="image-container">
+          <img src="/static/image/personalcare.jpg" alt="Personal Care">
+        </div>
+        <h3>Personal Care</h3>
+      </a>
+
+      <!-- Household Items -->
+      <a href="{{ url_for('household_items') }}" class="category-card">
+        <div class="image-container">
+          <img src="/static/image/household.jpeg" alt="Household Items">
+        </div>
+        <h3>Household Items</h3>
+      </a>
+
+
+
+      <!-- Home & Kitchen -->
+      <a href="{{ url_for('home_kitchen') }}" class="category-card">
+        <div class="image-container">
+          <img src="/static/image/kitchen.jpeg" alt="Home & Kitchen">
+        </div>
+        <h3>Home & Kitchen</h3>
+      </a>
+
+            <!-- Electronics -->
+      <a href="{{ url_for('grocery') }}" class="category-card">
+        <div class="image-container">
+          <img src="/static/image/grocery.jpeg" alt="Grocery">
+        </div>
+        <h3>Grocery</h3>
+      </a>
+
+      <!-- Beverages -->
+      <a href="{{ url_for('beverages') }}" class="category-card">
+        <div class="image-container">
+          <img src="/static/image/beverages.jpg" alt="Beverages">
+        </div>
+        <h3>Beverages</h3>
+      </a>
+
+      <!-- Frozen Foods -->
+      <a href="{{ url_for('frozen_foods') }}" class="category-card">
+        <div class="image-container">
+          <img src="/static/image/frozen_foods.jpg" alt="Frozen Foods">
+        </div>
+        <h3>Frozen Foods</h3>
+      </a>
+
+
+    </div>
+  </div>
+</section>
+<br><section class="container products-container active" id="all">
+  <h2 class="products-title">Popular Products</h2>
+  <div class="products-grid" id="popular-products-grid">
+    <!-- Products load dynamically from database -->
+  </div>
+</section>
+
+
+  <button class="scroll-to-top" onclick="scrollToTop()">↑</button>
+
+<footer class="footer">
+    <div class="container">
+        <div class="footer-grid">
+            <div class="footer-column">
+                <div class="footer-logo">
+                    <i class="fas fa-shopping-basket"></i> Daily<span>Drop</span>
+                </div>
+                <p class="footer-description">
+                    Revolutionizing grocery shopping. Get premium fresh foods and everyday essentials delivered directly to your door in 10 minutes.
+                </p>
+            </div>
+            <div class="footer-column">
+                <h4>Categories</h4>
+                <ul class="footer-links">
+                    <li><a href="{{ url_for('grocery') }}">Groceries</a></li>
+                    <li><a href="{{ url_for('personal_care') }}">Personal Care</a></li>
+                    <li><a href="{{ url_for('household_items') }}">Household Items</a></li>
+                    <li><a href="{{ url_for('home_kitchen') }}">Home & Kitchen</a></li>
+                    <li><a href="{{ url_for('baby_care') }}">Baby Products</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h4>Quick Links</h4>
+                <ul class="footer-links">
+                    <li><a href="{{ url_for('about_us') }}">About Us</a></li>
+                    <li><a href="{{ url_for('contact_us') }}">Contact Us</a></li>
+                    <li><a href="{{ url_for('faqs') }}">FAQs</a></li>
+                    <li><a href="{{ url_for('terms_signup_home') }}">Terms & Conditions</a></li>
+                    <li><a href="{{ url_for('privacy_policy_signup_home') }}">Privacy Policy</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h4>Get In Touch</h4>
+                <ul class="footer-contact">
+                    <li>
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>Horticulture, Chitradurga, Karnataka, India</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-envelope"></i>
+                        <span>support@dailydrop.com</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-phone-alt"></i>
+                        <span>+91 78292 83748</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 DailyDrop. All rights reserved. | Designed with <i class="fas fa-heart" style="color: #EF4444;"></i> for visual excellence.</p>
+        </div>
+    </div>
+</footer>
+
+
+
+<script>
+
+
+    // Slider Functionality
+    const slides = document.querySelectorAll('.slide');
+    const dotsContainer = document.querySelector('.slider-dots');
+    const prevButton = document.querySelector('.prev');
+    const nextButton = document.querySelector('.next');
+    let currentSlide = 0;
+    let autoSlideInterval;
+
+    // Create dots
+    slides.forEach((_, index) => {
+      const dot = document.createElement('div');
+      dot.classList.add('dot');
+      if (index === 0) dot.classList.add('active');
+      dot.addEventListener('click', () => goToSlide(index));
+      dotsContainer.appendChild(dot);
+    });
+
+    function goToSlide(index) {
+      slides[currentSlide].classList.remove('active');
+      dotsContainer.children[currentSlide].classList.remove('active');
+      currentSlide = (index + slides.length) % slides.length;
+      slides[currentSlide].classList.add('active');
+      dotsContainer.children[currentSlide].classList.add('active');
+    }
+
+    function nextSlide() {
+      goToSlide(currentSlide + 1);
+    }
+
+    function prevSlide() {
+      goToSlide(currentSlide - 1);
+    }
+
+    prevButton.addEventListener('click', prevSlide);
+    nextButton.addEventListener('click', nextSlide);
+
+    function startAutoSlide() {
+      autoSlideInterval = setInterval(nextSlide, 2500);
+    }
+
+    function stopAutoSlide() {
+      clearInterval(autoSlideInterval);
+    }
+
+    const heroSlider = document.querySelector('.hero-slider');
+    startAutoSlide();
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') prevSlide();
+      if (e.key === 'ArrowRight') nextSlide();
+    });
+
+
+// Search Functionality
+const searchInput = document.getElementById('searchInput');
+const searchResultsContainer = document.querySelector('.search-results-container');
+const searchResultsGrid = document.getElementById('search-results-grid');
+const allSections = document.querySelectorAll('.hero-slider, .categories-section, .products-container');
+const allProducts = document.querySelectorAll('.product-card');
+
+// Replace existing search functionality with this
+searchInput.addEventListener('input', function() {
+  const searchTerm = this.value.trim().toLowerCase();
+  searchResultsGrid.innerHTML = '';
+
+  if (!searchTerm) {
+    searchResultsContainer.style.display = 'none';
+    allSections.forEach(section => section.style.display = '');
+    document.querySelector('.products-container.active').style.display = 'block';
+    return;
+  }
+
+  allSections.forEach(section => section.style.display = 'none');
+  searchResultsContainer.style.display = 'block';
+
+  const filteredProducts = window.productsDB.filter(product =>
+    product.title.toLowerCase().includes(searchTerm)
+  );
+
+  if (filteredProducts.length === 0) {
+    searchResultsGrid.innerHTML = `
+      <div class="no-results">
+        <i class="fas fa-search"></i>
+        <p>No products found for "${searchTerm}"</p>
+      </div>
+    `;
+    return;
+  }
+
+  filteredProducts.forEach(product => {
+    const productCard = document.createElement('div');
+    productCard.className = 'product-card';
+    productCard.innerHTML = `
+      <img src="${product.image || product.image_path || "/static/logo1.webp"}" alt="${product.title}" class="product-image" />
+      <div class="product-details">
+        <div class="product-title">${product.title}</div>
+        <div class="product-category">${product.category}</div>
+        <div class="product-pricing">
+          <span class="current-price">Rs.${product.price}</span>
+          ${product.discount ? `
+            <span class="original-price">Rs.${Math.round(product.price/(1-product.discount/100))}</span>
+            <span class="discount">${product.discount}% OFF</span>
+          ` : ''}
+        </div>
+        <button class="add-to-cart-btn" onclick="addToCart('${product.title.replace(/'/g, "\\'")}', ${product.price}, '${product.image || product.image_path || "/static/logo1.webp"}')">ADD</button>
+      </div>
+    `;
+
+    searchResultsGrid.appendChild(productCard);
+  });
+  updateProductButtons();
+});
+
+// Category Filtering
+const categories = document.querySelectorAll('.category-card');
+const productContainers = document.querySelectorAll('.products-container');
+
+// Scroll to Top
+const scrollButton = document.querySelector('.scroll-to-top');
+
+window.addEventListener('scroll', () => {
+  window.pageYOffset > 300
+    ? scrollButton.classList.add('show')
+    : scrollButton.classList.remove('show');
+});
+
+scrollButton.addEventListener('click', scrollToTop);
+
+function scrollToTop() {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  });
+}
+
+// Initialize cart count on page load
+function initializeCart() {
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+    const count = cart.reduce((total, item) => total + (item.quantity || 1), 0);
+    document.getElementById('cart-count').textContent = count;
+}
+
+// Render Popular Products dynamically from database prioritizing most-used staple essentials
+function renderPopularProducts() {
+    const grid = document.getElementById('popular-products-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    
+    const dbProducts = window.productsDB || [];
+    if (dbProducts.length === 0) return;
+
+    // List of most popular daily staple product keywords
+    const stapleKeywords = [
+        'tomato', 'brinjal', 'apples', 'capsicum', 'cauliflower', 'broccoli', 
+        'bananas', 'black grapes', 'milk', 'bread', 'butter', 'cheese', 
+        'horlicks', 'gulab jamun', 'kurkure', 'kitkat', 'fanta', 'pepsi', 
+        'amul lassi', 'pampers', 'colgate', 'dove soap', 'jeera powder', 'attack'
+    ];
+
+    // Priority 1: Match staple essentials from database
+    let popularProducts = dbProducts.filter(p => 
+        stapleKeywords.some(keyword => p.title.toLowerCase().includes(keyword))
+    );
+
+    // Priority 2: Fill remaining slots if under 24
+    if (popularProducts.length < 24) {
+        const remaining = dbProducts.filter(p => !popularProducts.includes(p));
+        popularProducts = popularProducts.concat(remaining).slice(0, 24);
+    } else {
+        popularProducts = popularProducts.slice(0, 24);
+    }
+
+    popularProducts.forEach(product => {
+        const productCard = document.createElement('div');
+        productCard.className = 'product-card';
+        const pId = product.id || product.product_id;
+        const pTitle = product.title || product.name || 'Product';
+        const safeTitle = pTitle.replace(/'/g, "\\'");
+        const pImg = product.image || product.image_path || '/static/logo1.webp';
+        const pCat = product.category || '';
+        const pPrice = parseFloat(product.price || 0).toFixed(2);
+        
+        productCard.setAttribute('data-title', pTitle);
+        productCard.setAttribute('data-category', pCat);
+        productCard.setAttribute('data-product-id', pId);
+        
+        const isWishlisted = typeof isInWishlist === 'function' && isInWishlist(pId);
+        
+        productCard.innerHTML = `
+            <div class="product-image-container">
+                <button class="wishlist-heart-btn ${isWishlisted ? 'active' : ''}" data-product-id="${pId}" onclick="toggleWishlist(${pId}, event)" title="Save to Wishlist">
+                    <i class="${isWishlisted ? 'fas' : 'far'} fa-heart"></i>
+                </button>
+                <img src="${pImg}" alt="${pTitle}" class="product-image" loading="lazy" decoding="async" onclick="showDetails('${safeTitle}', ${product.price}, '${pImg}', '${pCat}')" style="cursor: pointer;" onerror="this.onerror=null; this.src='/static/logo1.webp'" />
+            </div>
+            <div class="product-details">
+                <div class="product-title" onclick="showDetails('${safeTitle}', ${product.price}, '${pImg}', '${pCat}')" style="cursor: pointer;">${pTitle}</div>
+                <div class="product-category">${pCat}</div>
+                <div class="product-pricing">
+                    <span class="current-price">Rs.${pPrice}</span>
+                </div>
+                <button class="add-to-cart-btn" onclick="addToCart('${safeTitle}', ${product.price}, '${pImg}')">ADD</button>
+            </div>
+        `;
+        grid.appendChild(productCard);
+    });
+    
+    if (typeof updateProductButtons === 'function') {
+        updateProductButtons();
+    }
+    if (typeof updateWishlistHeartButtons === 'function') {
+        updateWishlistHeartButtons();
+    }
+}
+
+// Call this when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+    initializeCart();
+    renderPopularProducts();
+    updateProductButtons();
+});
+
+document.addEventListener('productsSynced', renderPopularProducts);
+
+    if (typeof updateCartCount === 'function') updateCartCount();
+  </script>
+</body>
+</html>

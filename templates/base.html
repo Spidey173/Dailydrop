@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}DailyDrop | Instant Grocery Delivery{% endblock %}</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo1.webp') }}">
+
+  <!-- Bootstrap, FontAwesome & Google Fonts -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Centralized Design System -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+
+  <!-- Global Application State -->
+  <script>window.IS_USER_LOGGED_IN = {{ 'true' if session.get('user_id') else 'false' }};</script>
+  <script src="{{ url_for('static', filename='js/cart-helpers.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/wishlist.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/live-search.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/command-palette.js') }}"></script>
+
+  {% block head_extra %}{% endblock %}
+</head>
+<body>
+
+  {% block navbar %}
+  <!-- Premium Sticky Floating Navbar -->
+  <nav class="navbar">
+      <div class="container navbar-container">
+          <a href="{{ url_for('index') }}" class="logo">
+              <i class="fas fa-shopping-basket"></i> Daily<span>Drop</span>
+          </a>
+          <div class="search-bar">
+              <input type="text" id="searchInput" placeholder="Search for products..." autocomplete="off" />
+          </div>
+          <div class="nav-actions">
+              {% if 'user_id' in session %}
+                  <a href="{{ url_for('orders') }}" class="login-btn-outline"><i class="fas fa-box"></i> My Orders</a>
+                  <a href="{{ url_for('wishlist') }}" class="wishlist-nav-icon" title="My Wishlist">
+                      <i class="fas fa-heart"></i> <span class="nav-text">Wishlist</span> <span id="wishlist-count" class="wishlist-badge">0</span>
+                  </a>
+                  <a href="{{ url_for('logout') }}" class="login-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+              {% else %}
+                  <a href="{{ url_for('login') }}" class="login-btn"><i class="fas fa-sign-in-alt"></i> Login</a>
+              {% endif %}
+              <a href="{{ url_for('cart') }}" class="cart-icon">
+                  <i class="fas fa-shopping-cart"></i> My Cart <span id="cart-count">0</span>
+              </a>
+          </div>
+      </div>
+  </nav>
+  {% endblock %}
+
+  <!-- Main Content Block -->
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  {% block footer %}
+  <!-- Footer -->
+  <footer class="footer">
+      <div class="container footer-content">
+          <div class="footer-column">
+              <h4>Daily<span>Drop</span></h4>
+              <p>Fresh Groceries Delivered in 10-15 Minutes.</p>
+          </div>
+          <div class="footer-column">
+              <h4>Quick Links</h4>
+              <ul>
+                  <li><a href="{{ url_for('about_us') }}">About Us</a></li>
+                  <li><a href="{{ url_for('contact_us') }}">Contact Us</a></li>
+                  <li><a href="{{ url_for('faqs') }}">FAQs</a></li>
+              </ul>
+          </div>
+          <div class="footer-column">
+              <h4>Legal</h4>
+              <ul>
+                  <li><a href="{{ url_for('terms') }}">Terms & Conditions</a></li>
+                  <li><a href="{{ url_for('privacy') }}">Privacy Policy</a></li>
+              </ul>
+          </div>
+      </div>
+  </footer>
+  {% endblock %}
+
+  <!-- Core Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

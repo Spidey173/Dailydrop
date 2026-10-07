@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DailyDrop | Login</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo1.webp') }}">
+
+    <!-- Font Awesome & Google Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Centralized Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    
+    <style>
+        body {
+            background-color: var(--bg-base);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .auth-split-container {
+            display: flex;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Left Side: Animated Premium Branding Panel */
+        .auth-brand-side {
+            flex: 1.2;
+            background: linear-gradient(135deg, #020805 0%, #082516 100%);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 80px;
+            overflow: hidden;
+            border-right: 1px solid var(--border-glass);
+        }
+
+        .auth-brand-side::before {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%);
+            bottom: -50px;
+            left: -50px;
+            animation: float 10s infinite alternate ease-in-out;
+        }
+
+        .brand-content {
+            position: relative;
+            z-index: 5;
+            max-width: 520px;
+        }
+
+        .brand-logo {
+            font-family: 'Syne', sans-serif;
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand-logo i {
+            -webkit-text-fill-color: initial;
+            color: var(--accent);
+            text-shadow: var(--shadow-glow);
+            animation: pulse 2s infinite alternate;
+        }
+
+        .brand-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 20px;
+            color: white;
+            letter-spacing: -1.5px;
+        }
+
+        .brand-title span {
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand-description {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 40px;
+        }
+
+        /* Right Side: Glassmorphic Form Card Panel */
+        .auth-form-side {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            position: relative;
+        }
+
+        .auth-form-side::before {
+            content: '';
+            position: absolute;
+            width: 250px;
+            height: 250px;
+            background: radial-gradient(circle, rgba(52, 211, 153, 0.1) 0%, transparent 70%);
+            top: 10%;
+            right: 10%;
+        }
+
+        .form-card {
+            width: 100%;
+            max-width: 440px;
+            background: rgba(15, 42, 28, 0.45);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-glass);
+            padding: 48px 40px;
+            box-shadow: var(--shadow-xl);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            z-index: 5;
+            position: relative;
+        }
+
+        .form-header h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 30px;
+            color: white;
+            letter-spacing: -0.5px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 10px;
+            letter-spacing: 0.5px;
+        }
+
+        .input-container {
+            position: relative;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 16px 20px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-glass);
+            background: rgba(255, 255, 255, 0.04);
+            font-size: 0.95rem;
+            outline: none;
+            font-family: inherit;
+            transition: var(--transition-normal);
+            color: white;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-primary-glow);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary);
+            display: none;
+            pointer-events: none;
+        }
+
+        .icon.error {
+            color: #EF4444;
+        }
+
+        .error-message {
+            color: #EF4444;
+            font-size: 0.8rem;
+            margin-top: 6px;
+            display: none;
+            font-weight: 600;
+        }
+
+        #password {
+            padding-right: 80px;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            z-index: 10;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            background: transparent;
+        }
+
+        .password-toggle:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        #passwordIcon,
+        #passwordErrorIcon {
+            right: 48px !important;
+        }
+
+        .alert {
+            padding: 14px 18px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 24px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.5s ease, max-height 0.5s ease, margin-bottom 0.5s ease, padding 0.5s ease;
+            overflow: hidden;
+            max-height: 120px;
+        }
+
+        .alert.alert-fade-out {
+            opacity: 0;
+            transform: translateY(-8px);
+            max-height: 0;
+            margin-bottom: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+            border-width: 0;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            color: #34D399;
+        }
+
+        .alert-danger, .alert-error {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            color: #F43F5E;
+        }
+
+        .alert-info, .alert-message {
+            background: rgba(59, 130, 246, 0.12);
+            border: 1px solid rgba(59, 130, 246, 0.25);
+            color: #60A5FA;
+        }
+
+
+
+        .btn {
+            width: 100%;
+            background: var(--gradient-primary);
+            color: var(--bg-base);
+            padding: 16px 24px;
+            border-radius: var(--radius-sm);
+            font-weight: 700;
+            font-size: 1rem;
+            box-shadow: var(--shadow-primary-glow);
+            transition: var(--transition-normal);
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(16, 185, 129, 0.4);
+        }
+
+        .register-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 28px;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .register-link a {
+            color: var(--accent);
+            font-weight: 800;
+        }
+
+        .register-link a:hover {
+            color: var(--accent-hover);
+            text-decoration: underline;
+        }
+
+        .terms {
+            margin-top: 28px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .terms a {
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(10deg); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.1); }
+        }
+
+        /* Demo Fast Access Section */
+        .demo-buttons-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .demo-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 14px;
+            background: rgba(16, 185, 129, 0.08);
+            border: 1px solid rgba(52, 211, 153, 0.3);
+            border-radius: var(--radius-sm);
+            color: #FFFFFF;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 700;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .demo-btn:hover {
+            transform: translateY(-2px);
+            border-color: #34D399;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
+            background: rgba(16, 185, 129, 0.18);
+        }
+
+        .demo-btn.demo-admin {
+            border-color: rgba(245, 158, 11, 0.35);
+            background: rgba(245, 158, 11, 0.08);
+        }
+
+        .demo-btn.demo-admin:hover {
+            border-color: #FBBF24;
+            box-shadow: 0 4px 14px rgba(245, 158, 11, 0.25);
+            background: rgba(245, 158, 11, 0.18);
+        }
+
+        .demo-btn i {
+            font-size: 1rem;
+            color: #34D399;
+        }
+
+        .demo-btn.demo-admin i {
+            color: #FBBF24;
+        }
+
+        .divider-or {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 18px 0;
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .divider-or::before,
+        .divider-or::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .divider-or:not(:empty)::before {
+            margin-right: 12px;
+        }
+
+        .divider-or:not(:empty)::after {
+            margin-left: 12px;
+        }
+
+        /* Responsive rules */
+        @media (max-width: 1024px) {
+            .auth-brand-side {
+                display: none;
+            }
+            .auth-split-container {
+                justify-content: center;
+            }
+            body {
+                background: linear-gradient(135deg, #020805 0%, #030C07 100%);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Glowing Blobs for Form Side background -->
+    <div class="glow-blob glow-blob-1"></div>
+    <div class="glow-blob glow-blob-2"></div>
+
+    <div class="auth-split-container">
+        <!-- Left side branding panel -->
+        <div class="auth-brand-side">
+            <div class="brand-content">
+                <div class="brand-logo">
+                    <i class="fas fa-shopping-basket"></i>
+                    <div>Daily<span>Drop</span></div>
+                </div>
+                <h2 class="brand-title">Get fresh groceries in <span>10 Minutes</span></h2>
+                <p class="brand-description">Experience premium quick-commerce with farm-fresh produce and daily essentials delivered directly to your doorstep. Log in to start your cosmic shopping experience.</p>
+            </div>
+        </div>
+
+        <!-- Right side form panel -->
+        <div class="auth-form-side">
+            <!-- Glassmorphic Login Card -->
+            <div class="form-card">
+                <div class="form-header">
+                    <h1>Login</h1>
+                </div>
+
+                <!-- Flash Error/Success notifications -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">
+                                <i class="fas {% if category == 'success' %}fa-check-circle{% elif category in ['info', 'message'] %}fa-info-circle{% else %}fa-exclamation-circle{% endif %}"></i>
+                                <span>{{ message }}</span>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+
+                <!-- Demo Quick Access Buttons -->
+                <div class="demo-buttons-grid">
+                    <button type="button" class="demo-btn demo-customer" id="demoCustomerBtn" title="Auto-fill Demo Customer">
+                        <i class="fas fa-user"></i>
+                        <span>Demo User</span>
+                    </button>
+                    <a href="/admin_login" class="demo-btn demo-admin" id="demoAdminBtn" title="Go to Admin Login">
+                        <i class="fas fa-shield-halved"></i>
+                        <span>Demo Admin</span>
+                    </a>
+                </div>
+
+                <div class="divider-or">or login with email</div>
+
+                <form method="POST" action="{{ url_for('login') }}" id="loginForm">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <!-- Email Field -->
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <div class="input-container">
+                            <input type="email" id="email" name="email" class="form-control" placeholder="example@gmail.com" required autocomplete="email">
+                            <i class="fas fa-check icon" id="emailIcon"></i>
+                            <i class="fas fa-exclamation-circle icon error" id="emailErrorIcon"></i>
+                        </div>
+                        <div class="error-message" id="emailError">Please enter a valid Gmail address (e.g., name@gmail.com)</div>
+                    </div>
+
+                    <!-- Password Field -->
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <div class="input-container">
+                            <input type="password" id="password" name="password" class="form-control" placeholder="Enter your password" required autocomplete="current-password">
+                            <i class="fas fa-check icon" id="passwordIcon"></i>
+                            <i class="fas fa-exclamation-circle icon error" id="passwordErrorIcon"></i>
+                            <span class="password-toggle" id="passwordToggle">
+                                <i class="fas fa-eye"></i>
+                            </span>
+                        </div>
+                        <div class="error-message" id="passwordError">Password must be at least 8 characters long</div>
+                    </div>
+
+                    <button type="submit" class="btn">
+                        Login <i class="fas fa-arrow-right"></i>
+                    </button>
+                </form>
+
+                <div class="register-link">
+                    <span>Don't have an account?</span>
+                    <a href="{{ url_for('signup') }}">Sign Up</a>
+                </div>
+
+                <div class="terms">
+                    By logging in, you agree to our <a href="{{ url_for('terms_login') }}">Terms of Service</a> and <a href="{{ url_for('privacy_policy_login') }}">Privacy Policy</a>.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Client-side real-time validation logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const loginForm = document.getElementById('loginForm');
+
+            // Validation functions
+            function validateEmail() {
+                return /^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(emailInput.value);
+            }
+
+            function validatePassword() {
+                return passwordInput.value.length >= 8;
+            }
+
+            // Password Toggle
+            document.getElementById('passwordToggle').addEventListener('click', function() {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                this.innerHTML = `<i class="fas ${type === 'password' ? 'fa-eye' : 'fa-eye-slash'}"></i>`;
+            });
+
+            // Real-time validation visual cues
+            [emailInput, passwordInput].forEach(input => {
+                input.addEventListener('input', function() {
+                    const field = this.id;
+                    let valid = false;
+                    if (field === 'email') valid = validateEmail();
+                    if (field === 'password') valid = validatePassword();
+
+                    const errorIcon = document.getElementById(`${field}ErrorIcon`);
+                    const validIcon = document.getElementById(`${field}Icon`);
+                    const errorMessage = document.getElementById(`${field}Error`);
+
+                    if (this.value === '') {
+                        errorIcon.style.display = 'none';
+                        validIcon.style.display = 'none';
+                        errorMessage.style.display = 'none';
+                    } else if (valid) {
+                        errorIcon.style.display = 'none';
+                        validIcon.style.display = 'block';
+                        errorMessage.style.display = 'none';
+                        this.classList.remove('invalid');
+                        this.classList.add('valid');
+                    } else {
+                        errorIcon.style.display = 'block';
+                        validIcon.style.display = 'none';
+                        errorMessage.style.display = 'block';
+                        this.classList.remove('valid');
+                        this.classList.add('invalid');
+                    }
+                });
+            });
+
+            // Demo Customer Autofill & Fast Login
+            const demoCustomerBtn = document.getElementById('demoCustomerBtn');
+            const submitBtn = loginForm.querySelector('button[type="submit"]');
+
+            async function performFastLogin(emailVal, passVal) {
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin me-2"></i> Logging in...';
+                }
+
+                try {
+                    const response = await fetch('{{ url_for("auth.login") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify({
+                            email: emailVal,
+                            password: passVal,
+                            next: '{{ next_url or "" }}'
+                        })
+                    });
+
+                    const data = await response.json();
+                    if (response.ok && data.success) {
+                        if (submitBtn) {
+                            submitBtn.innerHTML = '<i class="fas fa-check me-2"></i> Success!';
+                            submitBtn.style.background = '#10B981';
+                        }
+                        window.location.replace(data.redirect_url || '{{ url_for("main.index") }}');
+                    } else {
+                        if (submitBtn) {
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = 'Login <i class="fas fa-arrow-right"></i>';
+                            submitBtn.style.background = '';
+                        }
+                        if (data.is_admin && data.redirect_url) {
+                            window.location.href = data.redirect_url;
+                            return;
+                        }
+                        showInlineError(data.message || 'Invalid email or password');
+                    }
+                } catch (err) {
+                    console.debug('Fast AJAX login fallback to standard submit:', err);
+                    loginForm.submit();
+                }
+            }
+
+            function showInlineError(msg) {
+                let existingAlert = document.querySelector('.alert');
+                if (!existingAlert) {
+                    existingAlert = document.createElement('div');
+                    existingAlert.className = 'alert alert-error';
+                    loginForm.parentElement.insertBefore(existingAlert, loginForm);
+                }
+                existingAlert.textContent = msg;
+                existingAlert.style.display = 'block';
+            }
+
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const emailVal = emailInput.value.trim();
+                const passVal = passwordInput.value;
+                if (!validateEmail() || !validatePassword()) {
+                    showInlineError('Please check your email and password format.');
+                    return;
+                }
+                performFastLogin(emailVal, passVal);
+            });
+
+            function fillCustomerCredentials(autoSubmit = false) {
+                emailInput.value = 'demo_dailydrop@gmail.com';
+                passwordInput.value = 'Demouser@123';
+
+                // Trigger real-time validation checkmarks immediately
+                emailInput.dispatchEvent(new Event('input'));
+                passwordInput.dispatchEvent(new Event('input'));
+
+                if (autoSubmit) {
+                    performFastLogin('demo_dailydrop@gmail.com', 'Demouser@123');
+                }
+            }
+
+            if (demoCustomerBtn) {
+                demoCustomerBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    fillCustomerCredentials(true);
+                });
+            }
+
+            // Auto-dismiss alert notifications after 5 seconds
+            const alerts = document.querySelectorAll('.alert');
+            if (alerts.length > 0) {
+                setTimeout(() => {
+                    alerts.forEach(alert => {
+                        alert.classList.add('alert-fade-out');
+                        setTimeout(() => alert.remove(), 500);
+                    });
+                }, 5000);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Wishlist - Daily Drop</title>
+  <meta name="description" content="Manage your saved items and favorite products on Daily Drop." />
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo1.webp') }}">
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
+  <script src="{{ url_for('static', filename='js/products.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/cart-helpers.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="{{ url_for('static', filename='js/product-modal.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/wishlist.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/live-search.js') }}"></script>
+  <style>
+    .wishlist-hero {
+      padding: 40px 0 20px;
+    }
+    .wishlist-empty-state {
+      text-align: center;
+      padding: 70px 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-md);
+      backdrop-filter: blur(16px);
+      margin: 30px auto;
+      max-width: 600px;
+    }
+    .wishlist-empty-state i {
+      font-size: 3.5rem;
+      color: #f43f5e;
+      margin-bottom: 20px;
+      opacity: 0.8;
+    }
+    .wishlist-empty-state h3 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 10px;
+    }
+    .wishlist-empty-state p {
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+    .wishlist-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 24px;
+      margin-top: 20px;
+    }
+    .wishlist-remove-btn {
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #f87171;
+      padding: 8px 12px;
+      border-radius: var(--radius-xs);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .wishlist-remove-btn:hover {
+      background: #ef4444;
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="container navbar-container">
+      <a href="{{ url_for('index') }}" class="logo">
+        <i class="fas fa-shopping-basket"></i> Daily<span>Drop</span>
+      </a>
+      <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Search for products..." autocomplete="off" />
+      </div>
+      <div class="nav-actions">
+        {% if 'user_id' in session %}
+<a href="{{ url_for('orders') }}" class="login-btn-outline"><i class="fas fa-box"></i> My Orders</a>
+          <a href="{{ url_for('wishlist') }}" class="wishlist-nav-icon" title="My Wishlist">
+            <i class="fas fa-heart"></i> <span class="nav-text">Wishlist</span> <span id="wishlist-count" class="wishlist-badge">{{ wishlist_items|length }}</span>
+          </a>
+          <a href="{{ url_for('logout') }}" class="login-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        {% else %}
+          <a href="{{ url_for('login') }}" class="login-btn"><i class="fas fa-sign-in-alt"></i> Login</a>
+        {% endif %}
+        <a href="{{ url_for('cart') }}" class="cart-icon">
+          <i class="fas fa-shopping-cart"></i> My Cart <span id="cart-count">0</span>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="container wishlist-hero">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div>
+        <h2 class="products-title mb-1" style="font-size: 2rem;">
+          <i class="fas fa-heart me-2" style="color: #f43f5e;"></i> My Saved Wishlist
+        </h2>
+        <p class="text-secondary mb-0">Products you've saved for later. Move them to cart anytime!</p>
+      </div>
+      <a href="{{ url_for('index') }}" class="btn btn-outline-success" style="border-radius: var(--radius-xl); font-weight: 600;">
+        <i class="fas fa-arrow-left me-1"></i> Continue Shopping
+      </a>
+    </div>
+
+    <!-- Wishlist Grid -->
+    {% if wishlist_items and wishlist_items|length > 0 %}
+      <div class="wishlist-grid" id="wishlistGrid">
+        {% for item in wishlist_items %}
+          <div class="product-card" data-title="{{ item.name }}" data-product-id="{{ item.product_id }}">
+            <div class="product-image-container">
+              <button class="wishlist-heart-btn active" data-product-id="{{ item.product_id }}" onclick="removeFromWishlistPage({{ item.product_id }}, this)" title="Remove from Wishlist">
+                <i class="fas fa-heart"></i>
+              </button>
+              <img src="{{ item.image_path }}" alt="{{ item.name }}" class="product-image" loading="lazy" onerror="this.onerror=null; this.src='/static/logo1.webp'" />
+            </div>
+            <div class="product-details">
+              <div class="product-category">{{ item.category }} {% if item.subcategory %}&bull; {{ item.subcategory }}{% endif %}</div>
+              <div class="product-title" title="{{ item.name }}">{{ item.name }}</div>
+              <div class="product-price">Rs. {{ "%.2f"|format(item.price) }}</div>
+              <div class="product-actions mt-3">
+                <button class="add-to-cart-btn" onclick="moveToCartFromWishlist('{{ item.name|replace("'", "\\'") }}', {{ item.price }}, '{{ item.image_path }}', {{ item.product_id }}, this)">
+                  <i class="fas fa-shopping-basket"></i> Move to Cart
+                </button>
+                <button class="wishlist-remove-btn" onclick="removeFromWishlistPage({{ item.product_id }}, this)" title="Remove">
+                  <i class="fas fa-trash-alt"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+      
+      <div class="wishlist-empty-state" id="wishlistEmptyState" style="display: none;">
+        <i class="far fa-heart"></i>
+        <h3>Your Wishlist is Empty</h3>
+        <p>Explore our wide selection of fresh groceries, staples, and daily essentials to save your favorite items!</p>
+        <a href="{{ url_for('index') }}" class="btn btn-primary" style="background: var(--primary); border: none; padding: 12px 28px; border-radius: var(--radius-xl); font-weight: 700;">
+          <i class="fas fa-shopping-basket me-2"></i> Start Shopping
+        </a>
+      </div>
+    {% else %}
+      <div class="wishlist-empty-state" id="wishlistEmptyState">
+        <i class="far fa-heart"></i>
+        <h3>Your Wishlist is Empty</h3>
+        <p>Explore our wide selection of fresh groceries, staples, and daily essentials to save your favorite items!</p>
+        <a href="{{ url_for('index') }}" class="btn btn-primary" style="background: var(--primary); border: none; padding: 12px 28px; border-radius: var(--radius-xl); font-weight: 700;">
+          <i class="fas fa-shopping-basket me-2"></i> Start Shopping
+        </a>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Product Modal -->
+  <div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="background: var(--bg-card); border: 1px solid var(--border-glass); border-radius: var(--radius-md); backdrop-filter: blur(20px); color: var(--text-primary);">
+        <div class="modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.08);">
+          <h5 class="modal-title" id="productModalLabel">Product Details</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body text-center">
+          <img id="modalProductImage" src="" alt="Product" style="max-height: 200px; object-fit: contain; margin-bottom: 15px; border-radius: var(--radius-sm);" onerror="this.onerror=null; this.src='/static/logo1.webp'" />
+          <h4 id="modalProductName" style="font-weight: 700; color: var(--text-primary);"></h4>
+          <p id="modalProductPrice" style="font-size: 1.3rem; color: var(--accent); font-weight: 800;"></p>
+          <p id="modalProductDescription" style="color: var(--text-secondary);"></p>
+        </div>
+        <div class="modal-footer" style="border-top: 1px solid rgba(255,255,255,0.08);">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius: var(--radius-xl);">Close</button>
+          <button type="button" class="btn btn-success" id="modalAddToCartBtn" style="border-radius: var(--radius-xl); background: var(--primary); border: none; font-weight: 600;">
+            <i class="fas fa-shopping-basket"></i> Add to Cart
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

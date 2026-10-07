@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Drop - Customer Orders & Delivery Fulfillment</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo1.webp') }}">
+
+    <style>
+        :root {
+            --bg-dark: #020805;
+            --card-bg: rgba(16, 24, 18, 0.75);
+            --card-border: rgba(52, 211, 153, 0.18);
+            --card-hover-border: rgba(52, 211, 153, 0.45);
+            --accent-green: #10B981;
+            --accent-mint: #34D399;
+            --accent-glow: rgba(16, 185, 129, 0.25);
+            --text-primary: #F3F4F6;
+            --text-muted: #9CA3AF;
+            --danger: #EF4444;
+            --warning: #F59E0B;
+            --info: #38BDF8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            background-image:
+                radial-gradient(circle at 12% 18%, rgba(16, 185, 129, 0.1) 0%, transparent 45%),
+                radial-gradient(circle at 88% 82%, rgba(52, 211, 153, 0.08) 0%, transparent 45%);
+            background-attachment: fixed;
+            padding-bottom: 60px;
+            position: relative;
+            overflow-x: hidden;
+            zoom: 115%
+        }
+
+        /* Ambient Glowing Blobs */
+        .glow-blob {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.35;
+        }
+
+        .glow-blob-1 {
+            width: 450px;
+            height: 450px;
+            background: #10B981;
+            top: -100px;
+            left: -100px;
+            animation: pulseBlob 12s ease-in-out infinite alternate;
+        }
+
+        .glow-blob-2 {
+            width: 400px;
+            height: 400px;
+            background: #059669;
+            bottom: -80px;
+            right: -80px;
+            animation: pulseBlob 14s ease-in-out infinite alternate-reverse;
+        }
+
+        @keyframes pulseBlob {
+            0% {
+                transform: scale(1) translate(0, 0);
+            }
+
+            100% {
+                transform: scale(1.15) translate(30px, 30px);
+            }
+        }
+
+        /* Top Navigation Bar */
+        .admin-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 36px;
+            background: rgba(2, 8, 5, 0.85);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--card-border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-logo-badge {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(52, 211, 153, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-mint);
+            font-size: 1.2rem;
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        .brand-title {
+            font-size: 1.35rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: #FFFFFF;
+        }
+
+        .brand-title span {
+            color: var(--accent-mint);
+        }
+
+        .badge-admin {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--accent-mint);
+            border: 1px solid rgba(52, 211, 153, 0.35);
+            font-size: 0.72rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 18px;
+            border-radius: 10px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            border: none;
+        }
+
+        .btn-outline {
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-primary);
+            border: 1px solid var(--card-border);
+        }
+
+        .btn-outline:hover {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: var(--accent-mint);
+            transform: translateY(-1px);
+            color: #FFFFFF;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-green) 0%, #059669 100%);
+            color: #FFFFFF;
+            box-shadow: 0 4px 14px var(--accent-glow);
+        }
+
+        .btn-primary:hover {
+            opacity: 0.95;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(16, 185, 129, 0.35);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1360px;
+            margin: 28px auto;
+            padding: 0 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Page Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 26px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .page-header h1 {
+            font-size: 1.85rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #FFFFFF 0%, var(--accent-mint) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .page-header p {
+            color: var(--text-muted);
+            font-size: 0.92rem;
+            margin-top: 4px;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 18px;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 20px;
+            backdrop-filter: blur(14px);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            border-color: var(--card-hover-border);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-mint), transparent);
+            opacity: 0.6;
+        }
+
+        .stat-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            background: rgba(16, 185, 129, 0.12);
+            color: var(--accent-mint);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            border: 1px solid rgba(52, 211, 153, 0.2);
+            flex-shrink: 0;
+        }
+
+        .stat-icon.revenue {
+            background: rgba(16, 185, 129, 0.16);
+            color: #34D399;
+            border-color: rgba(52, 211, 153, 0.3);
+        }
+
+        .stat-icon.warning {
+            background: rgba(245, 158, 11, 0.12);
+            color: var(--warning);
+            border-color: rgba(245, 158, 11, 0.25);
+        }
+
+        .stat-icon.info {
+            background: rgba(56, 189, 248, 0.12);
+            color: var(--info);
+            border-color: rgba(56, 189, 248, 0.25);
+        }
+
+        .stat-content h3 {
+            font-size: 1.65rem;
+            font-weight: 800;
+            color: #FFFFFF;
+            line-height: 1.2;
+        }
+
+        .stat-content p {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-top: 2px;
+        }
+
+        /* Catalog & Orders Card */
+        .catalog-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 18px;
+            backdrop-filter: blur(16px);
+            overflow: hidden;
+            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4);
+        }
+
+        .catalog-header {
+            padding: 20px 26px;
+            border-bottom: 1px solid var(--card-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .search-filter-box {
+            display: flex;
+            gap: 12px;
+            flex: 1;
+            max-width: 520px;
+        }
+
+        .input-group {
+            position: relative;
+            flex: 1;
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .input-control {
+            width: 100%;
+            padding: 11px 16px 11px 42px;
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .input-control:focus {
+            border-color: var(--accent-mint);
+            box-shadow: 0 0 12px var(--accent-glow);
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        /* Filter Pills */
+        .filter-tabs {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .filter-pill {
+            padding: 7px 14px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--card-border);
+            color: var(--text-muted);
+            transition: all 0.2s ease;
+        }
+
+        .filter-pill:hover,
+        .filter-pill.active {
+            background: rgba(16, 185, 129, 0.15);
+            border-color: var(--accent-mint);
+            color: #FFFFFF;
+        }
+
+        /* Table */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        .orders-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        .orders-table th {
+            background: rgba(0, 0, 0, 0.35);
+            padding: 16px 22px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            border-bottom: 1px solid var(--card-border);
+            white-space: nowrap;
+        }
+
+        .orders-table td {
+            padding: 18px 22px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            vertical-align: middle;
+            font-size: 0.9rem;
+        }
+
+        .orders-table tr:hover td {
+            background: rgba(16, 185, 129, 0.025);
+        }
+
+        /* Order ID Pill */
+        .order-id-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 800;
+            font-size: 0.85rem;
+            color: var(--accent-mint);
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(52, 211, 153, 0.25);
+            padding: 4px 10px;
+            border-radius: 8px;
+            white-space: nowrap;
+        }
+
+        /* Customer Cell */
+        .customer-card-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .customer-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(52, 211, 153, 0.1));
+            border: 1px solid rgba(52, 211, 153, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-mint);
+            font-weight: 700;
+            font-size: 0.95rem;
+            flex-shrink: 0;
+        }
+
+        .customer-details strong {
+            display: block;
+            color: #FFFFFF;
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+
+        .customer-meta {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 3px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .customer-meta a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .customer-meta a:hover {
+            color: var(--accent-mint);
+        }
+
+        /* Items List Pill */
+        .items-chip-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            max-width: 280px;
+        }
+
+        .item-chip {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 0.8rem;
+            color: var(--text-primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .item-chip-name {
+            font-weight: 600;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .item-chip-qty {
+            background: rgba(52, 211, 153, 0.15);
+            color: var(--accent-mint);
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 0.72rem;
+            font-weight: 700;
+        }
+
+        /* Price Badge */
+        .price-badge {
+            font-size: 1rem;
+            font-weight: 800;
+            color: #34D399;
+            letter-spacing: -0.3px;
+            white-space: nowrap;
+        }
+
+        /* Custom Styled Status Select */
+        .status-select {
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 0.84rem;
+            font-weight: 700;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background-color: rgba(16, 24, 18, 0.9);
+            color: #FFFFFF;
+            border: 1px solid var(--card-border);
+            min-width: 155px;
+        }
+
+        .status-select.status-processing {
+            border-color: rgba(245, 158, 11, 0.5);
+            color: #FBBF24;
+            background: rgba(245, 158, 11, 0.08);
+        }
+
+        .status-select.status-delivery {
+            border-color: rgba(56, 189, 248, 0.5);
+            color: #38BDF8;
+            background: rgba(56, 189, 248, 0.08);
+        }
+
+        .status-select.status-delivered {
+            border-color: rgba(52, 211, 153, 0.5);
+            color: #34D399;
+            background: rgba(16, 185, 129, 0.08);
+        }
+
+        .status-select option {
+            background: #0B140F;
+            color: #FFFFFF;
+            padding: 8px;
+        }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            background: rgba(6, 20, 12, 0.95);
+            border: 1px solid var(--accent-mint);
+            color: #FFFFFF;
+            padding: 14px 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 15px var(--accent-glow);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Empty State */
+        .empty-state {
+            padding: 60px 20px;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: rgba(52, 211, 153, 0.2);
+            margin-bottom: 16px;
+        }
+
+        .empty-state h3 {
+            color: #FFFFFF;
+            font-size: 1.2rem;
+            margin-bottom: 6px;
+        }
+
+        @media (max-width: 900px) {
+            .admin-nav {
+                padding: 14px 20px;
+            }
+
+            .container {
+                padding: 0 16px;
+            }
+
+            .catalog-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-filter-box {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Ambient Glowing Blobs -->
+    <div class="glow-blob glow-blob-1"></div>
+    <div class="glow-blob glow-blob-2"></div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Header Navigation -->
+    <nav class="admin-nav">
+        <div class="brand-container">
+            <div class="brand-logo-badge">
+                <i class="fas fa-shopping-basket"></i>
+            </div>
+            <span class="brand-title">Daily<span>Drop</span></span>
+            <span class="badge-admin">
+                <i class="fa-solid fa-truck-fast"></i> Admin Orders
+            </span>
+        </div>
+        <div class="nav-actions">
+            <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-outline">
+                <i class="fa-solid fa-boxes-stacked"></i> Products Catalog
+            </a>
+            <a href="{{ url_for('admin.admin_dashboard') }}#contactMessagesSection" class="btn btn-outline"
+                style="border-color: rgba(56, 189, 248, 0.4); color: #38BDF8;">
+                <i class="fa-solid fa-envelope"></i> Inquiries
+            </a>
+            <a href="/" class="btn btn-outline">
+                <i class="fa-solid fa-store"></i> Storefront
+            </a>
+            <a href="/logout" class="btn btn-outline"
+                style="color: var(--danger); border-color: rgba(239, 68, 68, 0.3);">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Page Title Header -->
+        <div class="page-header">
+            <div>
+                <h1>Customer Orders & Delivery Fulfillment</h1>
+                <p>Track live customer purchases, inspect order contents, and update delivery fulfillment status in
+                    real-time.</p>
+            </div>
+            <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-primary">
+                <i class="fa-solid fa-arrow-left"></i> Back to Catalog Management
+            </a>
+        </div>
+
+        <!-- Dashboard Stat Cards -->
+        {% set processing_count = all_orders|selectattr('status', 'equalto', 'Processing')|list|length %}
+        {% set delivery_count = all_orders|selectattr('status', 'equalto', 'Out for Delivery')|list|length %}
+        {% set delivered_count = all_orders|selectattr('status', 'equalto', 'Delivered')|list|length %}
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="statTotalOrders">{{ all_orders|length }}</h3>
+                    <p>Total Orders Placed</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon revenue">
+                    <i class="fa-solid fa-indian-rupee-sign"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>₹{{ "%.2f"|format(stats.total_revenue|default(0)) }}</h3>
+                    <p>Total Order Volume</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon warning">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="statPendingOrders">{{ processing_count + delivery_count }}</h3>
+                    <p>Active Pipeline (In Transit)</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon info">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="statDeliveredOrders">{{ delivered_count }}</h3>
+                    <p>Completed Deliveries</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Orders Table Card -->
+        <div class="catalog-card">
+            <div class="catalog-header">
+                <div class="search-filter-box">
+                    <div class="input-group">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="orderSearchInput" class="input-control"
+                            placeholder="Search orders by customer, phone, or address..." onkeyup="filterOrders()">
+                    </div>
+                </div>
+
+                <!-- Status Filter Pills -->
+                <div class="filter-tabs">
+                    <button class="filter-pill active" data-filter="all" onclick="setFilter('all', this)">
+                        All Orders (<span id="countAll">{{ all_orders|length }}</span>)
+                    </button>
+                    <button class="filter-pill" data-filter="Processing" onclick="setFilter('Processing', this)">
+                        ⏳ Processing (<span id="countProcessing">{{ processing_count }}</span>)
+                    </button>
+                    <button class="filter-pill" data-filter="Out for Delivery"
+                        onclick="setFilter('Out for Delivery', this)">
+                        🚚 Out for Delivery (<span id="countDelivery">{{ delivery_count }}</span>)
+                    </button>
+                    <button class="filter-pill" data-filter="Delivered" onclick="setFilter('Delivered', this)">
+                        ✅ Delivered (<span id="countDelivered">{{ delivered_count }}</span>)
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="orders-table">
+                    <thead>
+                        <tr>
+                            <th>S.No</th>
+                            <th>Order ID</th>
+                            <th>Customer Info</th>
+                            <th>Items Ordered</th>
+                            <th>Total Amount</th>
+                            <th>Order Date</th>
+                            <th>Fulfillment Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersTableBody">
+                        {% for ord in all_orders %}
+                        <tr id="order-row-{{ ord.order_id }}" data-status="{{ ord.status }}"
+                            data-search="{{ ord.full_name|lower }} {{ ord.phone_number }} {{ ord.address|lower }} ord-{{ ord.order_id }}">
+                            <td style="color: var(--text-muted); font-weight: 700;">#{{ loop.index }}</td>
+                            <td>
+                                <span class="order-id-pill">
+                                    <i class="fa-solid fa-receipt"></i> #ORD-{{ ord.order_id }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="customer-card-cell">
+                                    <div class="customer-avatar">
+                                        {{ ord.full_name[:1]|upper if ord.full_name else 'U' }}
+                                    </div>
+                                    <div class="customer-details">
+                                        <strong>{{ ord.full_name }}</strong>
+                                        <div class="customer-meta">
+                                            <span><i class="fa-solid fa-phone"
+                                                    style="font-size: 0.7rem; color: var(--accent-mint);"></i> <a
+                                                    href="tel:{{ ord.phone_number }}">{{ ord.phone_number }}</a></span>
+                                            <span><i class="fa-solid fa-location-dot"
+                                                    style="font-size: 0.7rem; color: var(--accent-mint);"></i> {{
+                                                ord.address }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                {% set items = ord.products_ordered|from_json_or_list %}
+                                <div class="items-chip-list">
+                                    {% for item in items %}
+                                    <div class="item-chip">
+                                        <span class="item-chip-name" title="{{ item.name }}">{{ item.name }}</span>
+                                        <span class="item-chip-qty">x{{ item.quantity }}</span>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="price-badge">₹{{ "%.2f"|format(ord.total_amount) }}</div>
+                                <span
+                                    style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">
+                                    {{ ord.payment_method|default('COD') }}
+                                </span>
+                            </td>
+                            <td>
+                                <div
+                                    style="display: flex; align-items: center; gap: 6px; color: var(--text-muted); font-size: 0.82rem; font-weight: 500;">
+                                    <i class="fa-regular fa-calendar" style="color: var(--accent-mint);"></i>
+                                    <span>{{ ord.order_date|string|truncate(16, True, '') }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <select
+                                    class="status-select {% if ord.status == 'Processing' %}status-processing{% elif ord.status == 'Out for Delivery' %}status-delivery{% else %}status-delivered{% endif %}"
+                                    onchange="updateOrderStatus({{ ord.order_id }}, this.value, this)">
+                                    <option value="Processing" {% if ord.status=='Processing' %}selected{% endif %}>⏳
+                                        Processing</option>
+                                    <option value="Out for Delivery" {% if ord.status=='Out for Delivery' %}selected{%
+                                        endif %}>🚚 Out for Delivery</option>
+                                    <option value="Delivered" {% if ord.status=='Delivered' %}selected{% endif %}>✅
+                                        Delivered</option>
+                                </select>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr id="emptyTableRow">
+                            <td colspan="7">
+                                <div class="empty-state">
+                                    <i class="fa-solid fa-box-open"></i>
+                                    <h3>No customer orders placed yet</h3>
+                                    <p>When customers purchase items from the storefront, their order details will
+                                        appear here.</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStatusFilter = 'all';
+
+        // Set Filter Tab
+        function setFilter(filter, el) {
+            currentStatusFilter = filter;
+            document.querySelectorAll('.filter-tabs .filter-pill').forEach(btn => btn.classList.remove('active'));
+            el.classList.add('active');
+            filterOrders();
+        }
+
+        // Search & Filter Orders
+        function filterOrders() {
+            const query = (document.getElementById('orderSearchInput').value || '').toLowerCase().trim();
+            const rows = document.querySelectorAll('#ordersTableBody tr[id^="order-row-"]');
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                const searchData = row.getAttribute('data-search') || '';
+                const rowStatus = row.getAttribute('data-status') || '';
+
+                const matchesQuery = !query || searchData.includes(query);
+                const matchesStatus = currentStatusFilter === 'all' || rowStatus === currentStatusFilter;
+
+                if (matchesQuery && matchesStatus) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        // Update Order Fulfillment Status
+        async function updateOrderStatus(orderId, newStatus, selectEl) {
+            try {
+                // Update select styling class
+                selectEl.className = 'status-select';
+                if (newStatus === 'Processing') selectEl.classList.add('status-processing');
+                else if (newStatus === 'Out for Delivery') selectEl.classList.add('status-delivery');
+                else if (newStatus === 'Delivered') selectEl.classList.add('status-delivered');
+
+                const row = document.getElementById(`order-row-${orderId}`);
+                if (row) {
+                    row.setAttribute('data-status', newStatus);
+                }
+
+                const res = await fetch(`/api/v1/admin/orders/${orderId}/status`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(`Order #ORD-${orderId} updated to "${newStatus}"!`);
+                    recalculateFilterCounts();
+                } else {
+                    showToast(data.error || 'Failed to update order status', true);
+                }
+            } catch (e) {
+                showToast('Server error updating order status', true);
+            }
+        }
+
+        // Recalculate Filter Badge Counts Dynamically
+        function recalculateFilterCounts() {
+            const rows = document.querySelectorAll('#ordersTableBody tr[id^="order-row-"]');
+            let total = rows.length;
+            let processing = 0;
+            let delivery = 0;
+            let delivered = 0;
+
+            rows.forEach(row => {
+                const s = row.getAttribute('data-status');
+                if (s === 'Processing') processing++;
+                else if (s === 'Out for Delivery') delivery++;
+                else if (s === 'Delivered') delivered++;
+            });
+
+            const countAll = document.getElementById('countAll');
+            const countProcessing = document.getElementById('countProcessing');
+            const countDelivery = document.getElementById('countDelivery');
+            const countDelivered = document.getElementById('countDelivered');
+
+            if (countAll) countAll.textContent = total;
+            if (countProcessing) countProcessing.textContent = processing;
+            if (countDelivery) countDelivery.textContent = delivery;
+            if (countDelivered) countDelivered.textContent = delivered;
+
+            const statPending = document.getElementById('statPendingOrders');
+            const statDelivered = document.getElementById('statDeliveredOrders');
+            if (statPending) statPending.textContent = processing + delivery;
+            if (statDelivered) statDelivered.textContent = delivered;
+        }
+
+        // Toast Notification Helper
+        function showToast(msg, isError = false) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            if (isError) {
+                toast.style.borderColor = 'var(--danger)';
+                toast.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(239, 68, 68, 0.3)';
+            }
+
+            toast.innerHTML = `
+                <i class="fa-solid ${isError ? 'fa-circle-xmark' : 'fa-circle-check'}" 
+                   style="color: ${isError ? 'var(--danger)' : 'var(--accent-mint)'}; font-size: 1.15rem;"></i>
+                <span>${msg}</span>
+            `;
+
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3500);
+        }
+    </script>
+</body>
+
+</html>

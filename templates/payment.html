@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DailyDrop | Checkout</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo1.webp') }}">
+
+  <!-- Bootstrap, FontAwesome & Google Fonts -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  
+  <!-- Centralized Stylesheet -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+
+  <!-- Razorpay Checkout SDK -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+  <style>
+    body {
+      background-color: var(--bg-base);
+    }
+
+    .checkout-page {
+      max-width: 1200px;
+      margin: 120px auto 60px;
+      padding: 0 20px;
+    }
+
+    .checkout-header {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin-bottom: 30px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .checkout-layout {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr;
+      gap: 30px;
+      align-items: start;
+    }
+
+    .checkout-form-card {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-glass);
+      padding: 30px;
+      box-shadow: var(--shadow-md);
+    }
+
+    .checkout-section-title {
+      font-size: 1.35rem;
+      font-weight: 750;
+      color: var(--text-primary);
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 12px 18px;
+      border: 1.5px solid var(--border-glass);
+      border-radius: var(--radius-sm);
+      font-size: 1rem;
+      background: var(--bg-base);
+      color: var(--text-primary);
+      transition: var(--transition-normal);
+      resize: none;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 0 4px rgba(12, 131, 31, 0.1);
+    }
+
+    /* Cash on Delivery Card Component */
+    .cod-card {
+      background: linear-gradient(135deg, rgba(12, 131, 31, 0.04) 0%, rgba(16, 185, 129, 0.04) 100%);
+      border: 1.5px dashed var(--border-glow);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      margin: 30px 0;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cod-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 150px;
+      height: 150px;
+      background: radial-gradient(circle, rgba(12, 131, 31, 0.05) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .cod-icon-wrapper {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      color: white;
+      width: 52px;
+      height: 52px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      box-shadow: 0 4px 10px rgba(12, 131, 31, 0.2);
+      flex-shrink: 0;
+    }
+
+    .cod-card-details {
+      flex: 1;
+    }
+
+    .cod-card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+
+    .cod-card-desc {
+      font-size: 0.92rem;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+
+    /* Interactive Payment Method Selector */
+    .payment-method-selector {
+      margin: 24px 0 20px;
+    }
+
+    .payment-methods-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 10px;
+    }
+
+    @media (max-width: 576px) {
+      .payment-methods-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .payment-method-card {
+      border: 1.5px solid var(--border-glass);
+      border-radius: var(--radius-md);
+      padding: 16px 18px;
+      background: rgba(255, 255, 255, 0.04);
+      cursor: pointer;
+      transition: var(--transition-normal);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      position: relative;
+    }
+
+    .payment-method-card:hover {
+      border-color: var(--accent);
+      background: rgba(255, 255, 255, 0.08);
+      transform: translateY(-2px);
+    }
+
+    .payment-method-card.selected {
+      border-color: var(--accent);
+      background: linear-gradient(135deg, rgba(12, 131, 31, 0.1) 0%, rgba(16, 185, 129, 0.08) 100%);
+      box-shadow: 0 0 0 1px var(--accent), 0 8px 20px rgba(12, 131, 31, 0.15);
+    }
+
+    .payment-method-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .payment-method-name {
+      font-size: 1rem;
+      font-weight: 750;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .payment-badge-pill {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      color: #fff;
+      letter-spacing: 0.4px;
+    }
+
+    .payment-method-sub {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      line-height: 1.35;
+      margin: 0;
+    }
+
+    .confirm-btn {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      color: white;
+      border: none;
+      padding: 16px;
+      border-radius: var(--radius-sm);
+      font-size: 1.1rem;
+      font-weight: 700;
+      width: 100%;
+      cursor: pointer;
+      box-shadow: var(--shadow-primary-glow);
+      transition: var(--transition-normal);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .confirm-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(0, 255, 135, 0.4);
+    }
+
+    .order-summary-card {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-glass);
+      padding: 30px;
+      box-shadow: var(--shadow-md);
+      position: sticky;
+      top: 120px;
+    }
+
+    .summary-title {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .order-items-scroll {
+      max-height: 320px;
+      overflow-y: auto;
+      margin-bottom: 20px;
+      padding-right: 5px;
+    }
+
+    .order-items-scroll::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .order-items-scroll::-webkit-scrollbar-thumb {
+      background-color: var(--border-subtle);
+      border-radius: 3px;
+    }
+
+    .order-item {
+      display: flex;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .order-item:last-child {
+      border-bottom: none;
+    }
+
+    .order-item img {
+      width: 60px;
+      height: 60px;
+      object-fit: contain;
+      border-radius: var(--radius-sm);
+      background: var(--bg-base);
+      padding: 6px;
+      border: 1px solid var(--border-glass);
+      margin-right: 15px;
+      flex-shrink: 0;
+    }
+
+    .item-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .item-name {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .item-meta {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .total-price-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      padding-top: 20px;
+      border-top: 1.5px solid var(--border-subtle);
+    }
+
+    .total-price-row span:last-child {
+      color: var(--accent);
+    }
+
+    @media (max-width: 992px) {
+      .checkout-layout {
+        grid-template-columns: 1fr;
+      }
+      .order-summary-card {
+        position: static;
+        order: -1;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Premium Sticky Floating Navbar -->
+  <nav class="navbar">
+      <div class="container navbar-container">
+          <a href="{{ url_for('index') }}" class="logo">
+              <i class="fas fa-shopping-basket"></i> Daily<span>Drop</span>
+          </a>
+          <div class="nav-actions">
+              {% if 'user_id' in session %}
+<a href="{{ url_for('orders') }}" class="login-btn-outline"><i class="fas fa-box"></i> My Orders</a>
+                  <a href="{{ url_for('logout') }}" class="login-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+              {% else %}
+                  <a href="{{ url_for('login') }}" class="login-btn"><i class="fas fa-sign-in-alt"></i> Login</a>
+              {% endif %}
+              <a href="{{ url_for('cart') }}" class="cart-icon">
+                  <i class="fas fa-shopping-cart"></i> My Cart <span id="cart-count">0</span>
+              </a>
+          </div>
+      </div>
+  </nav>
+
+  <div class="checkout-page">
+    <h2 class="checkout-header"><i class="fas fa-shipping-fast" style="color: var(--accent);"></i> Checkout</h2>
+    
+    <div class="checkout-layout">
+      <!-- Checkout Form -->
+      <div class="checkout-form-card">
+        <h3 class="checkout-section-title"><i class="fas fa-map-marked-alt" style="color: var(--accent);"></i> Shipping & Delivery</h3>
+        <form id="checkoutForm" onsubmit="placeOrder(event)">
+          <div class="form-group">
+            <label for="fullName">Full Name</label>
+            <input type="text" class="form-input" id="fullName" required placeholder="John Doe">
+          </div>
+
+          <div class="form-group">
+            <label for="address">Delivery Address</label>
+            <textarea class="form-input" id="address" rows="4" required placeholder="Apartment / House No, Street, Landmark, City - Pincode"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="phone">Phone Number</label>
+            <input type="tel" class="form-input" id="phone" required placeholder="9876543210">
+          </div>
+
+          <div class="payment-method-selector">
+            <label style="font-weight: 700; color: var(--text-primary); font-size: 1rem; display: flex; align-items: center; gap: 8px;">
+              <i class="fas fa-credit-card" style="color: var(--accent);"></i> Select Payment Method
+            </label>
+            <div class="payment-methods-grid">
+              <!-- Online Payment (Razorpay) -->
+              <div class="payment-method-card selected" id="method-online" onclick="setPaymentMethod('online')">
+                <div class="payment-method-top">
+                  <span class="payment-method-name">
+                    <i class="fas fa-bolt" style="color: #00d26a;"></i> Pay Online
+                  </span>
+                  <span class="payment-badge-pill">Instant & Free</span>
+                </div>
+                <p class="payment-method-sub">UPI (GPay/PhonePe), Cards, NetBanking via secure Razorpay.</p>
+              </div>
+
+              <!-- Cash on Delivery (COD) -->
+              <div class="payment-method-card" id="method-cod" onclick="setPaymentMethod('cod')">
+                <div class="payment-method-top">
+                  <span class="payment-method-name">
+                    <i class="fas fa-money-bill-wave" style="color: var(--accent);"></i> Cash on Delivery
+                  </span>
+                </div>
+                <p class="payment-method-sub">Pay via Cash, Card, or UPI scan when delivery partner arrives.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Razorpay Trust Banner -->
+          <div id="razorpayBanner" class="cod-card" style="margin: 20px 0;">
+            <div class="cod-icon-wrapper" style="background: linear-gradient(135deg, #0c831f 0%, #00d26a 100%);">
+              <i class="fas fa-shield-alt"></i>
+            </div>
+            <div class="cod-card-details">
+              <h4 class="cod-card-title">Razorpay 256-Bit Encrypted Payment</h4>
+              <p class="cod-card-desc">Your payment details are processed through Razorpay's PCI-DSS compliant sandbox gateway.</p>
+            </div>
+          </div>
+
+          <!-- Cash on Delivery Details (hidden by default) -->
+          <div id="codBanner" class="cod-card" style="margin: 20px 0; display: none;">
+            <div class="cod-icon-wrapper">
+              <i class="fas fa-wallet"></i>
+            </div>
+            <div class="cod-card-details">
+              <h4 class="cod-card-title">Cash on Delivery Selected</h4>
+              <p class="cod-card-desc">No advance payment required. Please keep exact change ready or scan partner UPI upon arrival.</p>
+            </div>
+          </div>
+
+          <button type="submit" class="confirm-btn" id="confirmBtn">
+            <i class="fas fa-lock me-2"></i> Pay & Place Order
+          </button>
+        </form>
+      </div>
+
+      <!-- Order Summary Card -->
+      <div class="order-summary-card">
+        <h3 class="summary-title"><i class="fas fa-shopping-bag me-2" style="color: var(--accent);"></i> Order Summary</h3>
+        <div class="order-items-scroll" id="orderItems">
+          <!-- Items populated by JavaScript -->
+        </div>
+        <div class="total-price-row">
+          <span>Total Payable</span>
+          <span id="orderTotal">Rs. 0.00</span>
+        </div>
+      </div>
+    </div>
+  <script>
+    const RAZORPAY_KEY_ID = "{{ razorpay_key_id|default('') }}";
+    let currentPaymentMethod = 'online';
+
+    function setPaymentMethod(method) {
+        currentPaymentMethod = method;
+        const onlineCard = document.getElementById('method-online');
+        const codCard = document.getElementById('method-cod');
+        const razorpayBanner = document.getElementById('razorpayBanner');
+        const codBanner = document.getElementById('codBanner');
+        const confirmBtn = document.getElementById('confirmBtn');
+
+        if (method === 'online') {
+            onlineCard.classList.add('selected');
+            codCard.classList.remove('selected');
+            razorpayBanner.style.display = 'flex';
+            codBanner.style.display = 'none';
+            confirmBtn.innerHTML = '<i class="fas fa-lock me-2"></i> Pay & Place Order';
+        } else {
+            codCard.classList.add('selected');
+            onlineCard.classList.remove('selected');
+            codBanner.style.display = 'flex';
+            razorpayBanner.style.display = 'none';
+            confirmBtn.innerHTML = '<i class="fas fa-check-circle me-2"></i> Confirm COD Order';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const cart = JSON.parse(localStorage.getItem('cart')) || [];
+        const total = calculateTotal(cart);
+        const orderItemsDiv = document.getElementById('orderItems');
+        const orderTotalSpan = document.getElementById('orderTotal');
+
+        orderItemsDiv.innerHTML = '';
+        updateCartCount();
+
+        if (cart.length === 0) {
+            orderItemsDiv.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 20px 0;">No items in cart</p>';
+            return;
+        }
+
+        cart.forEach(item => {
+            const itemHTML = `
+                <div class="order-item">
+                    <img src="${item.image}" alt="${item.name}">
+                    <div class="item-info">
+                        <h4 class="item-name">${item.name}</h4>
+                        <div class="item-meta">
+                            <span>Qty: ${item.quantity}</span>
+                            <span>Rs. ${(item.price * item.quantity).toFixed(2)}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            orderItemsDiv.insertAdjacentHTML('beforeend', itemHTML);
+        });
+
+        // Compute pricing breakdown (Free delivery for orders >= Rs. 500)
+        const subtotal = total;
+        const fee = subtotal >= 500 ? 0 : 30;
+        const finalTotal = subtotal + fee;
+
+        orderTotalSpan.textContent = `Rs. ${finalTotal.toFixed(2)}`;
+    });
+
+    function calculateTotal(items) {
+        return items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    }
+
+    function updateCartCount() {
+        const cart = JSON.parse(localStorage.getItem('cart')) || [];
+        const count = cart.reduce((total, item) => total + item.quantity, 0);
+        const el = document.getElementById('cart-count');
+        if (el) el.textContent = count;
+    }
+
+    async function placeOrder(event) {
+        event.preventDefault();
+
+        // Get form values
+        const fullName = document.getElementById('fullName').value.trim();
+        const address = document.getElementById('address').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        const cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+        // Validation
+        const phoneRegex = /^[6-9]\d{9}$/;
+        if (!phoneRegex.test(phone)) {
+            alert("Invalid phone number. It must be a 10-digit Indian mobile number starting with 6, 7, 8, or 9.");
+            return;
+        }
+
+        if (!fullName || !address || !phone) {
+            alert('Please fill in all required delivery fields.');
+            return;
+        }
+
+        if (address.length < 3) {
+            alert('Please provide a valid delivery address (at least 3 characters).');
+            return;
+        }
+
+        if (cart.length === 0) {
+            alert('Your cart is empty! Please add items before checking out.');
+            return;
+        }
+
+        const confirmBtn = document.getElementById('confirmBtn');
+        const originalBtnHTML = confirmBtn.innerHTML;
+
+        // Generate client-side Idempotency-Key to prevent duplicate orders/charges
+        const checkoutIdempotencyKey = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : ('idem_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9));
+
+        if (currentPaymentMethod === 'online') {
+            // ================= Razorpay Online Payment Flow =================
+            try {
+                confirmBtn.disabled = true;
+                confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Initializing Payment Gateway...';
+
+                // 1. Initialize Razorpay order on server with authoritative pricing and Idempotency key
+                const orderInitResp = await fetch('/api/create-order', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Idempotency-Key': checkoutIdempotencyKey
+                    },
+                    body: JSON.stringify({
+                        full_name: fullName,
+                        phone_number: phone,
+                        address: address,
+                        products: cart
+                    })
+                });
+
+                const orderData = await orderInitResp.json();
+                if (!orderData.success) {
+                    alert('Order creation failed: ' + (orderData.message || orderData.error || 'Please try again'));
+                    confirmBtn.disabled = false;
+                    confirmBtn.innerHTML = originalBtnHTML;
+                    return;
+                }
+
+                // 2. Configure and launch Razorpay Checkout Modal
+                const options = {
+                    key: orderData.key_id || RAZORPAY_KEY_ID,
+                    amount: orderData.amount,
+                    currency: orderData.currency || "INR",
+                    name: "DailyDrop Quick Commerce",
+                    description: `Order checkout for ${fullName}`,
+                    image: "{{ url_for('static', filename='logo1.webp') }}",
+                    order_id: orderData.order_id,
+                    prefill: {
+                        name: fullName,
+                        contact: phone,
+                        email: "{{ session.get('email', '') }}"
+                    },
+                    notes: {
+                        address: address
+                    },
+                    theme: {
+                        color: "#0c831f"
+                    },
+                    handler: async function (response) {
+                        confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Verifying Cryptographic Signature...';
+                        try {
+                            const verifyResp = await fetch('/api/verify-payment', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Idempotency-Key': checkoutIdempotencyKey
+                                },
+                                body: JSON.stringify({
+                                    razorpay_order_id: response.razorpay_order_id,
+                                    razorpay_payment_id: response.razorpay_payment_id,
+                                    razorpay_signature: response.razorpay_signature,
+                                    full_name: fullName,
+                                    phone_number: phone,
+                                    address: address,
+                                    products: cart
+                                })
+                            });
+
+                            const verifyData = await verifyResp.json();
+                            if (verifyData.success) {
+                                localStorage.removeItem('cart');
+                                const orderNum = verifyData.user_order_number || verifyData.order_id;
+                                alert('🎉 Payment Successful! Order #' + orderNum + ' has been placed. Expected delivery in 10-15 mins.');
+                                window.location.href = "{{ url_for('orders') }}";
+                            } else {
+                                alert('Payment verification failed: ' + (verifyData.message || 'Please contact support.'));
+                                confirmBtn.disabled = false;
+                                confirmBtn.innerHTML = originalBtnHTML;
+                            }
+                        } catch (err) {
+                            console.error('Payment verification error:', err);
+                            alert('An error occurred verifying your payment. Please check your Orders page.');
+                            window.location.href = "{{ url_for('orders') }}";
+                        }
+                    },
+                    modal: {
+                        ondismiss: function () {
+                            confirmBtn.disabled = false;
+                            confirmBtn.innerHTML = originalBtnHTML;
+                        }
+                    }
+                };
+
+                const rzp = new Razorpay(options);
+                rzp.on('payment.failed', function (response) {
+                    alert('Payment Failed: ' + (response.error.description || 'Transaction declined'));
+                    confirmBtn.disabled = false;
+                    confirmBtn.innerHTML = originalBtnHTML;
+                });
+                rzp.open();
+
+            } catch (error) {
+                console.error('Payment initiation error:', error);
+                alert('Something went wrong connecting to Razorpay. Please try again.');
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = originalBtnHTML;
+            }
+        } else {
+            // ================= Cash on Delivery Flow =================
+            try {
+                confirmBtn.disabled = true;
+                confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Placing Order...';
+
+                const response = await fetch('/place_order', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Idempotency-Key': checkoutIdempotencyKey
+                    },
+                    body: JSON.stringify({
+                        full_name: fullName,
+                        phone_number: phone,
+                        address: address,
+                        products: cart
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    localStorage.removeItem('cart');
+                    const orderNum = data.user_order_number || data.order_id;
+                    alert('🎉 COD Order confirmed! Order #' + orderNum + ' will arrive in 10 to 15 mins.');
+                    window.location.href = "{{ url_for('orders') }}";
+                } else {
+                    alert('Order failed: ' + (data.message || 'Please try again'));
+                    confirmBtn.disabled = false;
+                    confirmBtn.innerHTML = originalBtnHTML;
+                }
+            } catch (error) {
+                console.error('COD Order error:', error);
+                alert('Something went wrong placing your order. Please try again.');
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = originalBtnHTML;
+            }
+        }
+    }
+  </script>
+</body>
+</html>

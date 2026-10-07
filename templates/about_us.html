@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DailyDrop | About Us</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo1.webp') }}">
+
+  <!-- Bootstrap, FontAwesome & Google Fonts -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  
+  <!-- Centralized Stylesheet -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+
+  <style>
+    body {
+      background-color: var(--bg-base);
+    }
+
+    .about-page {
+      max-width: 1100px;
+      margin: 120px auto 60px;
+      padding: 0 20px;
+    }
+
+    .about-hero {
+      background: linear-gradient(135deg, rgba(12, 131, 31, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-lg);
+      padding: 60px 40px;
+      text-align: center;
+      margin-bottom: 50px;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .about-hero h1 {
+      font-size: 2.8rem;
+      font-weight: 850;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+    }
+
+    .about-hero h1 span {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .about-hero p {
+      font-size: 1.15rem;
+      color: var(--text-secondary);
+      max-width: 750px;
+      margin: 0 auto 24px;
+      line-height: 1.6;
+    }
+
+    .timer-highlight {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      color: white;
+      padding: 8px 24px;
+      border-radius: 30px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      box-shadow: var(--shadow-primary-glow);
+    }
+
+    .story-section {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-glass);
+      padding: 40px;
+      margin-bottom: 50px;
+      box-shadow: var(--shadow-md);
+    }
+
+    .story-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      align-items: center;
+    }
+
+    .story-text h2 {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin-bottom: 20px;
+    }
+
+    .story-text p {
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+      line-height: 1.6;
+      font-size: 1rem;
+    }
+
+    .story-visual {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      border-radius: var(--radius-md);
+      height: 320px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      padding: 30px;
+      text-align: center;
+      box-shadow: var(--shadow-md);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .story-visual::before {
+      content: '';
+      position: absolute;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+      top: -50px;
+      right: -50px;
+    }
+
+    .story-visual-icon {
+      font-size: 4rem;
+      margin-bottom: 16px;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .story-visual-text {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+
+    .values-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .values-header h2 {
+      font-size: 2rem;
+      font-weight: 850;
+      color: var(--text-primary);
+    }
+
+    .values-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      margin-bottom: 60px;
+    }
+
+    .value-card {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-glass);
+      padding: 35px 24px;
+      text-align: center;
+      box-shadow: var(--shadow-md);
+      transition: var(--transition-normal);
+    }
+
+    .value-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--border-glow);
+    }
+
+    .value-icon-wrapper {
+      width: 72px;
+      height: 72px;
+      background: var(--accent-light);
+      color: var(--accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+      font-size: 1.8rem;
+      transition: var(--transition-normal);
+    }
+
+    .value-card:hover .value-icon-wrapper {
+      background: var(--primary);
+      color: white;
+      transform: scale(1.05);
+    }
+
+    .value-card h3 {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+    }
+
+    .value-card p {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    .cta-card {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      border-radius: var(--radius-lg);
+      padding: 50px 30px;
+      color: white;
+      text-align: center;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .cta-card h2 {
+      font-size: 2.2rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .cta-card p {
+      font-size: 1.1rem;
+      max-width: 600px;
+      margin: 0 auto 28px;
+      opacity: 0.9;
+    }
+
+    .cta-btn {
+      background: #020805;
+      color: #FFFFFF;
+      padding: 14px 36px;
+      border-radius: var(--radius-sm);
+      font-weight: 700;
+      font-size: 1.05rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--border-glow);
+      box-shadow: var(--shadow-glow);
+      transition: var(--transition-normal);
+    }
+
+    .cta-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-primary-glow);
+      color: var(--primary);
+      border-color: var(--primary);
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    @media (max-width: 768px) {
+      .story-layout {
+        grid-template-columns: 1fr;
+      }
+      .about-hero {
+        padding: 40px 20px;
+      }
+      .about-hero h1 {
+        font-size: 2rem;
+      }
+    }
+  </style>
+  <script src="{{ url_for('static', filename='js/wishlist.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/live-search.js') }}"></script>
+</head>
+<body>
+
+  <!-- Premium Sticky Floating Navbar -->
+  <nav class="navbar">
+      <div class="container navbar-container">
+          <a href="{{ url_for('index') }}" class="logo">
+              <i class="fas fa-shopping-basket"></i> Daily<span>Drop</span>
+          </a>
+          <div class="nav-actions">
+              {% if 'user_id' in session %}
+<a href="{{ url_for('orders') }}" class="login-btn-outline"><i class="fas fa-box"></i> My Orders</a>
+                                    <a href="{{ url_for('wishlist') }}" class="wishlist-nav-icon" title="My Wishlist">
+                      <i class="fas fa-heart"></i> <span class="nav-text">Wishlist</span> <span id="wishlist-count" class="wishlist-badge">0</span>
+                  </a>
+                  <a href="{{ url_for('logout') }}" class="login-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+              {% else %}
+                  <a href="{{ url_for('login') }}" class="login-btn"><i class="fas fa-sign-in-alt"></i> Login</a>
+              {% endif %}
+              <a href="{{ url_for('cart') }}" class="cart-icon">
+                  <i class="fas fa-shopping-cart"></i> My Cart <span id="cart-count">0</span>
+              </a>
+          </div>
+      </div>
+  </nav>
+
+  <div class="about-page">
+    <!-- Hero Section -->
+    <div class="about-hero">
+      <h1>We Deliver More Than <span>Essentials</span></h1>
+      <p>DailyDrop is redefining convenience with lightning-fast delivery of fresh groceries, household items, and daily products directly to your doorstep.</p>
+      <div class="timer-highlight">
+        <i class="fas fa-stopwatch"></i> 10-15 MINUTE ULTRAPASS DELIVERY
+      </div>
+    </div>
+
+    <!-- Our Story -->
+    <div class="story-section">
+      <div class="story-layout">
+        <div class="story-text">
+          <h2>Our Story</h2>
+          <p>DailyDrop was founded with a simple yet ambitious vision: to make everyday grocery shopping completely effortless. We realized that getting your fresh supplies shouldn't involve long checkout lines, crowded aisles, or waiting hours for delivery.</p>
+          <p>We engineered a highly optimized network of localized micro-fulfillment centers, partnered directly with leading local growers and suppliers, and created an automated inventory control system to bridge the gap.</p>
+          <p>Today, DailyDrop is serving thousands of households daily, delivering fresh vegetables, breakfast essentials, and pantry staples in minutes. We are dedicated to returning valuable hours back to your day.</p>
+        </div>
+        <div class="story-visual">
+          <div class="story-visual-icon"><i class="fas fa-truck-fast"></i></div>
+          <div class="story-visual-text">Store to Door in Minutes</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Core Values -->
+    <div class="values-header">
+      <h2>Our Core Principles</h2>
+    </div>
+    <div class="values-grid">
+      <div class="value-card">
+        <div class="value-icon-wrapper">
+          <i class="fas fa-bolt"></i>
+        </div>
+        <h3>Ultra-Fast Operations</h3>
+        <p>Speed is in our DNA. We pack, verify, and dispatch every order in under 3 minutes of receipt so our delivery partners reach you fast and safely.</p>
+      </div>
+
+      <div class="value-card">
+        <div class="value-icon-wrapper">
+          <i class="fas fa-carrot"></i>
+        </div>
+        <h3>Farm Fresh & Certified</h3>
+        <p>Every single piece of produce is hand-picked, sorted, and certified for hygiene and freshness. If it's not absolutely fresh, we don't dispatch it.</p>
+      </div>
+
+      <div class="value-card">
+        <div class="value-icon-wrapper">
+          <i class="fas fa-heart"></i>
+        </div>
+        <h3>Customer Obsessed</h3>
+        <p>Your satisfaction is our ultimate goal. Our support is available 24/7 with zero waiting time to answer your questions and solve any issue instantly.</p>
+      </div>
+    </div>
+
+    <!-- Call to Action -->
+    <div class="cta-card">
+      <h2>Ready to Experience Premium Convenience?</h2>
+      <p>Skip the trip to the local store and get fresh, high-quality groceries delivered in 10 minutes flat.</p>
+      <a href="{{ url_for('index') }}" class="cta-btn">
+        Start Shopping <i class="fas fa-arrow-right"></i>
+      </a>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        updateCartCount();
+    });
+
+    function updateCartCount() {
+        const cart = JSON.parse(localStorage.getItem('cart')) || [];
+        const count = cart.reduce((total, item) => total + item.quantity, 0);
+        document.getElementById('cart-count').textContent = count;
+    }
+  </script>
+</body>
+</html>

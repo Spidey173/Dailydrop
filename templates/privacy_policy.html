@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DailyDrop | Privacy Policy</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo1.webp') }}">
+
+  <!-- Bootstrap, FontAwesome & Google Fonts -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  
+  <!-- Centralized Stylesheet -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+
+  <style>
+    body {
+      background-color: var(--bg-base);
+    }
+
+    .legal-page {
+      max-width: 800px;
+      margin: 120px auto 60px;
+      padding: 0 20px;
+    }
+
+    .legal-card {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-glass);
+      padding: 40px;
+      box-shadow: var(--shadow-md);
+    }
+
+    .legal-title {
+      font-size: 2.2rem;
+      font-weight: 850;
+      color: var(--text-primary);
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--border-subtle);
+    }
+
+    .legal-section-title {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--accent);
+      margin: 30px 0 16px;
+    }
+
+    .legal-card p {
+      font-size: 1.02rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+
+    .legal-card ul {
+      margin-bottom: 20px;
+      padding-left: 24px;
+    }
+
+    .legal-card li {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+      position: relative;
+      line-height: 1.5;
+    }
+
+    .contact-alert-box {
+      background: linear-gradient(135deg, rgba(12, 131, 31, 0.04) 0%, rgba(16, 185, 129, 0.04) 100%);
+      border: 1.5px solid rgba(12, 131, 31, 0.15);
+      border-radius: var(--radius-sm);
+      padding: 24px;
+      margin: 30px 0;
+    }
+
+    .contact-alert-box h3 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .highlight-link {
+      color: var(--accent);
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .highlight-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Premium Sticky Floating Navbar -->
+  <nav class="navbar">
+      <div class="container navbar-container">
+          <a href="{{ url_for('index') }}" class="logo">
+              <i class="fas fa-shopping-basket"></i> Daily<span>Drop</span>
+          </a>
+          <div class="nav-actions">
+              <a href="{{ back_url|default(url_for('index')) }}" class="login-btn-outline">
+                  <i class="fas fa-arrow-left"></i> {{ back_text|default('Back') }}
+              </a>
+          </div>
+      </div>
+  </nav>
+
+  <div class="legal-page">
+    <div class="legal-card">
+      <h1 class="legal-title">Privacy Policy</h1>
+
+      <h2 class="legal-section-title">Data Collection</h2>
+      <p>At DailyDrop, we collect only minimal customer information required to perform fast and secure grocery logistics. This includes:</p>
+      <ul>
+        <li>Your basic account identity coordinates (name, email, and authentication keys).</li>
+        <li>Active delivery address profiles and nearby landmark details to help our riders locate you.</li>
+        <li>Transactional totals and shopping items history to manage orders.</li>
+      </ul>
+
+      <div class="contact-alert-box">
+        <h3>Privacy Concerns & Queries</h3>
+        <p>If you have any questions, feedback, or concerns regarding your account data deletion, please shoot us an email at:</p>
+        <p><a href="mailto:dailydrop@gmail.com" class="highlight-link">dailydrop@gmail.com</a></p>
+        <p><strong>Office Address:</strong> Horticulture, Chitradurga</p>
+      </div>
+
+      <h2 class="legal-section-title">Data Security</h2>
+      <p>We are fully committed to protecting your private details. We implement high-grade SSL transaction encryption, restrict access control permissions, and carry out periodic internal server audits to verify that user records stay completely safe from any outside breaches.</p>
+    </div>
+  </div>
+</body>
+</html>

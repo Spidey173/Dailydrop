@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DailyDrop | FAQs</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo1.webp') }}">
+
+  <!-- Bootstrap, FontAwesome & Google Fonts -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  
+  <!-- Centralized Stylesheet -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+
+  <style>
+    body {
+      background-color: var(--bg-base);
+    }
+
+    .faqs-page {
+      max-width: 800px;
+      margin: 120px auto 60px;
+      padding: 0 20px;
+    }
+
+    .faqs-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .faqs-header h1 {
+      font-size: 2.5rem;
+      font-weight: 850;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+    }
+
+    .faqs-header p {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+    }
+
+    .accordion-container {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-glass);
+      box-shadow: var(--shadow-md);
+      overflow: hidden;
+    }
+
+    .faq-item {
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .faq-item:last-child {
+      border-bottom: none;
+    }
+
+    .faq-trigger {
+      width: 100%;
+      padding: 22px 28px;
+      background: transparent;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      text-align: left;
+      font-size: 1.15rem;
+      font-weight: 750;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: var(--transition-normal);
+    }
+
+    .faq-trigger:hover {
+      background: rgba(0, 255, 135, 0.02);
+      color: var(--accent);
+    }
+
+    .faq-trigger .icon {
+      font-size: 1.3rem;
+      color: var(--text-muted);
+      transition: var(--transition-normal);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--bg-base);
+    }
+
+    .faq-item.active .faq-trigger {
+      background: rgba(0, 255, 135, 0.04);
+      color: var(--accent);
+    }
+
+    .faq-item.active .faq-trigger .icon {
+      transform: rotate(45deg);
+      background: var(--primary);
+      color: white;
+    }
+
+    .faq-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      padding: 0 28px;
+      background: var(--bg-base);
+    }
+
+    .faq-content p {
+      font-size: 0.98rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      padding: 0;
+    }
+
+    .faq-item.active .faq-content {
+      max-height: 200px;
+      padding: 20px 28px;
+      border-top: 1px solid rgba(12, 131, 31, 0.06);
+    }
+  </style>
+  <script src="{{ url_for('static', filename='js/wishlist.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/live-search.js') }}"></script>
+</head>
+<body>
+
+  <!-- Premium Sticky Floating Navbar -->
+  <nav class="navbar">
+      <div class="container navbar-container">
+          <a href="{{ url_for('index') }}" class="logo">
+              <i class="fas fa-shopping-basket"></i> Daily<span>Drop</span>
+          </a>
+          <div class="nav-actions">
+              {% if 'user_id' in session %}
+<a href="{{ url_for('orders') }}" class="login-btn-outline"><i class="fas fa-box"></i> My Orders</a>
+                                    <a href="{{ url_for('wishlist') }}" class="wishlist-nav-icon" title="My Wishlist">
+                      <i class="fas fa-heart"></i> <span class="nav-text">Wishlist</span> <span id="wishlist-count" class="wishlist-badge">0</span>
+                  </a>
+                  <a href="{{ url_for('logout') }}" class="login-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+              {% else %}
+                  <a href="{{ url_for('login') }}" class="login-btn"><i class="fas fa-sign-in-alt"></i> Login</a>
+              {% endif %}
+              <a href="{{ url_for('cart') }}" class="cart-icon">
+                  <i class="fas fa-shopping-cart"></i> My Cart <span id="cart-count">0</span>
+              </a>
+          </div>
+      </div>
+  </nav>
+
+  <div class="faqs-page">
+    <div class="faqs-header">
+      <h1>Frequently Asked Questions</h1>
+      <p>Have questions about delivery, orders, or options? Find immediate answers below.</p>
+    </div>
+
+    <div class="accordion-container">
+      <!-- FAQ 1 -->
+      <div class="faq-item">
+        <div class="faq-trigger">
+          <h2>How do I place an order?</h2>
+          <span class="icon"><i class="fas fa-plus fs-xs"></i></span>
+        </div>
+        <div class="faq-content">
+          <p>Browse our fresh categories catalog, add your preferred items to your cart, and click Proceed to Checkout in the cart drawer. Specify your shipping details, confirm your phone number, and place your order in seconds.</p>
+        </div>
+      </div>
+
+      <!-- FAQ 2 -->
+      <div class="faq-item">
+        <div class="faq-trigger">
+          <h2>What are the delivery charges?</h2>
+          <span class="icon"><i class="fas fa-plus fs-xs"></i></span>
+        </div>
+        <div class="faq-content">
+          <p>We charge a nominal delivery fee of Rs. 30 for small orders. For orders above Rs. 500, delivery is completely FREE!</p>
+        </div>
+      </div>
+
+      <!-- FAQ 3 -->
+      <div class="faq-item">
+        <div class="faq-trigger">
+          <h2>How long will my order take to arrive?</h2>
+          <span class="icon"><i class="fas fa-plus fs-xs"></i></span>
+        </div>
+        <div class="faq-content">
+          <p>We pride ourselves on lightning-fast speed! All orders are typically packaged and delivered by our partners within 10 to 15 minutes of placing your order.</p>
+        </div>
+      </div>
+
+      <!-- FAQ 4 -->
+      <div class="faq-item">
+        <div class="faq-trigger">
+          <h2>What payment methods do you support?</h2>
+          <span class="icon"><i class="fas fa-plus fs-xs"></i></span>
+        </div>
+        <div class="faq-content">
+          <p>Currently, we support Cash on Delivery (COD) as our primary checkout payment method. You can pay with physical cash, or scan delivery partner UPI QR codes when they arrive.</p>
+        </div>
+      </div>
+
+      <!-- FAQ 5 -->
+      <div class="faq-item">
+        <div class="faq-trigger">
+          <h2>What is your refund and return policy?</h2>
+          <span class="icon"><i class="fas fa-plus fs-xs"></i></span>
+        </div>
+        <div class="faq-content">
+          <p>If you receive any damaged produce, incorrect products, or stale items, please raise a support ticket or contact us within 2 hours of delivery to get an instant replacement or refund.</p>
+        </div>
+      </div>
+
+      <!-- FAQ 6 -->
+      <div class="faq-item">
+        <div class="faq-trigger">
+          <h2>How do I contact customer support?</h2>
+          <span class="icon"><i class="fas fa-plus fs-xs"></i></span>
+        </div>
+        <div class="faq-content">
+          <p>You can shoot us an email at support@dailydrop.com, submit the contact form on our contact page, or call our customer helpline at +91 98765 43210.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        updateCartCount();
+        
+        document.querySelectorAll('.faq-trigger').forEach(trigger => {
+            trigger.addEventListener('click', () => {
+                const item = trigger.parentElement;
+                item.classList.toggle('active');
+            });
+        });
+    });
+
+    function updateCartCount() {
+        const cart = JSON.parse(localStorage.getItem('cart')) || [];
+        const count = cart.reduce((total, item) => total + item.quantity, 0);
+        document.getElementById('cart-count').textContent = count;
+    }
+  </script>
+</body>
+</html>

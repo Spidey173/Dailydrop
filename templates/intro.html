@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DailyDrop - Premium 10-Minute Grocery Delivery</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Experience lightning-fast grocery delivery with DailyDrop. Fresh farm produce, daily essentials, snacks, and beverages delivered to your doorstep in 10 minutes.">
+    <meta name="keywords" content="grocery delivery, fresh vegetables, daily essentials, 10 minute delivery, fresh fruits, online supermarket">
+    <meta name="author" content="DailyDrop">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo1.webp') }}">
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Centralized Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+    <!-- Animated Glowing Blobs -->
+    <div class="glow-blob glow-blob-1"></div>
+    <div class="glow-blob glow-blob-2"></div>
+    <div class="glow-blob glow-blob-3"></div>
+
+    <!-- Floating Glass Sticky Navbar -->
+    <nav class="navbar">
+        <div class="container navbar-container">
+            <a href="#" class="logo" id="nav-logo">
+                <i class="fas fa-shopping-basket"></i> Daily<span>Drop</span>
+            </a>
+            <div class="nav-actions">
+                <a href="{{ url_for('login') }}" class="login-btn-outline" id="nav-login-btn"><i class="fas fa-sign-in-alt"></i> Login</a>
+                <a href="{{ url_for('signup') }}" class="login-btn" id="nav-signup-btn"><i class="fas fa-user-plus"></i> Sign Up</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="container">
+        <section class="landing-hero" id="hero-section">
+            <div class="landing-hero-content anim-slide">
+                <div class="premium-badge"><i class="fas fa-star text-accent animate-pulse"></i> Hyper-Local Premium Experience</div>
+                <h1>Groceries in <span>10 Minutes</span> or Less</h1>
+                <p>Get fresh groceries delivered to your doorstep in minutes. Daily essentials, farm-fresh produce, artisanal snacks, and household essentials at the absolute best prices. Experience the next generation of hyper-local grocery shopping.</p>
+                <div class="landing-hero-buttons">
+                    <a href="{{ url_for('login') }}" class="login-btn" id="hero-start-btn">
+                        <i class="fas fa-shopping-cart"></i> Get Started <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="landing-hero-image anim-fade">
+                <img src="https://images.unsplash.com/photo-1607082350899-7e105aa886ae?q=80&w=900&auto=format&fit=crop" alt="Premium Grocery Delivery" class="anim-float">
+            </div>
+        </section>
+    </div>
+
+    <!-- Features Section -->
+    <section class="landing-features-section" id="features-section">
+        <div class="container">
+            <div class="section-title">
+                Why Shop With DailyDrop?
+            </div>
+            <div class="landing-features-grid">
+                <div class="landing-feature-card">
+                    <i class="fas fa-bolt"></i>
+                    <h3>Lightning Fast</h3>
+                    <p>Get your fresh groceries in 10-30 minutes with our state-of-the-art hyper-local delivery network.</p>
+                </div>
+                <div class="landing-feature-card">
+                    <i class="fas fa-leaf"></i>
+                    <h3>Farm Fresh</h3>
+                    <p>Locally sourced organic produce harvested daily and delivered at peak freshness directly to your home.</p>
+                </div>
+                <div class="landing-feature-card">
+                    <i class="fas fa-tags"></i>
+                    <h3>Unbeatable Value</h3>
+                    <p>Competitive pricing, massive savings, and regular deals on your favorite premium brands.</p>
+                </div>
+                <div class="landing-feature-card">
+                    <i class="fas fa-headset"></i>
+                    <h3>24/7 Support</h3>
+                    <p>Our dedicated support team is always standing by to guarantee an outstanding shopping experience.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Popular Categories Section -->
+    <section class="landing-categories-section" id="categories-section">
+        <div class="container">
+            <div class="section-title">
+                Explore Popular Categories
+            </div>
+            <div class="landing-categories-grid">
+                <div class="landing-category-card">
+                    <div class="landing-category-icon-wrapper">
+                        <i class="fas fa-apple-alt"></i>
+                    </div>
+                    <h3>Fruits & Veggies</h3>
+                </div>
+                <div class="landing-category-card">
+                    <div class="landing-category-icon-wrapper">
+                        <i class="fas fa-wine-bottle"></i>
+                    </div>
+                    <h3>Beverages</h3>
+                </div>
+                <div class="landing-category-card">
+                    <div class="landing-category-icon-wrapper">
+                        <i class="fas fa-bread-slice"></i>
+                    </div>
+                    <h3>Bakery</h3>
+                </div>
+                <div class="landing-category-card">
+                    <div class="landing-category-icon-wrapper">
+                        <i class="fas fa-egg"></i>
+                    </div>
+                    <h3>Dairy & Eggs</h3>
+                </div>
+                <div class="landing-category-card">
+                    <div class="landing-category-icon-wrapper">
+                        <i class="fas fa-drumstick-bite"></i>
+                    </div>
+                    <h3>Meat & Seafood</h3>
+                </div>
+                <div class="landing-category-card">
+                    <div class="landing-category-icon-wrapper">
+                        <i class="fas fa-ice-cream"></i>
+                    </div>
+                    <h3>Frozen Foods</h3>
+                </div>
+                <div class="landing-category-card">
+                    <div class="landing-category-icon-wrapper">
+                        <i class="fas fa-pizza-slice"></i>
+                    </div>
+                    <h3>Snacks</h3>
+                </div>
+                <div class="landing-category-card">
+                    <div class="landing-category-icon-wrapper">
+                        <i class="fas fa-mortar-pestle"></i>
+                    </div>
+                    <h3>Spices</h3>
+                </div>
+                <div class="landing-category-card">
+                    <div class="landing-category-icon-wrapper">
+                        <i class="fas fa-pump-soap"></i>
+                    </div>
+                    <h3>Home Care</h3>
+                </div>
+                <div class="landing-category-card">
+                    <div class="landing-category-icon-wrapper">
+                        <i class="fas fa-baby"></i>
+                    </div>
+                    <h3>Baby Care</h3>
+                </div>
+                <div class="landing-category-card">
+                    <div class="landing-category-icon-wrapper">
+                        <i class="fas fa-spa"></i>
+                    </div>
+                    <h3>Personal Care</h3>
+                </div>
+                <div class="landing-category-card">
+                    <div class="landing-category-icon-wrapper">
+                        <i class="fas fa-utensils"></i>
+                    </div>
+                    <h3>Home & Kitchen</h3>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Premium Footer Section -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-column">
+                    <div class="footer-logo">
+                        <i class="fas fa-shopping-basket"></i> Daily<span>Drop</span>
+                    </div>
+                    <p class="footer-description">
+                        Revolutionizing grocery shopping. Get premium fresh foods and everyday essentials delivered directly to your door in 10 minutes.
+                    </p>
+                </div>
+                <div class="footer-column">
+                    <h4>Popular Categories</h4>
+                    <ul class="footer-links">
+                        <li><a href="{{ url_for('login') }}">Fruits & Vegetables</a></li>
+                        <li><a href="{{ url_for('login') }}">Dairy & Breakfast</a></li>
+                        <li><a href="{{ url_for('login') }}">Snacks</a></li>
+                        <li><a href="{{ url_for('login') }}">Household Items</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>Quick Links</h4>
+                    <ul class="footer-links">
+                        <li><a href="{{ url_for('login') }}">About Us</a></li>
+                        <li><a href="{{ url_for('login') }}">FAQs</a></li>
+                        <li><a href="{{ url_for('login') }}">Contact Us</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>Get In Touch</h4>
+                    <ul class="footer-contact">
+                        <li>
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>123 Fresh Lane, Suite 100, Grocery Valley, GV 94025</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-envelope"></i>
+                            <span>support@dailydrop.com</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-phone-alt"></i>
+                            <span>+1 (800) 555-DROP</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 DailyDrop. All rights reserved. | Handcrafted with <i class="fas fa-heart" style="color: #EC4899;"></i> for visual excellence.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

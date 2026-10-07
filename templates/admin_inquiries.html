@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Drop - Customer Contact Inquiries</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo1.webp') }}">
+
+    <style>
+        :root {
+            --bg-dark: #020805;
+            --card-bg: rgba(16, 24, 18, 0.75);
+            --card-border: rgba(52, 211, 153, 0.18);
+            --card-hover-border: rgba(52, 211, 153, 0.45);
+            --accent-green: #10B981;
+            --accent-mint: #34D399;
+            --accent-glow: rgba(16, 185, 129, 0.25);
+            --text-primary: #F3F4F6;
+            --text-muted: #9CA3AF;
+            --danger: #EF4444;
+            --warning: #F59E0B;
+            --info: #38BDF8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            background-image:
+                radial-gradient(circle at 10% 15%, rgba(56, 189, 248, 0.08) 0%, transparent 45%),
+                radial-gradient(circle at 90% 85%, rgba(16, 185, 129, 0.08) 0%, transparent 45%);
+            background-attachment: fixed;
+            padding-bottom: 60px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Ambient Glowing Blobs */
+        .glow-blob {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.35;
+        }
+
+        .glow-blob-1 {
+            width: 450px;
+            height: 450px;
+            background: #38BDF8;
+            top: -100px;
+            left: -100px;
+            animation: pulseBlob 12s ease-in-out infinite alternate;
+        }
+
+        .glow-blob-2 {
+            width: 400px;
+            height: 400px;
+            background: #10B981;
+            bottom: -80px;
+            right: -80px;
+            animation: pulseBlob 14s ease-in-out infinite alternate-reverse;
+        }
+
+        @keyframes pulseBlob {
+            0% { transform: scale(1) translate(0, 0); }
+            100% { transform: scale(1.15) translate(30px, 30px); }
+        }
+
+        /* Top Navigation Bar */
+        .admin-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 36px;
+            background: rgba(2, 8, 5, 0.85);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--card-border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-logo-badge {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: rgba(56, 189, 248, 0.15);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--info);
+            font-size: 1.2rem;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.25);
+        }
+
+        .brand-title {
+            font-size: 1.35rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: #FFFFFF;
+        }
+
+        .brand-title span {
+            color: var(--accent-mint);
+        }
+
+        .badge-admin {
+            background: rgba(56, 189, 248, 0.15);
+            color: var(--info);
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            font-size: 0.72rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 18px;
+            border-radius: 10px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            border: none;
+        }
+
+        .btn-outline {
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-primary);
+            border: 1px solid var(--card-border);
+        }
+
+        .btn-outline:hover {
+            background: rgba(56, 189, 248, 0.1);
+            border-color: var(--info);
+            transform: translateY(-1px);
+            color: #FFFFFF;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-green) 0%, #059669 100%);
+            color: #FFFFFF;
+            box-shadow: 0 4px 14px var(--accent-glow);
+        }
+
+        .btn-primary:hover {
+            opacity: 0.95;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(16, 185, 129, 0.35);
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.12);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-danger:hover {
+            background: rgba(239, 68, 68, 0.25);
+            border-color: var(--danger);
+            transform: translateY(-1px);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1280px;
+            margin: 28px auto;
+            padding: 0 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Page Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 26px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .page-header h1 {
+            font-size: 1.85rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #FFFFFF 0%, var(--info) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .page-header p {
+            color: var(--text-muted);
+            font-size: 0.92rem;
+            margin-top: 4px;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 18px;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 20px;
+            backdrop-filter: blur(14px);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            border-color: var(--card-hover-border);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--info), transparent);
+            opacity: 0.6;
+        }
+
+        .stat-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            background: rgba(56, 189, 248, 0.12);
+            color: var(--info);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            border: 1px solid rgba(56, 189, 248, 0.25);
+            flex-shrink: 0;
+        }
+
+        .stat-icon.mint {
+            background: rgba(16, 185, 129, 0.12);
+            color: var(--accent-mint);
+            border-color: rgba(52, 211, 153, 0.25);
+        }
+
+        .stat-icon.warning {
+            background: rgba(245, 158, 11, 0.12);
+            color: var(--warning);
+            border-color: rgba(245, 158, 11, 0.25);
+        }
+
+        .stat-content h3 {
+            font-size: 1.65rem;
+            font-weight: 800;
+            color: #FFFFFF;
+            line-height: 1.2;
+        }
+
+        .stat-content p {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-top: 2px;
+        }
+
+        /* Filter & Search Header Card */
+        .filter-container-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            backdrop-filter: blur(16px);
+            padding: 18px 24px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .search-filter-box {
+            display: flex;
+            gap: 12px;
+            flex: 1;
+            max-width: 500px;
+        }
+
+        .input-group {
+            position: relative;
+            flex: 1;
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .input-control {
+            width: 100%;
+            padding: 11px 16px 11px 42px;
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .input-control:focus {
+            border-color: var(--info);
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        /* Inquiries Message Feed */
+        .inquiries-feed {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Inquiry Card */
+        .inquiry-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 18px;
+            backdrop-filter: blur(16px);
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .inquiry-card:hover {
+            border-color: rgba(56, 189, 248, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 14px 36px rgba(0, 0, 0, 0.5), 0 0 20px rgba(56, 189, 248, 0.1);
+        }
+
+        .inquiry-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .sender-profile {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .sender-avatar {
+            width: 46px;
+            height: 46px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.25), rgba(16, 185, 129, 0.15));
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--info);
+            font-size: 1.15rem;
+            font-weight: 800;
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.2);
+            flex-shrink: 0;
+        }
+
+        .sender-info-block h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sender-badges {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 4px;
+            flex-wrap: wrap;
+        }
+
+        .contact-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            background: rgba(255, 255, 255, 0.04);
+            padding: 3px 8px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.2s ease;
+        }
+
+        .contact-pill:hover {
+            color: var(--info);
+            border-color: rgba(56, 189, 248, 0.3);
+            background: rgba(56, 189, 248, 0.08);
+        }
+
+        .subject-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            background: rgba(56, 189, 248, 0.12);
+            color: #38BDF8;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+        }
+
+        .inquiry-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .time-badge {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 5px 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Message Text Container - Maximum Readability & Aesthetics */
+        .message-content-box {
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-left: 3px solid var(--info);
+            border-radius: 12px;
+            padding: 16px 20px;
+            position: relative;
+            margin-top: 10px;
+        }
+
+        .message-quote-icon {
+            position: absolute;
+            right: 18px;
+            bottom: 12px;
+            font-size: 2rem;
+            color: rgba(56, 189, 248, 0.08);
+            pointer-events: none;
+        }
+
+        .message-text {
+            font-size: 0.96rem;
+            line-height: 1.65;
+            color: #F3F4F6;
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-weight: 400;
+        }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            background: rgba(6, 20, 12, 0.95);
+            border: 1px solid var(--accent-mint);
+            color: #FFFFFF;
+            padding: 14px 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 15px var(--accent-glow);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Empty State */
+        .empty-state {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 18px;
+            backdrop-filter: blur(16px);
+            padding: 70px 20px;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        .empty-state i {
+            font-size: 3.5rem;
+            color: rgba(56, 189, 248, 0.25);
+            margin-bottom: 16px;
+        }
+
+        .empty-state h3 {
+            color: #FFFFFF;
+            font-size: 1.3rem;
+            margin-bottom: 6px;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Ambient Glowing Blobs -->
+    <div class="glow-blob glow-blob-1"></div>
+    <div class="glow-blob glow-blob-2"></div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Header Navigation -->
+    <nav class="admin-nav">
+        <div class="brand-container">
+            <div class="brand-logo-badge">
+                <i class="fas fa-shopping-basket"></i>
+            </div>
+            <span class="brand-title">Daily<span>Drop</span></span>
+            <span class="badge-admin">
+                <i class="fa-solid fa-envelope-open-text"></i> Customer Inquiries
+            </span>
+        </div>
+        <div class="nav-actions">
+            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline">
+                <i class="fa-solid fa-boxes-stacked"></i> Products Catalog
+            </a>
+            <a href="{{ url_for('admin_orders') }}" class="btn btn-outline">
+                <i class="fa-solid fa-truck-fast"></i> Customer Orders
+            </a>
+            <a href="/" class="btn btn-outline">
+                <i class="fa-solid fa-store"></i> Storefront
+            </a>
+            <a href="/logout" class="btn btn-outline" style="color: var(--danger); border-color: rgba(239, 68, 68, 0.3);">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Page Title Header -->
+        <div class="page-header">
+            <div>
+                <h1>Customer Inquiries & Feedback Center</h1>
+                <p>Read full message submissions, inspect customer queries, and manage received contact requests.</p>
+            </div>
+            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-primary">
+                <i class="fa-solid fa-arrow-left"></i> Back to Catalog Management
+            </a>
+        </div>
+
+        <!-- Dashboard Stat Cards -->
+        {% set unique_emails = [] %}
+        {% for msg in contact_messages %}
+            {% if msg.email not in unique_emails %}
+                {% set _ = unique_emails.append(msg.email) %}
+            {% endif %}
+        {% endfor %}
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-inbox"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="statTotalInquiries">{{ contact_messages|length }}</h3>
+                    <p>Total Inquiries Received</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon mint">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ unique_emails|length }}</h3>
+                    <p>Unique Customer Senders</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon warning">
+                    <i class="fa-solid fa-clock"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 style="font-size: 1.15rem;">
+                        {% if contact_messages|length > 0 %}
+                            {{ contact_messages[0].timestamp|string|truncate(16, True, '') }}
+                        {% else %}
+                            None
+                        {% endif %}
+                    </h3>
+                    <p>Latest Message Received</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter & Search Controls Card -->
+        <div class="filter-container-card">
+            <div class="search-filter-box">
+                <div class="input-group">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="inquirySearchInput" class="input-control" placeholder="Search inquiries by customer name, email, subject, or message text..." onkeyup="filterInquiries()">
+                </div>
+            </div>
+            <div style="font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-message" style="color: var(--info);"></i>
+                <span>Showing <strong id="visibleCount" style="color: #FFFFFF;">{{ contact_messages|length }}</strong> total message threads</span>
+            </div>
+        </div>
+
+        <!-- Inquiries Message Feed -->
+        <div class="inquiries-feed" id="inquiriesFeed">
+            {% for msg in contact_messages %}
+            <div class="inquiry-card" id="inquiry-card-{{ msg.id }}" 
+                 data-search="{{ msg.name|lower }} {{ msg.email|lower }} {{ msg.phone|default('')|lower }} {{ msg.subject|lower }} {{ msg.message|lower }}">
+                
+                <!-- Card Header -->
+                <div class="inquiry-card-header">
+                    <div class="sender-profile">
+                        <div class="sender-avatar">
+                            {{ msg.name[:1]|upper if msg.name else 'U' }}
+                        </div>
+                        <div class="sender-info-block">
+                            <h3>
+                                {{ msg.name }}
+                                <span class="subject-badge">
+                                    <i class="fa-solid fa-tag" style="font-size: 0.7rem;"></i> {{ msg.subject }}
+                                </span>
+                            </h3>
+                            <div class="sender-badges">
+                                <a href="mailto:{{ msg.email }}" class="contact-pill" title="Customer Email">
+                                    <i class="fa-regular fa-envelope" style="color: var(--info);"></i> {{ msg.email }}
+                                </a>
+                                {% if msg.phone %}
+                                <a href="tel:{{ msg.phone }}" class="contact-pill" title="Customer Phone">
+                                    <i class="fa-solid fa-phone" style="color: var(--accent-mint);"></i> {{ msg.phone }}
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="inquiry-actions">
+                        <div class="time-badge">
+                            <i class="fa-regular fa-calendar-days" style="color: var(--info);"></i>
+                            <span>{{ msg.timestamp|string|truncate(16, True, '') }}</span>
+                        </div>
+                        <button class="btn btn-danger btn-sm" style="padding: 6px 14px; font-size: 0.78rem;" onclick="deleteInquiry({{ msg.id }}, this)" title="Dismiss / Delete inquiry">
+                            <i class="fa-solid fa-trash-can"></i> Dismiss
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Message Body Container -->
+                <div class="message-content-box">
+                    <i class="fa-solid fa-quote-right message-quote-icon"></i>
+                    <p class="message-text" id="message-text-{{ msg.id }}">{{ msg.message }}</p>
+                </div>
+            </div>
+            {% else %}
+            <div class="empty-state" id="emptyStateBox">
+                <i class="fa-regular fa-comments"></i>
+                <h3>No customer inquiries received yet</h3>
+                <p>When customers submit messages through the Contact Us form, their full inquiries will appear here.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        // Live Search Filtering
+        function filterInquiries() {
+            const query = (document.getElementById('inquirySearchInput').value || '').toLowerCase().trim();
+            const cards = document.querySelectorAll('.inquiry-card');
+            let visible = 0;
+
+            cards.forEach(card => {
+                const searchData = card.getAttribute('data-search') || '';
+                if (!query || searchData.includes(query)) {
+                    card.style.display = '';
+                    visible++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            const countEl = document.getElementById('visibleCount');
+            if (countEl) countEl.textContent = visible;
+        }
+
+        // Delete/Dismiss Inquiry API
+        async function deleteInquiry(msgId, btn) {
+            if (!confirm(`Are you sure you want to dismiss/delete Inquiry #${msgId}?`)) return;
+
+            try {
+                const res = await fetch(`/api/v1/admin/messages/${msgId}/delete`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    const card = document.getElementById(`inquiry-card-${msgId}`);
+                    if (card) {
+                        card.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+                        card.style.opacity = '0';
+                        card.style.transform = 'translateY(15px) scale(0.98)';
+                        setTimeout(() => {
+                            card.remove();
+                            const remaining = document.querySelectorAll('.inquiry-card').length;
+                            const statTotal = document.getElementById('statTotalInquiries');
+                            const visibleCount = document.getElementById('visibleCount');
+                            if (statTotal) statTotal.textContent = remaining;
+                            if (visibleCount) visibleCount.textContent = remaining;
+
+                            if (remaining === 0) {
+                                const feed = document.getElementById('inquiriesFeed');
+                                if (feed) {
+                                    feed.innerHTML = `
+                                        <div class="empty-state">
+                                            <i class="fa-regular fa-comments"></i>
+                                            <h3>No customer inquiries received yet</h3>
+                                            <p>When customers submit messages through the Contact Us form, their full inquiries will appear here.</p>
+                                        </div>
+                                    `;
+                                }
+                            }
+                        }, 300);
+                    }
+                    showToast(`Inquiry #${msgId} dismissed successfully.`);
+                } else {
+                    showToast(data.error || 'Failed to dismiss inquiry', true);
+                }
+            } catch (e) {
+                showToast('Server error dismissing inquiry', true);
+            }
+        }
+
+        // Toast Notification Helper
+        function showToast(msg, isError = false) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            if (isError) {
+                toast.style.borderColor = 'var(--danger)';
+                toast.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(239, 68, 68, 0.3)';
+            }
+
+            toast.innerHTML = `
+                <i class="fa-solid ${isError ? 'fa-circle-xmark' : 'fa-circle-check'}" 
+                   style="color: ${isError ? 'var(--danger)' : 'var(--accent-mint)'}; font-size: 1.15rem;"></i>
+                <span>${msg}</span>
+            `;
+
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3500);
+        }
+    </script>
+</body>
+</html>

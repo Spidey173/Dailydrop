@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Drop - Admin Login</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-dark: #020805;
+            --card-bg: rgba(16, 24, 18, 0.85);
+            --card-border: rgba(52, 211, 153, 0.25);
+            --accent-green: #10B981;
+            --accent-mint: #34D399;
+            --accent-glow: rgba(16, 185, 129, 0.3);
+            --text-primary: #F3F4F6;
+            --text-muted: #9CA3AF;
+            --danger: #EF4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-image: 
+                radial-gradient(circle at 20% 20%, rgba(16, 185, 129, 0.12) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(52, 211, 153, 0.08) 0%, transparent 50%);
+            padding: 20px;
+        }
+
+        .login-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            width: 100%;
+            max-width: 440px;
+            padding: 40px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-green), var(--accent-mint));
+        }
+
+        .header-box {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .icon-badge {
+            width: 64px;
+            height: 64px;
+            border-radius: 18px;
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid var(--card-border);
+            color: var(--accent-mint);
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px auto;
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        .title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            background: linear-gradient(135deg, #FFFFFF 0%, var(--accent-mint) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .flash-messages {
+            margin-bottom: 20px;
+        }
+
+        .flash-msg {
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 0.88rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.5s ease, max-height 0.5s ease, margin-bottom 0.5s ease, padding 0.5s ease;
+            overflow: hidden;
+            max-height: 100px;
+        }
+
+        .flash-msg.flash-fade-out {
+            opacity: 0;
+            transform: translateY(-6px);
+            max-height: 0;
+            margin-bottom: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+            border-width: 0;
+        }
+
+        .flash-error {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #FCA5A5;
+        }
+
+        .flash-success {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: var(--accent-mint);
+        }
+
+        .flash-info, .flash-message {
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: #93C5FD;
+        }
+
+
+        .form-group {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px 12px 46px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--accent-mint);
+            box-shadow: 0 0 12px var(--accent-glow);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(135deg, var(--accent-green) 0%, #059669 100%);
+            color: #FFFFFF;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px var(--accent-glow);
+            margin-top: 10px;
+        }
+
+        .btn-submit:hover {
+            opacity: 0.92;
+            transform: translateY(-1px);
+        }
+
+        /* Demo Admin Fast Access */
+        .demo-admin-panel {
+            margin-bottom: 20px;
+        }
+
+        .demo-admin-btn {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 12px 16px;
+            background: rgba(245, 158, 11, 0.08);
+            border: 1px solid rgba(245, 158, 11, 0.4);
+            border-radius: 12px;
+            color: #FFFFFF;
+            cursor: pointer;
+            font-size: 0.92rem;
+            font-weight: 700;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .demo-admin-btn:hover {
+            background: rgba(245, 158, 11, 0.18);
+            border-color: #FBBF24;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.25);
+        }
+
+        .demo-admin-btn i {
+            font-size: 1rem;
+            color: #FBBF24;
+        }
+
+        .divider-or {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 18px 0;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .divider-or::before,
+        .divider-or::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .divider-or:not(:empty)::before {
+            margin-right: 12px;
+        }
+
+        .divider-or:not(:empty)::after {
+            margin-left: 12px;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            font-size: 0.88rem;
+        }
+
+        .footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent-mint);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <div class="header-box">
+            <div class="icon-badge">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <h1 class="title">Admin Portal</h1>
+            <p class="subtitle">Enter administrator credentials to manage products & orders</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash-msg flash-{{ category if category != 'message' else 'info' }}">
+                            <i class="fa-solid fa-circle-exclamation"></i>
+                            <span>{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Fast Demo Access Button -->
+        <div class="demo-admin-panel">
+            <button type="button" class="demo-admin-btn" id="demoAdminFillBtn">
+                <i class="fa-solid fa-bolt"></i>
+                <span>Fill Demo Admin</span>
+            </button>
+        </div>
+
+        <div class="divider-or">or login with credentials</div>
+
+        <form action="/admin_login" method="POST" id="adminLoginForm">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <div class="form-group">
+                <label for="email">Admin Email</label>
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-user-shield"></i>
+                    <input type="email" id="email" name="email" class="form-control" required placeholder="admin_dailydrop@gmail.com">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Admin Password</label>
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-lock"></i>
+                    <input type="password" id="password" name="password" class="form-control" required placeholder="••••••••••••">
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit">
+                <i class="fa-solid fa-right-to-bracket"></i> Log In to Admin Panel
+            </button>
+        </form>
+
+        <div class="footer-links">
+            <a href="/">
+                <i class="fa-solid fa-arrow-left"></i> Storefront
+            </a>
+            <a href="/login">
+                <i class="fa-solid fa-user"></i> Customer Login
+            </a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const demoBtn = document.getElementById('demoAdminFillBtn');
+            const form = document.getElementById('adminLoginForm');
+
+            function fillAdminCredentials(autoSubmit = false) {
+                emailInput.value = 'admin_dailydrop@gmail.com';
+                passwordInput.value = 'Dailydrop@173';
+                if (autoSubmit && form) {
+                    form.submit();
+                }
+            }
+
+            if (demoBtn) {
+                demoBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    fillAdminCredentials(true);
+                });
+            }
+
+            // Check if redirected with ?demo=1 or ?demo=admin
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('demo') === '1' || params.get('demo') === 'admin') {
+                fillAdminCredentials(false);
+            }
+
+            // Auto-dismiss flash notifications after 5 seconds
+            const flashMsgs = document.querySelectorAll('.flash-msg');
+            if (flashMsgs.length > 0) {
+                setTimeout(() => {
+                    flashMsgs.forEach(msg => {
+                        msg.classList.add('flash-fade-out');
+                        setTimeout(() => msg.remove(), 500);
+                    });
+                }, 5000);
+            }
+        });
+    </script>
+</body>
+</html>
+
+
