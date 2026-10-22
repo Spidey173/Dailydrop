@@ -13,8 +13,14 @@ def _init_serverless_app():
     # If not explicitly configured in Vercel project settings, provide live demo cloud DB & secure key
     if not os.getenv('DATABASE_URL'):
         os.environ['DATABASE_URL'] = 'postgresql://neondb_owner:npg_Kgh3pLGtWVE2@ep-aged-shape-axt5bimg-pooler.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require'
-    if not os.getenv('SECRET_KEY') or len(os.getenv('SECRET_KEY', '')) < 16:
-        os.environ['SECRET_KEY'] = 'dailydrop-demo-secure-prod-key-32bytes-live-store'
+    
+    from config import INSECURE_SECRET_KEYS, Config
+    current_key = os.getenv('SECRET_KEY', '')
+    if not current_key or current_key in INSECURE_SECRET_KEYS or len(current_key) < 16:
+        secure_key = 'c8e31295b28a9dc384917a26f8be220f8c3e80931d87192750e39b9868725fa1'
+        os.environ['SECRET_KEY'] = secure_key
+        Config.SECRET_KEY = secure_key
+
     os.environ['DISABLE_FILE_UPLOADS'] = 'true'
     os.environ['VERCEL'] = '1'
 
