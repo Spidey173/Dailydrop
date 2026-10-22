@@ -17,11 +17,28 @@ ENV = os.getenv('FLASK_ENV', 'development')
 DEBUG = ENV == 'development'
 
 
+# Known insecure placeholder keys that must never be used in production
+INSECURE_SECRET_KEYS = {
+    'daily-drop-neon-secure-key-2026',
+    'change-this-to-a-secure-random-secret-key',
+    'your-secret-key-here',
+    'secret',
+    'default',
+    'admin',
+    'password',
+    ''
+}
+
+
 class Config:
     """Base configuration."""
 
+    ENV = ENV
+    DEBUG = DEBUG
+    TESTING = False
+
     # Flask settings
-    SECRET_KEY = os.getenv('SECRET_KEY', 'daily-drop-neon-secure-key-2026')
+    SECRET_KEY = os.getenv('SECRET_KEY', '')
     SESSION_COOKIE_SECURE = not DEBUG
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'
@@ -40,7 +57,6 @@ class Config:
     CACHE_CATALOG_TTL = int(os.getenv('CACHE_CATALOG_TTL', 600))  # 10 minutes
     IDEMPOTENCY_TTL = int(os.getenv('IDEMPOTENCY_TTL', 86400))  # 24 hours
 
-
     # Performance & Static asset caching
     SEND_FILE_MAX_AGE_DEFAULT = 43200  # 12 hours browser caching for static files
     TEMPLATES_AUTO_RELOAD = DEBUG
@@ -49,15 +65,39 @@ class Config:
     ITEMS_PER_PAGE = 12
     ORDERS_PER_PAGE = 10
 
-
     # File uploads
-    UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER', 'uploads')
+    UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER', 'static/uploads')
     MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
+    ALLOWED_IMAGE_EXTENSIONS = {'.png', '.jpg', '.jpeg', '.webp'}
 
     # Razorpay Payment Gateway (Loaded securely from environment variables)
     RAZORPAY_KEY_ID = os.getenv('RAZORPAY_KEY_ID', '')
     RAZORPAY_KEY_SECRET = os.getenv('RAZORPAY_KEY_SECRET', '')
     RAZORPAY_WEBHOOK_SECRET = os.getenv('RAZORPAY_WEBHOOK_SECRET', os.getenv('RAZORPAY_KEY_SECRET', ''))
+
+    @classmethod
+    def validate_config(cls, env_name: Optional[str] = None) -> bool:
+        """
+        Validate configuration for security and completeness based on the target environment.
+        Raises ValueError with clear guidance if a critical setting is missing or insecure.
+        """
+        target_env = (env_name or cls.ENV).lower()
+        if cls.TESTING or target_env == 'testing':
+            return True
+
+        secret = cls.SECRET_KEY or ''
+        if target_env == 'production':
+            if not secret or secret in INSECURE_SECRET_KEYS or len(secret) < 16:
+                raise ValueError(
+                    "CRITICAL SECURITY CONFIGURATION ERROR: Production requires a strong, unique SECRET_KEY. "
+                    "Insecure or placeholder keys are rejected. Generate one via: "
+                    "python -c 'import secrets; print(secrets.token_hex(32))'"
+                )
+            if not cls.DATABASE_URL:
+                raise ValueError(
+                    "CRITICAL CONFIGURATION ERROR: Production requires DATABASE_URL pointing to PostgreSQL."
+                )
+        return True
 
 
 class DevelopmentConfig(Config):
@@ -65,6 +105,8 @@ class DevelopmentConfig(Config):
 
     DEBUG = True
     TESTING = False
+    # Safe development default if SECRET_KEY is not defined locally
+    SECRET_KEY = os.getenv('SECRET_KEY', 'dev-local-secret-key-not-for-production-use')
 
 
 class ProductionConfig(Config):
@@ -80,6 +122,9 @@ class TestingConfig(Config):
 
     DEBUG = True
     TESTING = True
+    WTF_CSRF_ENABLED = False
+    SECRET_KEY = os.getenv('SECRET_KEY', 'test-mock-secret-key-32bytes-secure-pytest')
+    DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///:memory:')
 
 
 # Configuration dictionary

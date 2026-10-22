@@ -1,3 +1,30 @@
+// Global CSRF Token Retrieval Helper
+function getCsrfToken() {
+    return window.CSRF_TOKEN || document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+}
+
+// Automatically attach X-CSRFToken to mutating same-origin fetch requests
+if (typeof window !== 'undefined' && window.fetch) {
+    const _origFetch = window.fetch;
+    window.fetch = function(input, init) {
+        init = init || {};
+        const method = (init.method || 'GET').toUpperCase();
+        if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+            const token = getCsrfToken();
+            if (token) {
+                if (init.headers instanceof Headers) {
+                    if (!init.headers.has('X-CSRFToken')) init.headers.append('X-CSRFToken', token);
+                } else if (Array.isArray(init.headers)) {
+                    init.headers.push(['X-CSRFToken', token]);
+                } else {
+                    init.headers = Object.assign({}, init.headers, { 'X-CSRFToken': token });
+                }
+            }
+        }
+        return _origFetch.call(this, input, init);
+    };
+}
+
 // Check if user is logged in
 function isUserLoggedIn() {
     if (typeof window.IS_USER_LOGGED_IN === 'boolean') {

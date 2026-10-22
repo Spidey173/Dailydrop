@@ -33,7 +33,6 @@ def payment() -> str:
 
 @cart_bp.route('/api/create-order', methods=['POST'], endpoint='api_create_order')
 @cart_bp.route('/api/v1/payment/create-order', methods=['POST'], endpoint='api_create_razorpay_order')
-@csrf.exempt
 def api_create_order() -> Tuple[Any, int]:
     """
     Initialize a Razorpay order.
@@ -148,7 +147,6 @@ def api_create_order() -> Tuple[Any, int]:
 
 @cart_bp.route('/api/verify-payment', methods=['POST'], endpoint='api_verify_payment')
 @cart_bp.route('/api/v1/payment/verify', methods=['POST'], endpoint='api_verify_razorpay_payment')
-@csrf.exempt
 def api_verify_payment() -> Tuple[Any, int]:
     """
     Cryptographically verify Razorpay payment signature and persist order.
@@ -210,6 +208,24 @@ def api_verify_payment() -> Tuple[Any, int]:
     # If storefront order context is present, persist order in database
     products = data.get('products', [])
     user_id = session.get('user_id')
+
+    # Verify against pending_orders to prevent user impersonation and ensure integrity
+    from database import get_pending_order
+    pending = None
+    try:
+        pending = get_pending_order(razorpay_order_id)
+    except Exception as pe:
+        logger.warning(f"Could not load pending order {razorpay_order_id}: {pe}")
+
+    if pending and user_id:
+        pending_user_id = pending.get('user_id')
+        if pending_user_id and str(pending_user_id) != str(user_id):
+            if idempotency_key:
+                IdempotencyService.release(idempotency_key)
+            return jsonify({'success': False, 'message': 'Unauthorized: Payment order does not belong to this user'}), 403
+
+    if not products and pending and pending.get('products_data'):
+        products = pending.get('products_data')
 
     if user_id and products:
         valid, err_msg, subtotal, fee, final_total = PaymentService.calculate_authoritative_total(products)
@@ -392,7 +408,6 @@ def api_razorpay_webhook() -> Tuple[Any, int]:
 
 
 @cart_bp.route('/place_order', methods=['POST'], endpoint='place_order')
-@csrf.exempt
 @require_login
 def place_order() -> Tuple[Any, int]:
     """Process Cash on Delivery (COD) order placement with Idempotency protection."""
@@ -419,12 +434,9 @@ def place_order() -> Tuple[Any, int]:
 
     valid, err_msg, subtotal, fee, final_total = PaymentService.calculate_authoritative_total(products)
     if not valid:
-        try:
-            final_total = float(data.get('total_amount', 0))
-        except (ValueError, TypeError):
-            if idempotency_key:
-                IdempotencyService.release(idempotency_key)
-            return jsonify({'success': False, 'message': err_msg}), 400
+        if idempotency_key:
+            IdempotencyService.release(idempotency_key)
+        return jsonify({'success': False, 'message': err_msg}), 400
 
     success, message, order_id = OrderService.create_order(
         user_id=session['user_id'],
@@ -478,7 +490,6 @@ def wishlist() -> str:
 
 
 @cart_bp.route('/api/v1/wishlist/toggle', methods=['POST'], endpoint='api_toggle_wishlist')
-@csrf.exempt
 @require_login
 def api_toggle_wishlist() -> Tuple[Any, int]:
     """Toggle item in wishlist via AJAX."""
@@ -503,7 +514,6 @@ def api_toggle_wishlist() -> Tuple[Any, int]:
 
 
 @cart_bp.route('/api/v1/wishlist/remove', methods=['POST'], endpoint='api_remove_wishlist')
-@csrf.exempt
 @require_login
 def api_remove_wishlist() -> Tuple[Any, int]:
     """Remove item from wishlist via AJAX."""

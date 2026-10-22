@@ -32,7 +32,11 @@ def create_app(config_name: Optional[str] = None) -> Flask:
     app = Flask(__name__)
 
     env = config_name or os.getenv('FLASK_ENV', 'development')
-    app.config.from_object(config_dict.get(env, config_dict['default']))
+    config_cls = config_dict.get(env, config_dict['default'])
+    app.config.from_object(config_cls)
+
+    # Validate configuration (fails fast in production if required secrets/configs are missing)
+    config_cls.validate_config(env)
 
     # Initialize extensions
     csrf.init_app(app)
@@ -72,6 +76,8 @@ def create_app(config_name: Optional[str] = None) -> Flask:
     def handle_csrf_error(error):
         """Handle CSRF expiration without crashing with raw 400 Bad Request."""
         logger.warning(f"CSRF error handled: {error.description}")
+        if request.is_json or request.path.startswith('/api/'):
+            return {"success": False, "error": "CSRF validation failed. Please refresh the page and try again."}, 400
         flash("Your form session expired. Please try logging in again.", "error")
         return redirect(request.referrer or url_for('auth.login'))
 
@@ -83,12 +89,18 @@ def create_app(config_name: Optional[str] = None) -> Flask:
         return redirect(request.referrer or url_for('auth.login'))
 
     @app.after_request
-    def set_auth_cookie(response):
-        """Synchronize client-side cookie with session state for frontend cart."""
+    def set_security_headers_and_auth_cookie(response):
+        """Synchronize client-side cookie with session state and apply defensive security headers."""
         if 'user_id' in session:
             response.set_cookie('is_logged_in', 'true', samesite='Lax', path='/')
         else:
             response.set_cookie('is_logged_in', 'false', samesite='Lax', path='/')
+
+        # Defensive HTTP Security Headers
+        response.headers['X-Content-Type-Options'] = 'nosniff'
+        response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+        response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+        response.headers['X-XSS-Protection'] = '1; mode=block'
         return response
 
     @app.context_processor

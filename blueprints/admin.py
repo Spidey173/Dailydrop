@@ -43,7 +43,6 @@ def admin_dashboard():
 
 
 @admin_bp.route('/api/v1/admin/messages/<int:message_id>/delete', methods=['POST', 'DELETE'], endpoint='api_delete_message')
-@csrf.exempt
 @admin_required
 def api_delete_message(message_id: int):
     """API endpoint to delete or dismiss a customer contact message."""
@@ -102,7 +101,6 @@ def admin_inquiries():
 
 
 @admin_bp.route('/api/v1/admin/orders/<int:order_id>/status', methods=['POST', 'PATCH'], endpoint='api_update_order_status')
-@csrf.exempt
 @admin_required
 def api_update_order_status(order_id: int):
     """API to update a customer order delivery status."""
@@ -123,7 +121,6 @@ def api_update_order_status(order_id: int):
 
 
 @admin_bp.route('/api/v1/admin/products/<int:product_id>/price', methods=['POST', 'PATCH'], endpoint='api_update_product_price')
-@csrf.exempt
 @admin_required
 def api_update_product_price(product_id: int):
     """API to update a product price dynamically via inline AJAX."""
@@ -145,7 +142,6 @@ def api_update_product_price(product_id: int):
 
 
 @admin_bp.route('/api/v1/admin/products/<int:product_id>/stock', methods=['POST', 'PATCH'], endpoint='api_update_product_stock')
-@csrf.exempt
 @admin_required
 def api_update_product_stock(product_id: int):
     """API to update product stock quantity via inline AJAX."""
@@ -167,7 +163,6 @@ def api_update_product_stock(product_id: int):
 
 
 @admin_bp.route('/api/v1/admin/products/add', methods=['POST'], endpoint='api_add_product')
-@csrf.exempt
 @admin_required
 def api_add_product():
     """API to create a new product in the catalog with image upload support."""
@@ -183,16 +178,27 @@ def api_add_product():
             file = request.files['image_file']
             if file and file.filename:
                 raw_filename = file.filename
-                ext = os.path.splitext(raw_filename)[1].lower() or '.png'
+                ext = os.path.splitext(raw_filename)[1].lower()
+                allowed_exts = current_app.config.get('ALLOWED_IMAGE_EXTENSIONS', {'.png', '.jpg', '.jpeg', '.webp'})
+                if ext not in allowed_exts:
+                    return jsonify({
+                        'success': False,
+                        'error': f"Invalid image format '{ext}'. Allowed formats: {', '.join(sorted(allowed_exts))}"
+                    }), 400
+
                 clean_base = secure_filename(os.path.splitext(raw_filename)[0]) or 'uploaded_image'
                 timestamp = int(datetime.now().timestamp())
                 filename = f"{timestamp}_{clean_base}{ext}"
 
-                uploads_dir = os.path.join(current_app.static_folder, 'uploads')
-                os.makedirs(uploads_dir, exist_ok=True)
-                save_path = os.path.join(uploads_dir, filename)
-                file.save(save_path)
-                image_path = f'/static/uploads/{filename}'
+                uploads_dir = os.path.join(current_app.static_folder or 'static', 'uploads')
+                try:
+                    os.makedirs(uploads_dir, exist_ok=True)
+                    save_path = os.path.join(uploads_dir, filename)
+                    file.save(save_path)
+                    image_path = f'/static/uploads/{filename}'
+                except (OSError, IOError) as upload_err:
+                    logger.warning(f"Could not persist upload locally: {upload_err}. Falling back to default image.")
+                    image_path = '/static/logo.webp'
 
         if not image_path:
             image_path = '/static/logo.webp'
@@ -217,7 +223,6 @@ def api_add_product():
 
 
 @admin_bp.route('/api/v1/admin/products/<int:product_id>/delete', methods=['POST', 'DELETE'], endpoint='api_delete_product')
-@csrf.exempt
 @admin_required
 def api_delete_product(product_id: int):
     """API to delete a product by ID."""

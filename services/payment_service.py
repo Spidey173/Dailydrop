@@ -28,7 +28,8 @@ class PaymentService:
     def calculate_authoritative_total(cls, products: List[Dict[str, Any]]) -> Tuple[bool, str, float, float, float]:
         """
         Authoritatively calculates subtotal, delivery fee, and final payable amount
-        to prevent client-side price tampering.
+        to prevent client-side price tampering. Resolves authoritative prices from catalog
+        when product IDs are present.
 
         Returns:
             Tuple of (success, message, subtotal, delivery_fee, final_total)
@@ -39,7 +40,25 @@ class PaymentService:
         subtotal = 0.0
         for item in products:
             try:
-                price = float(item.get('price', 0))
+                prod_id = item.get('id') or item.get('product_id')
+                authoritative_price = None
+
+                # Query authoritative price from catalog database if product_id is provided
+                if prod_id:
+                    try:
+                        from services.product_service import ProductService
+                        prod = ProductService.get_product(int(prod_id))
+                        if prod and 'price' in prod:
+                            authoritative_price = float(prod['price'])
+                    except Exception as pe:
+                        logger.warning(f"Could not resolve DB price for product ID {prod_id}: {pe}")
+
+                if authoritative_price is not None:
+                    price = authoritative_price
+                    item['price'] = authoritative_price  # enforce DB price on item dict
+                else:
+                    price = float(item.get('price', 0))
+
                 quantity = int(item.get('quantity', 1))
                 if price <= 0 or quantity <= 0:
                     return False, f"Invalid price or quantity for item: {item.get('name', 'product')}", 0.0, 0.0, 0.0

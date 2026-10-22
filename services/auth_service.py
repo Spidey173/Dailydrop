@@ -28,7 +28,8 @@ class AuthService:
         if not is_valid:
             return False, error_msg, None
 
-        if 'admin' in email.lower():
+        email_user = email.lower().split('@')[0] if '@' in email else email.lower()
+        if email_user == 'admin' or email_user.startswith('admin') or email_user.endswith('admin') or '_admin' in email_user or '.admin' in email_user or '-admin' in email_user:
             return False, 'Admin accounts cannot be created via signup. Please log in directly.', None
 
         if get_user_by_email(email):

@@ -83,7 +83,10 @@ async function toggleWishlist(productId, evtOrEl) {
   try {
     const response = await fetch('/api/v1/wishlist/toggle', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': typeof getCsrfToken === 'function' ? getCsrfToken() : (window.CSRF_TOKEN || '')
+      },
       body: JSON.stringify({ product_id: pid })
     });
 
@@ -130,7 +133,10 @@ async function removeFromWishlistPage(productId, buttonEl) {
   try {
     const res = await fetch('/api/v1/wishlist/remove', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': typeof getCsrfToken === 'function' ? getCsrfToken() : (window.CSRF_TOKEN || '')
+      },
       body: JSON.stringify({ product_id: pid })
     });
     const data = await res.json();

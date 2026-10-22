@@ -33,12 +33,8 @@ def signup() -> str:
 
 
 def _clear_auth_session() -> None:
-    """Clear user session variables and stale flash messages while preserving CSRF protection token."""
-    session.pop('user_id', None)
-    session.pop('name', None)
-    session.pop('email', None)
-    session.pop('user_role', None)
-    session.pop('_flashes', None)
+    """Clear user session completely to eliminate session fixation vulnerabilities."""
+    session.clear()
 
 
 @auth_bp.route('/login', methods=['GET', 'POST'], endpoint='login')
@@ -70,7 +66,6 @@ def login():
                 return jsonify({
                     'success': False,
                     'message': message,
-                    'is_admin': bool(user and user.get('role') == 'admin'),
                     'redirect_url': url_for('auth.admin_login') if (user and user.get('role') == 'admin') else None
                 }), 400
             flash(message, 'error')

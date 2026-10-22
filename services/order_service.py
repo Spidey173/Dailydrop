@@ -85,20 +85,22 @@ class OrderService:
                         pid = item.get('product_id') or item.get('id')
                         prod_row = None
                         if pid is not None:
-                            cursor.execute("SELECT product_id, name, stock FROM products WHERE product_id = %s", (pid,))
+                            cursor.execute("SELECT product_id, name, stock, price FROM products WHERE product_id = %s", (pid,))
                             prod_row = cursor.fetchone()
                         if not prod_row and name:
-                            cursor.execute("SELECT product_id, name, stock FROM products WHERE LOWER(name) = LOWER(%s)", (name,))
+                            cursor.execute("SELECT product_id, name, stock, price FROM products WHERE LOWER(name) = LOWER(%s)", (name,))
                             prod_row = cursor.fetchone()
 
                         if prod_row:
                             r_pid = prod_row['product_id'] if isinstance(prod_row, dict) else prod_row[0]
                             r_name = prod_row['name'] if isinstance(prod_row, dict) else prod_row[1]
+                            r_price = float(prod_row['price'] if isinstance(prod_row, dict) else prod_row[3])
+                            subtotal = round(r_price * qty, 2)
                             item_quantities[r_pid] += qty
                             resolved_items.append({
                                 'product_id': r_pid,
                                 'name': r_name,
-                                'price': price,
+                                'price': r_price,
                                 'quantity': qty,
                                 'image': img,
                                 'subtotal': subtotal
@@ -340,6 +342,17 @@ class OrderService:
             return False, f"Invalid status '{status}'. Must be one of: {', '.join(valid_statuses)}"
 
         try:
+            with get_db_connection() as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute("SELECT status FROM orders WHERE order_id = %s", (order_id,))
+                    row = cursor.fetchone()
+                    if not row:
+                        return False, f"Order #{order_id} not found"
+                    curr_status = row['status'] if isinstance(row, dict) else row[0]
+                    # Disallow altering final terminal states (Delivered, Cancelled)
+                    if curr_status in ['Delivered', 'Cancelled'] and status != curr_status:
+                        return False, f"Cannot change status of a {curr_status} order to {status}."
+
             success = db_update_order_status(order_id, status)
             if success:
                 clear_analytics_cache()

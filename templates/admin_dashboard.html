@@ -9,6 +9,28 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script>
+        window.CSRF_TOKEN = "{{ csrf_token() }}";
+        if (typeof window !== 'undefined' && window.fetch) {
+            const _origFetch = window.fetch;
+            window.fetch = function(url, options) {
+                options = options || {};
+                const method = (options.method || 'GET').toUpperCase();
+                if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+                    options.headers = options.headers || {};
+                    if (options.headers instanceof Headers) {
+                        if (!options.headers.has('X-CSRFToken')) options.headers.append('X-CSRFToken', window.CSRF_TOKEN);
+                    } else if (Array.isArray(options.headers)) {
+                        options.headers.push(['X-CSRFToken', window.CSRF_TOKEN]);
+                    } else {
+                        options.headers['X-CSRFToken'] = window.CSRF_TOKEN;
+                    }
+                }
+                return _origFetch.call(this, url, options);
+            };
+        }
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>

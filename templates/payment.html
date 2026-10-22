@@ -7,6 +7,8 @@
   
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo1.webp') }}">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <script>window.CSRF_TOKEN = "{{ csrf_token() }}";</script>
 
   <!-- Bootstrap, FontAwesome & Google Fonts -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
@@ -588,12 +590,12 @@
                 confirmBtn.disabled = true;
                 confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Initializing Payment Gateway...';
 
-                // 1. Initialize Razorpay order on server with authoritative pricing and Idempotency key
                 const orderInitResp = await fetch('/api/create-order', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Idempotency-Key': checkoutIdempotencyKey
+                        'Idempotency-Key': checkoutIdempotencyKey,
+                        'X-CSRFToken': '{{ csrf_token() }}'
                     },
                     body: JSON.stringify({
                         full_name: fullName,
@@ -638,7 +640,8 @@
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
-                                    'Idempotency-Key': checkoutIdempotencyKey
+                                    'Idempotency-Key': checkoutIdempotencyKey,
+                                    'X-CSRFToken': '{{ csrf_token() }}'
                                 },
                                 body: JSON.stringify({
                                     razorpay_order_id: response.razorpay_order_id,
@@ -700,7 +703,8 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Idempotency-Key': checkoutIdempotencyKey
+                        'Idempotency-Key': checkoutIdempotencyKey,
+                        'X-CSRFToken': '{{ csrf_token() }}'
                     },
                     body: JSON.stringify({
                         full_name: fullName,

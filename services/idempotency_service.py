@@ -63,6 +63,15 @@ class IdempotencyService:
                 except Exception:
                     payload = {"status": existing}
 
+                cached_user_id = payload.get("user_id")
+                if user_id and cached_user_id and str(cached_user_id) != str(user_id):
+                    logger.warning(f"Cross-user idempotency collision blocked: key={key}, caller={user_id}, owner={cached_user_id}")
+                    return False, {
+                        "success": False,
+                        "error": "Conflict",
+                        "message": "Idempotency key belongs to another user session."
+                    }, 409
+
                 status = payload.get("status")
                 if status == "PROCESSING":
                     logger.warning(f"Concurrent idempotent request blocked for key: {key}")
@@ -95,7 +104,7 @@ class IdempotencyService:
             return True, None, None
 
     @classmethod
-    def complete(cls, key: str, response_payload: Dict[str, Any], status_code: int = 200, ttl: Optional[int] = None) -> None:
+    def complete(cls, key: str, response_payload: Dict[str, Any], status_code: int = 200, ttl: Optional[int] = None, user_id: Optional[Any] = None) -> None:
         """Cache the successful response under the idempotency key."""
         client = RedisService.get_client()
         if not client or not key:
@@ -106,8 +115,18 @@ class IdempotencyService:
             ttl = getattr(Config, 'IDEMPOTENCY_TTL', cls.DEFAULT_COMPLETED_TTL)
 
         try:
+            existing_user_id = str(user_id) if user_id else None
+            if not existing_user_id:
+                try:
+                    raw_existing = client.get(redis_key)
+                    if raw_existing:
+                        existing_user_id = json.loads(raw_existing).get('user_id')
+                except Exception:
+                    pass
+
             data = json.dumps({
                 "status": "COMPLETED",
+                "user_id": existing_user_id,
                 "response": response_payload,
                 "status_code": status_code
             }, default=str)

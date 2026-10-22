@@ -165,3 +165,11 @@ product_users.db
 # Vercel
 .vercel
 .vercel/
+
+# Runtime Logs
+*.log
+
+# Dynamic File Uploads
+uploads/
+static/uploads/
+!static/uploads/.gitkeep
