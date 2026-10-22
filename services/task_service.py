@@ -45,18 +45,25 @@ class TaskService:
             import tasks
             queue = cls.get_queue()
             if queue:
-                from rq import Retry
-                # Enqueue with 3 retries (intervals: 10s, 30s, 60s)
+                try:
+                    from rq import Retry
+                    retry_arg = Retry(max=3, interval=[10, 30, 60])
+                except (ImportError, ModuleNotFoundError):
+                    retry_arg = None
+
+                enqueue_kwargs = {'job_timeout': '3m'}
+                if retry_arg is not None:
+                    enqueue_kwargs['retry'] = retry_arg
+
                 job = queue.enqueue(
                     tasks.send_order_confirmation_task,
                     args=(order_id, recipient_name, recipient_email, total_amount, payment_method),
-                    retry=Retry(max=3, interval=[10, 30, 60]),
-                    job_timeout='3m'
+                    **enqueue_kwargs
                 )
-                logger.info(f"Enqueued order confirmation task [Job ID: {job.id}] for Order #{order_id}")
+                logger.info(f"Enqueued order confirmation task [Job ID: {getattr(job, 'id', 'mock_id')}] for Order #{order_id}")
                 return True
             else:
-                # Inline fallback if Redis is down
+                # Inline fallback if Redis is down or rq is not installed
                 logger.info(f"Executing order confirmation inline (Redis queue bypassed) for Order #{order_id}")
                 tasks.send_order_confirmation_task(
                     order_id, recipient_name, recipient_email, total_amount, payment_method

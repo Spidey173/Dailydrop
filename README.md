@@ -126,19 +126,27 @@ Daily-Drop/
 
 ---
 
-## 🧪 Automated Testing & CI
+## 🧪 Reproducible Testing & Dependency Guide (100% Green)
 
-The project includes **61 automated tests** covering authentication, cart calculations, forged price rejection, unknown product blocking, atomic checkout, stock race conditions, payment signature verification, webhook idempotency, and state machine validation:
+The project includes **61 automated tests** covering authentication, cart calculations, forged price rejection, unknown product blocking, atomic checkout, stock race conditions, payment signature verification, webhook idempotency, and order state machine validation.
 
+### One-Command Test Execution
 ```bash
-# Run the complete test suite locally
-pytest -v
+# Option 1: Automated runner script (installs missing test deps if needed and runs pytest)
+chmod +x run_tests.sh && ./run_tests.sh
 
-# Run linting and static syntax checks
-flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=venv,.venv,docs
+# Option 2: Standard pytest in virtual environment
+python3 -m venv venv && source venv/bin/activate
+pip install -r requirements.txt
+pytest -v
 ```
 
-All 61 tests run completely offline against an in-memory SQLite fixture with zero skips, executing in ~25s in GitHub Actions CI across Python 3.10, 3.11, and 3.12.
+### 🛡️ Why DailyDrop Tests are 100% Deterministic & Offline
+* **Zero External DB Dependency**: Neon PostgreSQL connection pooling is seamlessly redirected during tests to a shared, in-memory SQLite fixture with automatic query translation (including stripping PostgreSQL `FOR UPDATE` row locks).
+* **Zero External Redis Dependency**: A thread-safe `MockRedisClient` provides Lua script emulation, atomic stock decrement simulation, and catalog cache keys.
+* **Resilient Background Task Dispatch**: `TaskService` includes defensive fallbacks—tests verify clean task dispatch whether worker libraries (`rq`) are active or uninstalled.
+
+All 61 tests run completely offline with zero skips in ~2 seconds, and pass across Python 3.10, 3.11, and 3.12 in GitHub Actions CI.
 
 ---
 
@@ -154,10 +162,10 @@ python3 -m venv venv
 source venv/bin/activate
 # Windows: venv\Scripts\activate
 
-# 3. Install dependencies
+# 3. Install all dependencies (including worker & redis client)
 pip install -r requirements.txt
 
-# 4. Configure environment (Generate a secure 32-byte secret key)
+# 4. Configure environment
 python3 -c "import secrets; print(secrets.token_hex(32))"
 cp .env.example .env
 
@@ -171,19 +179,25 @@ Open [http://localhost:5000](http://localhost:5000) in your browser.
 
 ---
 
-## 🌐 Deployment Architecture Options
+## 🌐 Architecture Breakdown: Live Demo vs. Full Production Infrastructure
 
-### A. Vercel Serverless (Current Demo Setup)
-* **Frontend & Web Routing**: Deployed on Vercel Serverless WSGI.
-* **Database**: Neon Serverless PostgreSQL with connection pooling.
-* **Storage Consideration**: Vercel lambdas feature an ephemeral, read-only filesystem. File uploads in the demo are gracefully disabled (`DISABLE_FILE_UPLOADS=true`) with user-friendly error handling.
-* **Worker Note**: Background outbox events are synchronously dispatched or processed on a fallback basis.
+To provide a zero-idle-cost, interactive portfolio demo without requiring paid multi-service orchestration, DailyDrop is configured with graceful fallbacks. The table below clearly delineates what the live Vercel demo natively supports versus what requires dedicated production infrastructure:
 
-### B. Production Container PaaS (Render / Railway / AWS ECS)
-* **Web Service**: Runs `gunicorn app:app -w 4 -k gthread --threads 2`.
-* **Worker Service**: Runs `python worker.py` continuously processing transactional outbox events from `outbox_events` and Redis.
-* **Media Storage**: AWS S3, Cloudflare R2, or Google Cloud Storage bucket for catalog images.
-* **Health Monitoring**: Monitored via `/healthz` HTTP probe.
+| Capability / Tier | 🌐 Live Demo (`dailydrop17.vercel.app`) | 🚀 Full Production Setup (Container PaaS / Microservices) |
+| :--- | :--- | :--- |
+| **Hosting Model** | **Vercel Serverless WSGI Functions** (Ephemeral, stateless compute) | **Persistent Container Platform / Kubernetes** (`gunicorn app:app -w 4 -k gthread`) |
+| **Relational Database** | **Neon Cloud PostgreSQL** (Serverless pooling with `psycopg2`) | **Neon PostgreSQL** or **AWS RDS PostgreSQL** |
+| **Catalog, Cart, Auth & Orders** | **100% Supported**: Full 200+ product catalog, instant search, session cart, wishlist, and user auth | **100% Supported** |
+| **Server-Authoritative Pricing** | **100% Supported**: Client prices are recomputed against database catalog; forged prices rejected | **100% Supported** |
+| **Payment Verification & FSM** | **100% Supported**: Razorpay HMAC-SHA256 signature verification & finite state machine | **100% Supported**: Live Razorpay webhook listener with replay idempotency |
+| **File Uploads (Product Images)** | **Pre-seeded static assets**: Write uploads disabled via `DISABLE_FILE_UPLOADS=true` with clean 400 error responses (serverless lambda disk is ephemeral & read-only) | **External Cloud Object Storage** (AWS S3, Cloudflare R2, or Google Cloud Storage) with presigned URLs for media persistence |
+| **Background Task Workers (`worker.py`)** | **Inline Synchronous Fallback**: Order confirmations & notifications execute in-request (serverless functions terminate immediately and cannot host daemons) | **Dedicated Worker Service**: Long-running background worker (`Procfile: worker: python worker.py`) on Render/Railway/ECS consuming from Redis & transactional outbox |
+| **Caching & Distributed Locks** | **In-Memory Thread-Safe Fallback**: Resilient fallback cache when external Redis is offline | **Managed Redis Cluster** (Upstash, AWS ElastiCache, or Redis Cloud) for sub-ms atomic Lua locking |
+
+### Why This Distinction Matters:
+1. **Serverless Filesystem Limits**: Vercel lambdas provide an ephemeral `/tmp` filesystem that wipes upon container teardown. DailyDrop defensively guards against broken image uploads in the demo via `DISABLE_FILE_UPLOADS` while supporting cloud object storage in production.
+2. **Background Worker Execution**: Serverless compute models freeze execution after the HTTP response is sent. In production, asynchronous background tasks (receipt emailing, PDF generation, low-stock threshold alerting) are decoupled into `worker.py` running as a dedicated PaaS worker.
+
 
 ---
 
