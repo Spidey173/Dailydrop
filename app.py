@@ -127,7 +127,11 @@ def create_app(config_name: Optional[str] = None) -> Flask:
 
 
 # Default app instance for WSGI / CLI execution
-app = create_app()
+try:
+    app = create_app()
+except Exception as _app_err:
+    logger.warning(f"Default app initialization deferred: {_app_err}")
+    app = None
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', os.environ.get('FLASK_RUN_PORT', 5000)))
