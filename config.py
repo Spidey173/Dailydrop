@@ -6,6 +6,7 @@ application, including database paths, Flask settings, and security parameters.
 """
 
 import os
+from typing import Optional
 from datetime import timedelta
 from dotenv import load_dotenv
 

@@ -12,11 +12,11 @@ Verifies:
 import io
 import pytest
 from app import create_app
-from config import Config, ProductionConfig, INSECURE_SECRET_KEYS
+from config import ProductionConfig
 from services.payment_service import PaymentService
 from services.order_service import OrderService
 from services.idempotency_service import IdempotencyService
-from database import get_db_connection, clear_user_cache
+from database import get_db_connection
 
 
 @pytest.fixture
