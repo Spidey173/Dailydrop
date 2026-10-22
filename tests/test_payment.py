@@ -95,6 +95,10 @@ def test_api_verify_payment_validation():
 
     with app.test_client() as client:
         # 1. Missing fields should return 400
+        with client.session_transaction() as sess:
+            sess['user_id'] = 1
+            sess['name'] = 'Payment Tester'
+
         resp = client.post('/api/verify-payment', json={'razorpay_order_id': 'order_123'})
         assert resp.status_code == 400
         assert 'Missing' in resp.get_json().get('message', '')
@@ -108,14 +112,42 @@ def test_api_verify_payment_validation():
         assert resp.status_code == 400
         assert 'Invalid' in resp.get_json().get('message', '')
 
-        # 3. Valid HMAC-SHA256 signature should return 200
-        order_id = 'order_abc123'
-        pay_id = 'pay_xyz789'
+        # 3. Missing pending order should return 400
+        missing_order_id = 'order_nonexistent_999'
+        missing_pay_id = 'pay_nonexistent_999'
+        missing_sig = hmac.new(
+            key_secret.encode('utf-8'),
+            f"{missing_order_id}|{missing_pay_id}".encode('utf-8'),
+            hashlib.sha256
+        ).hexdigest()
+
+        resp_missing = client.post('/api/verify-payment', json={
+            'razorpay_order_id': missing_order_id,
+            'razorpay_payment_id': missing_pay_id,
+            'razorpay_signature': missing_sig
+        })
+        assert resp_missing.status_code == 400
+        assert 'Missing pending order' in (resp_missing.get_json().get('error', '') or resp_missing.get_json().get('message', ''))
+
+        # 4. Valid signature with real pending order owned by user should return 200
+        order_id = 'order_valid_fresh_101'
+        pay_id = 'pay_valid_fresh_101'
         valid_sig = hmac.new(
             key_secret.encode('utf-8'),
             f"{order_id}|{pay_id}".encode('utf-8'),
             hashlib.sha256
         ).hexdigest()
+
+        from database import save_pending_order
+        save_pending_order(
+            razorpay_order_id=order_id,
+            user_id=1,
+            full_name='Payment Tester',
+            phone_number='9876543210',
+            address='123 Test St',
+            products=[{"name": "Tea", "price": 50.0, "quantity": 1}],
+            total_amount=50.0
+        )
 
         resp = client.post('/api/verify-payment', json={
             'razorpay_order_id': order_id,
@@ -124,6 +156,8 @@ def test_api_verify_payment_validation():
         })
         assert resp.status_code == 200
         assert resp.get_json().get('success') is True
+
+
 
 
 def test_razorpay_webhook_signature_and_idempotency():

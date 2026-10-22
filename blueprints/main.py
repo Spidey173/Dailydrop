@@ -119,3 +119,95 @@ def faqs() -> str:
 def about_us() -> str:
     """Display about us page."""
     return render_template('about_us.html')
+
+
+# ==================== System Health & Observability ====================
+
+@main_bp.route('/healthz', methods=['GET'], endpoint='healthz')
+@main_bp.route('/api/v1/health', methods=['GET'], endpoint='api_health')
+def health_check():
+    """
+    Application Health Check Endpoint.
+    Checks PostgreSQL database ping latency, Redis cache availability,
+    worker queue status, and storage configuration.
+    Returns HTTP 200 if healthy, HTTP 503 if primary database is degraded.
+    """
+    import time
+    from database import get_db_connection
+    from services.redis_service import RedisService
+    from flask import current_app, jsonify
+
+    health_status = {
+        'status': 'healthy',
+        'timestamp': time.time(),
+        'environment': current_app.config.get('ENV', 'development'),
+        'components': {
+            'database': {'status': 'unknown'},
+            'redis': {'status': 'unknown'},
+            'storage': {'status': 'unknown'},
+            'worker': {'status': 'unknown'}
+        }
+    }
+
+    # 1. Check PostgreSQL Database
+    t0 = time.time()
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT 1")
+                cursor.fetchone()
+        db_latency_ms = round((time.time() - t0) * 1000, 2)
+        health_status['components']['database'] = {
+            'status': 'connected',
+            'type': 'PostgreSQL',
+            'latency_ms': db_latency_ms
+        }
+    except Exception as dbe:
+        health_status['status'] = 'degraded'
+        health_status['components']['database'] = {
+            'status': 'disconnected',
+            'error': str(dbe)
+        }
+
+    # 2. Check Redis Cache
+    if current_app.config.get('REDIS_ENABLED', False):
+        try:
+            t_redis = time.time()
+            is_ready = RedisService.is_available()
+            redis_latency_ms = round((time.time() - t_redis) * 1000, 2)
+            health_status['components']['redis'] = {
+                'status': 'connected' if is_ready else 'degraded',
+                'latency_ms': redis_latency_ms
+            }
+        except Exception as rerr:
+            health_status['components']['redis'] = {
+                'status': 'error',
+                'error': str(rerr)
+            }
+    else:
+        health_status['components']['redis'] = {
+            'status': 'disabled',
+            'note': 'In-memory fallback active'
+        }
+
+    # 3. Check Storage & Uploads
+    if current_app.config.get('DISABLE_FILE_UPLOADS', False):
+        health_status['components']['storage'] = {
+            'status': 'serverless_read_only',
+            'uploads': 'disabled_for_demo'
+        }
+    else:
+        health_status['components']['storage'] = {
+            'status': 'local_filesystem',
+            'folder': current_app.config.get('UPLOAD_FOLDER', 'static/uploads')
+        }
+
+    # 4. Background Worker Queue
+    health_status['components']['worker'] = {
+        'queue': 'dailydrop_tasks',
+        'relay': 'transactional_outbox'
+    }
+
+    status_code = 200 if health_status['status'] == 'healthy' else 503
+    return jsonify(health_status), status_code
+

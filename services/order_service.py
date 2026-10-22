@@ -66,62 +66,71 @@ class OrderService:
         try:
             with get_db_connection() as conn:
                 with conn.cursor() as cursor:
-                    # 1. Inspect cart items and resolve catalog products
+                    # 1. Inspect cart items and strictly resolve against real catalog products
                     resolved_items = []
                     item_quantities = defaultdict(int)
 
                     for item in items_list:
                         if not isinstance(item, dict):
-                            continue
+                            return False, 'Invalid cart item structure', None
                         qty = int(item.get('quantity', 1))
                         if qty <= 0:
                             return False, 'Product quantity must be at least 1', None
 
-                        price = float(item.get('price', 0))
-                        name = item.get('name', 'Product')
+                        name = item.get('name', '')
                         img = item.get('image') or item.get('image_path') or '/static/logo1.webp'
-                        subtotal = round(price * qty, 2)
-
                         pid = item.get('product_id') or item.get('id')
+
                         prod_row = None
                         if pid is not None:
-                            cursor.execute("SELECT product_id, name, stock, price FROM products WHERE product_id = %s", (pid,))
-                            prod_row = cursor.fetchone()
+                            try:
+                                cursor.execute("SELECT product_id, name, stock, price, image_path FROM products WHERE product_id = %s", (int(pid),))
+                                prod_row = cursor.fetchone()
+                            except (ValueError, TypeError):
+                                prod_row = None
+
                         if not prod_row and name:
-                            cursor.execute("SELECT product_id, name, stock, price FROM products WHERE LOWER(name) = LOWER(%s)", (name,))
+                            cursor.execute("SELECT product_id, name, stock, price, image_path FROM products WHERE LOWER(name) = LOWER(%s)", (name.strip(),))
                             prod_row = cursor.fetchone()
 
-                        if prod_row:
-                            r_pid = prod_row['product_id'] if isinstance(prod_row, dict) else prod_row[0]
-                            r_name = prod_row['name'] if isinstance(prod_row, dict) else prod_row[1]
-                            r_price = float(prod_row['price'] if isinstance(prod_row, dict) else prod_row[3])
-                            subtotal = round(r_price * qty, 2)
-                            item_quantities[r_pid] += qty
-                            resolved_items.append({
-                                'product_id': r_pid,
-                                'name': r_name,
-                                'price': r_price,
-                                'quantity': qty,
-                                'image': img,
-                                'subtotal': subtotal
-                            })
-                        else:
-                            # Not a catalog product (e.g., ad-hoc test item)
-                            resolved_items.append({
-                                'product_id': None,
-                                'name': name,
-                                'price': price,
-                                'quantity': qty,
-                                'image': img,
-                                'subtotal': subtotal
-                            })
+                        if not prod_row and name:
+                            cursor.execute("SELECT product_id, name, stock, price, image_path FROM products WHERE name ILIKE %s ORDER BY LENGTH(name) ASC LIMIT 1", (f"%{name.strip()}%",))
+                            prod_row = cursor.fetchone()
+
+                        if not prod_row:
+                            conn.rollback()
+                            identifier = name or (f"ID #{pid}" if pid else "item")
+                            logger.warning(f"Rejected checkout: Product '{identifier}' not found in catalog database.")
+                            return False, f"Product '{identifier}' not found in catalog", None
+
+                        r_pid = prod_row['product_id'] if isinstance(prod_row, dict) else prod_row[0]
+                        r_name = prod_row['name'] if isinstance(prod_row, dict) else prod_row[1]
+                        raw_price = prod_row.get('price') if isinstance(prod_row, dict) else prod_row[3]
+                        r_price = float(raw_price if raw_price is not None else item.get('price', 0.0))
+                        r_img = (prod_row['image_path'] if isinstance(prod_row, dict) else prod_row[4]) or img
+
+                        subtotal = round(r_price * qty, 2)
+                        item_quantities[r_pid] += qty
+                        resolved_items.append({
+                            'product_id': r_pid,
+                            'name': r_name,
+                            'price': r_price,
+                            'quantity': qty,
+                            'image': r_img,
+                            'subtotal': subtotal
+                        })
+
+                    # Recalculate authoritative order totals from database
+                    computed_subtotal = round(sum(i['subtotal'] for i in resolved_items), 2)
+                    computed_fee = 0.0 if computed_subtotal >= 500.0 else 30.0
+                    authoritative_total = round(computed_subtotal + computed_fee, 2)
+                    products_json = json.dumps(resolved_items)
 
                     # 2. Flash-Sale Concurrency Protection: Distributed Redis Lua Script (< 1ms)
                     # Atomically check & decrement in Redis memory before executing heavy DB row writes.
                     from services.redis_service import RedisService
                     redis_decrements = {}
                     for r_pid, required_qty in item_quantities.items():
-                        # Fetch fallback stock if key not pre-warmed in Redis
                         cursor.execute("SELECT name, stock FROM products WHERE product_id = %s", (r_pid,))
                         p_info = cursor.fetchone()
                         avail_stock = (p_info['stock'] if isinstance(p_info, dict) else p_info[1]) if p_info else None
@@ -160,20 +169,20 @@ class OrderService:
                             logger.warning(f"Overselling prevented: Insufficient stock for '{p_name}' (requested {required_qty}, available {avail_stock})")
                             return False, f"Insufficient stock for '{p_name}'. Only {avail_stock} units left in stock.", None
 
-                    # 4. Insert order record
+                    # 4. Insert order record using authoritative total and resolved products
                     try:
                         cursor.execute('''
                             INSERT INTO orders (user_id, full_name, phone_number, address, products_ordered, total_amount, status, payment_method, payment_id)
                             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
                             RETURNING order_id
-                        ''', (user_id, full_name, phone_number, address, products_json, total_amount, status, payment_method, payment_id))
+                        ''', (user_id, full_name, phone_number, address, products_json, authoritative_total, status, payment_method, payment_id))
                     except Exception:
                         conn.rollback()
                         cursor.execute('''
                             INSERT INTO orders (user_id, full_name, phone_number, address, products_ordered, total_amount, status)
                             VALUES (%s, %s, %s, %s, %s, %s, %s)
                             RETURNING order_id
-                        ''', (user_id, full_name, phone_number, address, products_json, total_amount, status))
+                        ''', (user_id, full_name, phone_number, address, products_json, authoritative_total, status))
 
                     order_row = cursor.fetchone()
                     order_id = order_row['order_id'] if isinstance(order_row, dict) else order_row[0]
@@ -183,6 +192,7 @@ class OrderService:
                         cursor.execute('''
                             INSERT INTO order_items (order_id, product_id, product_name, price, quantity, image_path, subtotal)
                             VALUES (%s, %s, %s, %s, %s, %s, %s)
+
                         ''', (
                             order_id,
                             r_item['product_id'],
@@ -334,12 +344,26 @@ class OrderService:
             logger.error(f"Error fetching all orders: {e}")
             return []
 
-    @staticmethod
-    def update_status(order_id: int, status: str) -> Tuple[bool, str]:
-        """Update status of an order."""
-        valid_statuses = ['Processing', 'Packed', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled']
-        if status not in valid_statuses:
-            return False, f"Invalid status '{status}'. Must be one of: {', '.join(valid_statuses)}"
+    VALID_ORDER_STATUSES = ['Paid', 'Processing', 'Packed', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled']
+
+    VALID_TRANSITIONS = {
+        'Paid': {'Processing', 'Packed', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled'},
+        'Processing': {'Packed', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled'},
+        'Packed': {'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled'},
+        'Shipped': {'Out for Delivery', 'Delivered', 'Cancelled'},
+        'Out for Delivery': {'Delivered', 'Cancelled'},
+        'Delivered': set(),  # Terminal state: cannot change
+        'Cancelled': set(),  # Terminal state: cannot change
+    }
+
+
+    @classmethod
+    def update_status(cls, order_id: int, status: str) -> Tuple[bool, str]:
+        """
+        Update status of an order according to strict payment and fulfillment lifecycle transitions.
+        """
+        if status not in cls.VALID_ORDER_STATUSES:
+            return False, f"Invalid status '{status}'. Must be one of: {', '.join(cls.VALID_ORDER_STATUSES)}"
 
         try:
             with get_db_connection() as conn:
@@ -349,9 +373,19 @@ class OrderService:
                     if not row:
                         return False, f"Order #{order_id} not found"
                     curr_status = row['status'] if isinstance(row, dict) else row[0]
-                    # Disallow altering final terminal states (Delivered, Cancelled)
-                    if curr_status in ['Delivered', 'Cancelled'] and status != curr_status:
+
+                    # 1. Idempotent check
+                    if curr_status == status:
+                        return True, f"Order #{order_id} is already in {status} state"
+
+                    # 2. Terminal state enforcement
+                    if curr_status in ['Delivered', 'Cancelled']:
                         return False, f"Cannot change status of a {curr_status} order to {status}."
+
+                    # 3. Valid transition enforcement
+                    allowed_targets = cls.VALID_TRANSITIONS.get(curr_status, set())
+                    if status not in allowed_targets:
+                        return False, f"Invalid status transition from '{curr_status}' to '{status}'"
 
             success = db_update_order_status(order_id, status)
             if success:
@@ -362,6 +396,7 @@ class OrderService:
         except DatabaseError as e:
             logger.error(f"Error updating status for order #{order_id}: {e}")
             return False, 'Failed to update order status'
+
 
     @staticmethod
     def get_analytics(days: int = 30) -> Dict[str, Any]:

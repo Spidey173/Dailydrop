@@ -9,9 +9,11 @@ import os
 import re
 import json
 import sqlite3
+import threading
 from typing import Any, Tuple, Optional, Dict, List
 from contextlib import contextmanager
 import pytest
+
 
 # Add root project directory to sys.path
 ROOT_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -85,38 +87,45 @@ def translate_query(query: str) -> str:
     return q
 
 
+_SQLITE_LOCK = threading.RLock()
+
+
 class SQLiteCursorWrapper:
     """Cursor wrapper delegating to sqlite3 with query translation and dict rows."""
     def __init__(self, raw_cursor):
         self._cursor = raw_cursor
 
     def execute(self, sql: str, params=None):
-        translated = translate_query(sql)
-        statements = [s.strip() for s in translated.split(';') if s.strip()]
-        if not statements:
-            return self
-        if len(statements) == 1:
-            if params is None:
-                self._cursor.execute(statements[0])
+        with _SQLITE_LOCK:
+            translated = translate_query(sql)
+            statements = [s.strip() for s in translated.split(';') if s.strip()]
+            if not statements:
+                return self
+            if len(statements) == 1:
+                if params is None:
+                    self._cursor.execute(statements[0])
+                else:
+                    self._cursor.execute(statements[0], params)
             else:
-                self._cursor.execute(statements[0], params)
-        else:
-            for stmt in statements:
-                try:
-                    self._cursor.execute(stmt)
-                except Exception:
-                    pass
-        return self
+                for stmt in statements:
+                    try:
+                        self._cursor.execute(stmt)
+                    except Exception:
+                        pass
+            return self
 
     def fetchone(self):
-        row = self._cursor.fetchone()
-        if row is None:
-            return None
-        return SQLiteDictRow(self._cursor, row)
+        with _SQLITE_LOCK:
+            row = self._cursor.fetchone()
+            if row is None:
+                return None
+            return SQLiteDictRow(self._cursor, row)
 
     def fetchall(self):
-        rows = self._cursor.fetchall()
-        return [SQLiteDictRow(self._cursor, r) for r in rows]
+        with _SQLITE_LOCK:
+            rows = self._cursor.fetchall()
+            return [SQLiteDictRow(self._cursor, r) for r in rows]
+
 
     def fetchmany(self, size=None):
         rows = self._cursor.fetchmany(size)
@@ -331,7 +340,28 @@ def _seed_test_database():
         except Exception as e:
             print(f"Warning: could not seed catalog products in SQLite: {e}")
 
+    # Seed specific catalog products referenced in integration tests
+    test_products = [
+        ('Organic Tomatoes', 3.99, 'Vegetables', 'Fresh', 50),
+        ('Whole Milk', 4.50, 'Dairy', 'Milk', 50),
+        ('Apple', 1.50, 'Fruits', 'Fresh', 50),
+        ('Organic Almonds 500g', 12.50, 'Grocery', 'Dry Fruits', 50),
+        ('Fresh Avocados 2pk', 6.00, 'Fruits', 'Fresh', 50),
+        ('Basmati Rice 5kg', 450.00, 'Grocery', 'Rice', 50),
+        ('Olive Oil 1L', 600.00, 'Grocery', 'Oils', 50),
+        ('Organic Apples 1kg', 120.00, 'Fruits', 'Apples', 50),
+        ('Tea', 50.00, 'Beverages', 'Tea', 50),
+        ('Brown Bread', 40.00, 'Bakery', 'Bread', 50),
+        ('Tamper Proof Oil', 400.00, 'Grocery', 'Oils', 50),
+    ]
+    for p_name, p_price, p_cat, p_sub, p_stk in test_products:
+        cur.execute('''
+            INSERT OR IGNORE INTO products (name, price, category, subcategory, image_path, description, stock)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        ''', (p_name, p_price, p_cat, p_sub, '/static/logo1.webp', 'Test catalog product', p_stk))
+
     _SHARED_SQLITE_CONN.commit()
+
 
 
 # Seed SQLite database immediately upon conftest load

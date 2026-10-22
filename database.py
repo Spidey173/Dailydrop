@@ -532,6 +532,45 @@ def get_product_by_id(product_id: int) -> Optional[Dict[str, Any]]:
         raise DatabaseError(f"Failed to retrieve product: {e}") from e
 
 
+def get_product_by_name(name: str) -> Optional[Dict[str, Any]]:
+    """Retrieve a product by name (exact or case-insensitive) from database."""
+    if not name or not isinstance(name, str):
+        return None
+    cleaned = name.strip()
+    if not cleaned:
+        return None
+
+    # Check local memory cache
+    for _, (_, products) in _PRODUCT_CACHE.items():
+        for p in products:
+            if p.get('name', '').lower() == cleaned.lower():
+                return p
+
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cursor:
+                cursor.execute('SELECT * FROM products WHERE LOWER(name) = LOWER(%s) LIMIT 1', (cleaned,))
+                result = cursor.fetchone()
+                if not result:
+                    # Also try partial matching if name contains packaging specs
+                    cursor.execute(
+                        'SELECT * FROM products WHERE name ILIKE %s ORDER BY LENGTH(name) ASC LIMIT 1',
+                        (f"%{cleaned}%",)
+                    )
+                    result = cursor.fetchone()
+                if result:
+                    item = dict(result)
+                    item['id'] = item.get('product_id')
+                    item['title'] = item.get('name')
+                    item['image'] = item.get('image_path')
+                    return item
+                return None
+    except Exception as e:
+        logger.error(f"Error retrieving product by name '{name}': {e}")
+        return None
+
+
+
 _ANALYTICS_CACHE: Dict[str, Tuple[float, Dict[str, Any]]] = {}
 _ANALYTICS_TTL_SECONDS = 30.0  # 30 seconds in-memory cache for ultra-fast, responsive dashboard
 

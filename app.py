@@ -16,13 +16,12 @@ from config import config_dict, Config
 from database import init_database, DatabaseError
 from extensions import csrf, limiter
 from blueprints import register_blueprints
+from utils import configure_structured_logging
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+# Configure sanitized structured logging
+configure_structured_logging()
 logger = logging.getLogger(__name__)
+
 
 
 def create_app(config_name: Optional[str] = None) -> Flask:

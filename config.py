@@ -70,6 +70,8 @@ class Config:
     UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER', 'static/uploads')
     MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
     ALLOWED_IMAGE_EXTENSIONS = {'.png', '.jpg', '.jpeg', '.webp'}
+    DISABLE_FILE_UPLOADS = os.getenv('DISABLE_FILE_UPLOADS', 'false').lower() in ('true', '1', 'yes') or os.getenv('VERCEL') == '1'
+
 
     # Razorpay Payment Gateway (Loaded securely from environment variables)
     RAZORPAY_KEY_ID = os.getenv('RAZORPAY_KEY_ID', '')
@@ -125,7 +127,7 @@ class TestingConfig(Config):
     TESTING = True
     WTF_CSRF_ENABLED = False
     SECRET_KEY = os.getenv('SECRET_KEY', 'test-mock-secret-key-32bytes-secure-pytest')
-    DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///:memory:')
+    DATABASE_URL = os.getenv('DATABASE_URL') or 'sqlite:///:memory:'
 
 
 # Configuration dictionary

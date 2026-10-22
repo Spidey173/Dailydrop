@@ -25,11 +25,15 @@ class PaymentService:
         return key_id, key_secret
 
     @classmethod
-    def calculate_authoritative_total(cls, products: List[Dict[str, Any]]) -> Tuple[bool, str, float, float, float]:
+    def calculate_authoritative_total(
+        cls,
+        products: List[Dict[str, Any]],
+        require_catalog: bool = True
+    ) -> Tuple[bool, str, float, float, float]:
         """
         Authoritatively calculates subtotal, delivery fee, and final payable amount
         to prevent client-side price tampering. Resolves authoritative prices from catalog
-        when product IDs are present.
+        database and rejects uncataloged items when require_catalog=True.
 
         Returns:
             Tuple of (success, message, subtotal, delivery_fee, final_total)
@@ -37,32 +41,55 @@ class PaymentService:
         if not products or not isinstance(products, list):
             return False, "Cart cannot be empty", 0.0, 0.0, 0.0
 
+        from services.product_service import ProductService
+
         subtotal = 0.0
         for item in products:
+            if not isinstance(item, dict):
+                return False, "Invalid product data format", 0.0, 0.0, 0.0
+
             try:
+                quantity = int(item.get('quantity', 1))
+                if quantity <= 0:
+                    return False, f"Invalid quantity for item: {item.get('name', 'product')}", 0.0, 0.0, 0.0
+
                 prod_id = item.get('id') or item.get('product_id')
-                authoritative_price = None
+                name = item.get('name')
+                prod = None
 
-                # Query authoritative price from catalog database if product_id is provided
-                if prod_id:
+                # 1. Query catalog by ID if provided
+                if prod_id is not None:
                     try:
-                        from services.product_service import ProductService
                         prod = ProductService.get_product(int(prod_id))
-                        if prod and 'price' in prod:
-                            authoritative_price = float(prod['price'])
-                    except Exception as pe:
-                        logger.warning(f"Could not resolve DB price for product ID {prod_id}: {pe}")
+                    except (ValueError, TypeError):
+                        prod = None
 
-                if authoritative_price is not None:
+                # 2. Query catalog by name if not found by ID
+                if not prod and name:
+                    try:
+                        prod = ProductService.get_product_by_name(name)
+                    except Exception:
+                        prod = None
+
+                if prod and 'price' in prod:
+                    authoritative_price = float(prod['price'])
+                    item['price'] = authoritative_price
+                    item['product_id'] = prod.get('product_id') or prod.get('id')
+                    item['name'] = prod.get('name', name)
+                    item['image'] = prod.get('image_path') or item.get('image', '/static/logo1.webp')
                     price = authoritative_price
-                    item['price'] = authoritative_price  # enforce DB price on item dict
+                elif require_catalog:
+                    identifier = name or (f"ID #{prod_id}" if prod_id else "item")
+                    return False, f"Product '{identifier}' not found in catalog", 0.0, 0.0, 0.0
                 else:
                     price = float(item.get('price', 0))
 
-                quantity = int(item.get('quantity', 1))
-                if price <= 0 or quantity <= 0:
+                if price <= 0:
                     return False, f"Invalid price or quantity for item: {item.get('name', 'product')}", 0.0, 0.0, 0.0
-                subtotal += price * quantity
+
+                item['subtotal'] = round(price * quantity, 2)
+                subtotal += item['subtotal']
+
             except (ValueError, TypeError):
                 return False, "Invalid product data format", 0.0, 0.0, 0.0
 
@@ -72,6 +99,7 @@ class PaymentService:
         subtotal = round(subtotal, 2)
 
         return True, "", subtotal, delivery_fee, final_total
+
 
     @classmethod
     def create_order(

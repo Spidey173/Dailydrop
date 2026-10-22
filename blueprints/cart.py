@@ -157,12 +157,8 @@ def api_verify_payment() -> Tuple[Any, int]:
     from services.payment_service import PaymentService
     from services.idempotency_service import IdempotencyService
     data = request.get_json(silent=True) or {}
-
-    # Check unauthenticated access when no verification payload
-    if 'user_id' not in session and not data:
-        return jsonify({'success': False, 'error': 'Unauthorized', 'message': 'Authentication required.'}), 401
-
     razorpay_order_id = data.get('razorpay_order_id') or data.get('order_id')
+
     razorpay_payment_id = data.get('razorpay_payment_id') or data.get('payment_id')
     razorpay_signature = data.get('razorpay_signature') or data.get('signature')
 
@@ -176,7 +172,14 @@ def api_verify_payment() -> Tuple[Any, int]:
         if not can_proceed:
             return jsonify(cached_resp), (status_code or 200)
 
-    # Missing fields: return 400
+    # 1. Require authenticated session
+    user_id = session.get('user_id')
+    if not user_id:
+        if idempotency_key:
+            IdempotencyService.release(idempotency_key)
+        return jsonify({'success': False, 'error': 'Unauthorized', 'message': 'Authentication required. Please log in.'}), 401
+
+    # 2. Missing fields check
     if not all([razorpay_order_id, razorpay_payment_id, razorpay_signature]):
         if idempotency_key:
             IdempotencyService.release(idempotency_key)
@@ -187,14 +190,13 @@ def api_verify_payment() -> Tuple[Any, int]:
             'message': 'Missing required fields: razorpay_order_id, razorpay_payment_id, razorpay_signature'
         }), 400
 
-    # Signature validation using HMAC-SHA256
+
+    # 3. Cryptographic signature validation using HMAC-SHA256
     is_valid = PaymentService.verify_payment_signature(
         razorpay_order_id=razorpay_order_id,
         razorpay_payment_id=razorpay_payment_id,
         razorpay_signature=razorpay_signature
     )
-
-    # Signature mismatch: return 400, do NOT mark as paid
     if not is_valid:
         if idempotency_key:
             IdempotencyService.release(idempotency_key)
@@ -205,94 +207,136 @@ def api_verify_payment() -> Tuple[Any, int]:
             'message': 'Invalid payment signature. Transaction rejected.'
         }), 400
 
-    # If storefront order context is present, persist order in database
-    products = data.get('products', [])
-    user_id = session.get('user_id')
+    # 4. Check if order was already recorded (idempotent retry from client or webhook)
+    from database import get_db_connection, get_pending_order, delete_pending_order
+    from psycopg2.extras import RealDictCursor
 
-    # Verify against pending_orders to prevent user impersonation and ensure integrity
-    from database import get_pending_order
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cursor:
+                cursor.execute(
+                    'SELECT order_id, user_id FROM orders WHERE payment_id = %s OR payment_id = %s',
+                    (razorpay_payment_id, razorpay_order_id)
+                )
+                existing = cursor.fetchone()
+                if existing:
+                    existing_uid = existing['user_id'] if isinstance(existing, dict) else existing[1]
+                    if str(existing_uid) != str(user_id):
+                        if idempotency_key:
+                            IdempotencyService.release(idempotency_key)
+                        return jsonify({
+                            'success': False,
+                            'error': 'Forbidden',
+                            'message': 'Unauthorized: Payment order does not belong to this user'
+                        }), 403
+
+                    ord_id = existing['order_id'] if isinstance(existing, dict) else existing[0]
+                    res_payload = {
+                        'success': True,
+                        'status': 'success',
+                        'order_id': ord_id,
+                        'payment_id': razorpay_payment_id,
+                        'razorpay_order_id': razorpay_order_id,
+                        'message': 'Payment already verified and order recorded.'
+                    }
+                    if idempotency_key:
+                        IdempotencyService.complete(idempotency_key, res_payload, status_code=200)
+                    return jsonify(res_payload), 200
+    except Exception as db_err:
+        logger.warning(f"Error checking existing order: {db_err}")
+
+    # 5. Require a valid pending order owned by current user
     pending = None
     try:
         pending = get_pending_order(razorpay_order_id)
     except Exception as pe:
         logger.warning(f"Could not load pending order {razorpay_order_id}: {pe}")
 
-    if pending and user_id:
-        pending_user_id = pending.get('user_id')
-        if pending_user_id and str(pending_user_id) != str(user_id):
-            if idempotency_key:
-                IdempotencyService.release(idempotency_key)
-            return jsonify({'success': False, 'message': 'Unauthorized: Payment order does not belong to this user'}), 403
-
-    if not products and pending and pending.get('products_data'):
-        products = pending.get('products_data')
-
-    if user_id and products:
-        valid, err_msg, subtotal, fee, final_total = PaymentService.calculate_authoritative_total(products)
-        if not valid:
-            return jsonify({'success': False, 'message': err_msg}), 400
-
-        full_name = data.get('full_name', '')
-        phone_number = data.get('phone_number', '')
-        address = data.get('address', '')
-
-        success, message, order_id = OrderService.create_order(
-            user_id=user_id,
-            full_name=full_name,
-            phone_number=phone_number,
-            address=address,
-            products=products,
-            total_amount=final_total,
-            payment_method='Razorpay',
-            payment_id=razorpay_payment_id,
-            status='Paid'
-        )
-
-        if not success:
-            return jsonify({'success': False, 'message': message}), 500
-
-        try:
-            from database import delete_pending_order
-            delete_pending_order(razorpay_order_id)
-        except Exception:
-            pass
-
-        user_orders = OrderService.get_user_orders(user_id)
-        user_order_number = len(user_orders)
-
-        res_payload = {
-            'success': True,
-            'status': 'success',
-            'order_id': order_id,
-            'user_order_number': user_order_number,
-            'payment_id': razorpay_payment_id,
-            'razorpay_order_id': razorpay_order_id,
-            'message': 'Payment verified and order placed successfully!'
-        }
+    if not pending:
         if idempotency_key:
-            IdempotencyService.complete(idempotency_key, res_payload, status_code=200)
+            IdempotencyService.release(idempotency_key)
+        return jsonify({
+            'success': False,
+            'error': 'Missing pending order',
+            'message': 'No pending order found for this payment transaction. Please restart checkout.'
+        }), 400
 
-        return jsonify(res_payload), 200
+    pending_user_id = pending.get('user_id')
+    if not pending_user_id or str(pending_user_id) != str(user_id):
+        if idempotency_key:
+            IdempotencyService.release(idempotency_key)
+        return jsonify({
+            'success': False,
+            'error': 'Forbidden',
+            'message': 'Unauthorized: Payment order does not belong to this user'
+        }), 403
+
+    # Extract cart products from pending order
+    products = pending.get('products_data', [])
+    if isinstance(products, str):
+        import json
+        try:
+            products = json.loads(products)
+        except Exception:
+            products = []
+
+    if not products:
+        products = data.get('products', [])
+
+    if not products:
+        if idempotency_key:
+            IdempotencyService.release(idempotency_key)
+        return jsonify({'success': False, 'error': 'Empty cart', 'message': 'Cart cannot be empty'}), 400
+
+    # 6. Authoritative price & total recalculation from database
+    valid, err_msg, subtotal, fee, final_total = PaymentService.calculate_authoritative_total(products, require_catalog=True)
+    if not valid:
+        if idempotency_key:
+            IdempotencyService.release(idempotency_key)
+        return jsonify({'success': False, 'error': err_msg, 'message': err_msg}), 400
+
+    full_name = pending.get('full_name') or data.get('full_name', '') or session.get('name', 'Customer')
+    phone_number = pending.get('phone_number') or data.get('phone_number', '')
+    address = pending.get('address') or data.get('address', '')
+
+    success, message, order_id = OrderService.create_order(
+        user_id=user_id,
+        full_name=full_name,
+        phone_number=phone_number,
+        address=address,
+        products=products,
+        total_amount=final_total,
+        payment_method='Razorpay',
+        payment_id=razorpay_payment_id,
+        status='Paid'
+    )
+
+    if not success:
+        if idempotency_key:
+            IdempotencyService.release(idempotency_key)
+        return jsonify({'success': False, 'error': message, 'message': message}), 500
 
     try:
-        from database import delete_pending_order
         delete_pending_order(razorpay_order_id)
     except Exception:
         pass
 
-    # Return success for standalone API verification
-    standalone_res = {
+    user_orders = OrderService.get_user_orders(user_id)
+    user_order_number = len(user_orders)
+
+    res_payload = {
         'success': True,
         'status': 'success',
-        'verified': True,
-        'order_id': razorpay_order_id,
+        'order_id': order_id,
+        'user_order_number': user_order_number,
         'payment_id': razorpay_payment_id,
-        'message': 'Payment signature verified successfully'
+        'razorpay_order_id': razorpay_order_id,
+        'message': 'Payment verified and order placed successfully!'
     }
     if idempotency_key:
-        IdempotencyService.complete(idempotency_key, standalone_res, status_code=200)
+        IdempotencyService.complete(idempotency_key, res_payload, status_code=200)
 
-    return jsonify(standalone_res), 200
+    return jsonify(res_payload), 200
 
 
 @cart_bp.route('/api/v1/payment/webhook', methods=['POST'], endpoint='api_razorpay_webhook')
@@ -305,6 +349,7 @@ def api_razorpay_webhook() -> Tuple[Any, int]:
 
     - Cryptographically verifies X-Razorpay-Signature header (HMAC SHA-256).
     - Checks for existing order to guarantee idempotency.
+    - Prevents fulfillment state regression on out-of-order events.
     - Automatically recovers and places orders from pending_orders table if client disconnected.
     """
     import json
@@ -344,7 +389,8 @@ def api_razorpay_webhook() -> Tuple[Any, int]:
                     existing_order = cursor.fetchone()
                     if existing_order:
                         ord_id = existing_order['order_id'] if isinstance(existing_order, dict) else existing_order[0]
-                        cursor.execute("UPDATE orders SET status = 'Paid' WHERE order_id = %s", (ord_id,))
+                        # Safe transition: only mark Paid if not already past in lifecycle
+                        cursor.execute("UPDATE orders SET status = 'Paid' WHERE order_id = %s AND status IN ('Processing', 'Created')", (ord_id,))
                         try:
                             from services.outbox_service import OutboxService
                             OutboxService.record_event(
@@ -404,7 +450,16 @@ def api_razorpay_webhook() -> Tuple[Any, int]:
                         logger.error(f"Webhook: Failed to recover order from pending: {rec_msg}")
                         return jsonify({'status': 'recovery_failed', 'error': rec_msg}), 500
 
+    elif event_type == 'payment.failed':
+        # Safely log payment failure without regressing completed orders
+        payment_entity = event_payload.get('payload', {}).get('payment', {}).get('entity', {})
+        rzp_order_id = payment_entity.get('order_id')
+        error_desc = payment_entity.get('error_description', 'Payment failed at gateway')
+        logger.warning(f"Razorpay webhook payment.failed for order {rzp_order_id}: {error_desc}")
+        return jsonify({'status': 'acknowledged', 'event': event_type, 'message': 'Payment failure noted'}), 200
+
     return jsonify({'status': 'acknowledged', 'event': event_type}), 200
+
 
 
 @cart_bp.route('/place_order', methods=['POST'], endpoint='place_order')

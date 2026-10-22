@@ -17,19 +17,16 @@ def client():
 
 
 def test_product_catalog_queries():
-    try:
-        all_prods = ProductService.get_products_by_category()
-        assert len(all_prods) > 200
-        grocery_prods = ProductService.get_products_by_category('Grocery')
-        assert len(grocery_prods) > 0
-        for p in grocery_prods:
-            assert p['category'] == 'Grocery'
-        first_prod = all_prods[0]
-        fetched = ProductService.get_product(first_prod['product_id'])
-        assert fetched is not None
-        assert fetched['name'] == first_prod['name']
-    except Exception as e:
-        pytest.skip(f"Database unavailable for test: {e}")
+    all_prods = ProductService.get_products_by_category()
+    assert len(all_prods) > 200
+    grocery_prods = ProductService.get_products_by_category('Grocery')
+    assert len(grocery_prods) > 0
+    for p in grocery_prods:
+        assert p['category'] == 'Grocery'
+    first_prod = all_prods[0]
+    fetched = ProductService.get_product(first_prod['product_id'])
+    assert fetched is not None
+    assert fetched['name'] == first_prod['name']
 
 
 def test_product_routes(client):
@@ -44,26 +41,21 @@ def test_product_routes(client):
 
 
 def test_api_products_list(client):
-    try:
-        res = client.get('/api/v1/products/list')
-        assert res.status_code == 200
-        json_data = res.get_json()
-        assert json_data['success'] is True
-        assert json_data['count'] > 200
-    except Exception as e:
-        pytest.skip(f"Database unavailable for test: {e}")
+    res = client.get('/api/v1/products/list')
+    assert res.status_code == 200
+    json_data = res.get_json()
+    assert json_data['success'] is True
+    assert json_data['count'] > 200
 
 
 def test_api_products_search(client):
-    try:
-        res = client.get('/api/v1/products/search?q=milk')
-        assert res.status_code == 200
-        data = res.get_json()
-        assert data['success'] is True
-        assert data['count'] > 0
-        assert any('milk' in r['name'].lower() for r in data['results'])
-    except Exception as e:
-        pytest.skip(f"Database unavailable for test: {e}")
+    res = client.get('/api/v1/products/search?q=milk')
+    assert res.status_code == 200
+    data = res.get_json()
+    assert data['success'] is True
+    assert data['count'] > 0
+    assert any('milk' in r['name'].lower() for r in data['results'])
+
 
     # 2. Search with empty query
     res_empty = client.get('/api/v1/products/search?q=')

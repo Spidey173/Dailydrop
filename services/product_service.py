@@ -4,7 +4,7 @@ Product service managing catalog retrieval, inventory updates, and product admin
 from typing import Optional, List, Dict, Any, Tuple
 import logging
 from database import (
-    get_all_products, get_product_by_id, update_product_price,
+    get_all_products, get_product_by_id, get_product_by_name, update_product_price,
     update_product_stock, add_product, delete_product, get_low_stock_products,
     DatabaseError
 )
@@ -34,6 +34,15 @@ class ProductService:
             return get_product_by_id(product_id)
         except DatabaseError as e:
             logger.error(f"Error fetching product ID {product_id}: {e}")
+            return None
+
+    @staticmethod
+    def get_product_by_name(name: str) -> Optional[Dict[str, Any]]:
+        """Retrieve product by name."""
+        try:
+            return get_product_by_name(name)
+        except DatabaseError as e:
+            logger.error(f"Error fetching product by name '{name}': {e}")
             return None
 
     @staticmethod

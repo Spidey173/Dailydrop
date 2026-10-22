@@ -177,9 +177,15 @@ def api_add_product():
         if 'image_file' in request.files:
             file = request.files['image_file']
             if file and file.filename:
+                if current_app.config.get('DISABLE_FILE_UPLOADS', False):
+                    return jsonify({
+                        'success': False,
+                        'error': 'File uploads are disabled in the serverless demo environment. Please use an image URL or default product image.'
+                    }), 400
                 raw_filename = file.filename
                 ext = os.path.splitext(raw_filename)[1].lower()
                 allowed_exts = current_app.config.get('ALLOWED_IMAGE_EXTENSIONS', {'.png', '.jpg', '.jpeg', '.webp'})
+
                 if ext not in allowed_exts:
                     return jsonify({
                         'success': False,

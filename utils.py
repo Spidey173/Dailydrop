@@ -161,3 +161,44 @@ def validate_contact_data(name: str, email: str, subject: str, message: str) -> 
         return False, "Message must be at least 10 characters"
 
     return True, None
+
+
+class SanitizingLogFormatter(logging.Formatter):
+    """
+    Structured log formatter that sanitizes credentials, tokens, secrets,
+    passwords, and payment payload signatures before writing to log streams.
+    """
+    SENSITIVE_PATTERNS = [
+        # Passwords, keys, tokens, secrets
+        (re.compile(r'(?i)(password|passwd|pwd|secret|key_secret|token|api_key|authorization|bearer)\s*[:=]\s*["\']?([^"\'\s,;]+)'), r'\1=[REDACTED]'),
+        # Razorpay signatures & payment IDs
+        (re.compile(r'(?i)(razorpay_signature|signature)\s*[:=]\s*["\']?([a-fA-F0-9]{32,64})'), r'\1=[REDACTED_SIGNATURE]'),
+        # Credit Card Numbers (13 to 16 digits)
+        (re.compile(r'\b(?:\d[ -]*?){13,16}\b'), '[REDACTED_CARD]'),
+    ]
+
+    def format(self, record: logging.LogRecord) -> str:
+        original = super().format(record)
+        sanitized = original
+        for pattern, replacement in self.SENSITIVE_PATTERNS:
+            sanitized = pattern.sub(replacement, sanitized)
+        return sanitized
+
+
+def configure_structured_logging(level=logging.INFO) -> None:
+    """
+    Configure application-wide structured and sanitized logging.
+    """
+    root_logger = logging.getLogger()
+    root_logger.setLevel(level)
+
+    handler = logging.StreamHandler()
+    formatter = SanitizingLogFormatter(
+        '%(asctime)s - [%(process)d] - %(name)s - %(levelname)s - %(message)s'
+    )
+    handler.setFormatter(formatter)
+
+    # Avoid duplicate handlers
+    if not any(isinstance(h.formatter, SanitizingLogFormatter) for h in root_logger.handlers if h.formatter):
+        root_logger.handlers = [handler]
+
