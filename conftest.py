@@ -490,7 +490,9 @@ class MockRedisClient:
         pass
 
 
+from unittest.mock import MagicMock
 from services.redis_service import RedisService, _LUA_DECREMENT_STOCK, _LUA_ROLLBACK_STOCK
+from services.task_service import TaskService
 
 _MOCK_REDIS = MockRedisClient()
 RedisService._client = _MOCK_REDIS
@@ -500,4 +502,11 @@ RedisService._rollback_script = _MOCK_REDIS.register_script(_LUA_ROLLBACK_STOCK)
 RedisService.get_client = classmethod(lambda cls: _MOCK_REDIS)
 RedisService.get_raw_client = classmethod(lambda cls: _MOCK_REDIS)
 RedisService.is_available = classmethod(lambda cls: True)
+
+# Mock TaskService queue for offline deterministic task dispatch
+_MOCK_JOB = MagicMock()
+_MOCK_JOB.id = "mock_job_test_7777"
+_MOCK_RQ_QUEUE = MagicMock()
+_MOCK_RQ_QUEUE.enqueue.return_value = _MOCK_JOB
+TaskService.get_queue = classmethod(lambda cls: _MOCK_RQ_QUEUE)
 
