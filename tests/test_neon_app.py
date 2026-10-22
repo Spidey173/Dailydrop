@@ -1,6 +1,6 @@
 import json
 import pytest
-from app import app
+from app import create_app
 from database import (
     get_db_connection, get_all_products, get_user_by_email,
     get_dashboard_stats
@@ -8,8 +8,9 @@ from database import (
 
 @pytest.fixture
 def client():
-    app.config['TESTING'] = True
-    with app.test_client() as client:
+    test_app = create_app('testing')
+    test_app.config['WTF_CSRF_ENABLED'] = False
+    with test_app.test_client() as client:
         yield client
 
 def test_home_page(client):

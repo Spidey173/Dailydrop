@@ -76,6 +76,8 @@ def translate_query(query: str) -> str:
     q = query
     # ILIKE -> LIKE
     q = re.sub(r'\bILIKE\b', 'LIKE', q, flags=re.IGNORECASE)
+    # Strip PostgreSQL FOR UPDATE lock clause for SQLite
+    q = re.sub(r'\s+FOR\s+UPDATE\b', '', q, flags=re.IGNORECASE)
     # SERIAL PRIMARY KEY -> INTEGER PRIMARY KEY AUTOINCREMENT
     q = re.sub(r'\bSERIAL\s+PRIMARY\s+KEY\b', 'INTEGER PRIMARY KEY AUTOINCREMENT', q, flags=re.IGNORECASE)
     # Strip PostgreSQL type casts (e.g., ::date, ::json, ::text)
@@ -413,3 +415,89 @@ def check_db_availability(request):
     Check DB availability: In-memory SQLite fixture is always active and available.
     """
     return
+
+
+# =============================================================================
+# In-Memory Redis Mock Fixture for 100% Deterministic, Offline Test Execution
+# =============================================================================
+class MockRedisClient:
+    """
+    In-memory Redis mock supporting string operations, TTLs, and atomic Lua scripts.
+    Eliminates external Redis daemon dependency during CI/CD and offline test suites.
+    """
+    def __init__(self):
+        self._store = {}
+        self._ttls = {}
+
+    def ping(self):
+        return True
+
+    def get(self, key):
+        return self._store.get(str(key))
+
+    def set(self, key, value, ex=None, nx=False):
+        key_str = str(key)
+        if nx and key_str in self._store:
+            return None
+        self._store[key_str] = str(value)
+        return True
+
+    def delete(self, *keys):
+        count = 0
+        for k in keys:
+            if str(k) in self._store:
+                del self._store[str(k)]
+                count += 1
+        return count
+
+    def keys(self, pattern='*'):
+        import fnmatch
+        return [k for k in self._store.keys() if fnmatch.fnmatch(k, pattern)]
+
+    def scan(self, cursor=0, match=None, count=10):
+        import fnmatch
+        matched = [k for k in self._store.keys() if (not match or fnmatch.fnmatch(k, match))]
+        return 0, matched
+
+    def register_script(self, script_str):
+        if 'decrby' in script_str:
+            def decr(keys, args):
+                k = str(keys[0])
+                qty = int(args[0])
+                if k not in self._store:
+                    return -1
+                cur = int(self._store[k])
+                if cur >= qty:
+                    self._store[k] = str(cur - qty)
+                    return 1
+                return 0
+            return decr
+        elif 'incrby' in script_str:
+            def incr(keys, args):
+                k = str(keys[0])
+                qty = int(args[0])
+                if k in self._store:
+                    self._store[k] = str(int(self._store[k]) + qty)
+                    return 1
+                return 0
+            return incr
+        return lambda keys, args: 1
+
+    def flushall(self):
+        self._store.clear()
+
+    def close(self):
+        pass
+
+
+from services.redis_service import RedisService, _LUA_DECREMENT_STOCK, _LUA_ROLLBACK_STOCK
+
+_MOCK_REDIS = MockRedisClient()
+RedisService._client = _MOCK_REDIS
+RedisService._raw_client = _MOCK_REDIS
+RedisService._decr_script = _MOCK_REDIS.register_script(_LUA_DECREMENT_STOCK)
+RedisService._rollback_script = _MOCK_REDIS.register_script(_LUA_ROLLBACK_STOCK)
+RedisService.get_client = classmethod(lambda cls: _MOCK_REDIS)
+RedisService.get_raw_client = classmethod(lambda cls: _MOCK_REDIS)
+RedisService.is_available = classmethod(lambda cls: True)
+

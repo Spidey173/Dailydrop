@@ -1,6 +1,7 @@
 # DailyDrop 🛒 — Full-Stack Quick-Commerce Web Application
 
 [![CI Pipeline](https://github.com/Spidey173/Dailydrop/actions/workflows/ci.yml/badge.svg)](https://github.com/Spidey173/Dailydrop/actions)
+[![Tests](https://img.shields.io/badge/Pytest-61%20Passed-brightgreen?style=flat-square&logo=pytest)](tests/)
 [![Backend](https://img.shields.io/badge/Backend-Python%20%7C%20Flask-blue?style=flat-square&logo=python)](app.py)
 [![Database](https://img.shields.io/badge/Database-PostgreSQL%20(Neon)-336791?style=flat-square&logo=postgresql&logoColor=white)](database.py)
 [![Cache](https://img.shields.io/badge/Cache-Redis%20(Fallback%20Safe)-DC382D?style=flat-square&logo=redis&logoColor=white)](services/redis_service.py)

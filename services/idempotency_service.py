@@ -17,11 +17,18 @@ from functools import wraps
 from config import Config
 from services.redis_service import RedisService
 
+import time
+import threading
+
 logger = logging.getLogger(__name__)
+
+# Fallback in-memory store for idempotency protection during Redis downtime
+_FALLBACK_IDEMPOTENCY_STORE: Dict[str, Dict[str, Any]] = {}
+_FALLBACK_IDEMPOTENCY_LOCK = threading.Lock()
 
 
 class IdempotencyService:
-    """Manages idempotency tokens stored in Redis."""
+    """Manages idempotency tokens stored in Redis with in-memory degradation protection."""
 
     PREFIX = "idempotency:checkout:"
     DEFAULT_PROCESSING_TTL = 120  # 2 minutes lock during processing
@@ -49,8 +56,38 @@ class IdempotencyService:
         """
         client = RedisService.get_client()
         if not client:
-            # If Redis is unavailable, allow execution to proceed (graceful degradation)
-            return True, None, None
+            # Fall back to thread-safe in-memory lock store when Redis is unavailable
+            with _FALLBACK_IDEMPOTENCY_LOCK:
+                now = time.time()
+                # Clean up expired items
+                expired_keys = [k for k, v in _FALLBACK_IDEMPOTENCY_STORE.items() if v.get('expires_at', 0) < now]
+                for exp_k in expired_keys:
+                    _FALLBACK_IDEMPOTENCY_STORE.pop(exp_k, None)
+
+                existing = _FALLBACK_IDEMPOTENCY_STORE.get(key)
+                if existing:
+                    cached_user_id = existing.get("user_id")
+                    if user_id and cached_user_id and str(cached_user_id) != str(user_id):
+                        return False, {
+                            "success": False,
+                            "error": "Conflict",
+                            "message": "Idempotency key belongs to another user session."
+                        }, 409
+                    if existing.get("status") == "PROCESSING":
+                        return False, {
+                            "success": False,
+                            "error": "Conflict",
+                            "message": "A checkout request with this Idempotency-Key is already being processed. Please wait."
+                        }, 409
+                    elif existing.get("status") == "COMPLETED":
+                        return False, existing.get("response", {}), existing.get("status_code", 200)
+
+                _FALLBACK_IDEMPOTENCY_STORE[key] = {
+                    "status": "PROCESSING",
+                    "user_id": str(user_id) if user_id else None,
+                    "expires_at": now + cls.DEFAULT_PROCESSING_TTL
+                }
+                return True, None, None
 
         redis_key = f"{cls.PREFIX}{key}"
 
@@ -106,8 +143,19 @@ class IdempotencyService:
     @classmethod
     def complete(cls, key: str, response_payload: Dict[str, Any], status_code: int = 200, ttl: Optional[int] = None, user_id: Optional[Any] = None) -> None:
         """Cache the successful response under the idempotency key."""
+        if not key:
+            return
+
         client = RedisService.get_client()
-        if not client or not key:
+        if not client:
+            with _FALLBACK_IDEMPOTENCY_LOCK:
+                _FALLBACK_IDEMPOTENCY_STORE[key] = {
+                    "status": "COMPLETED",
+                    "user_id": str(user_id) if user_id else None,
+                    "response": response_payload,
+                    "status_code": status_code,
+                    "expires_at": time.time() + (ttl or cls.DEFAULT_COMPLETED_TTL)
+                }
             return
 
         redis_key = f"{cls.PREFIX}{key}"
@@ -138,9 +186,15 @@ class IdempotencyService:
     @classmethod
     def release(cls, key: str) -> None:
         """Release / delete an in-progress lock if validation or order failed before completion."""
-        client = RedisService.get_client()
-        if not client or not key:
+        if not key:
             return
+
+        client = RedisService.get_client()
+        if not client:
+            with _FALLBACK_IDEMPOTENCY_LOCK:
+                _FALLBACK_IDEMPOTENCY_STORE.pop(key, None)
+            return
+
         try:
             client.delete(f"{cls.PREFIX}{key}")
         except Exception as e:

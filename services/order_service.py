@@ -88,14 +88,28 @@ class OrderService:
                                 prod_row = cursor.fetchone()
                             except (ValueError, TypeError):
                                 prod_row = None
+                            except Exception as db_err:
+                                conn.rollback()
+                                logger.error(f"Database error during product lookup #{pid}: {db_err}")
+                                return False, 'Database error during catalog lookup', None
 
                         if not prod_row and name:
-                            cursor.execute("SELECT product_id, name, stock, price, image_path FROM products WHERE LOWER(name) = LOWER(%s)", (name.strip(),))
-                            prod_row = cursor.fetchone()
+                            try:
+                                cursor.execute("SELECT product_id, name, stock, price, image_path FROM products WHERE LOWER(name) = LOWER(%s)", (name.strip(),))
+                                prod_row = cursor.fetchone()
+                            except Exception as db_err:
+                                conn.rollback()
+                                logger.error(f"Database error during product name lookup '{name}': {db_err}")
+                                return False, 'Database error during catalog lookup', None
 
                         if not prod_row and name:
-                            cursor.execute("SELECT product_id, name, stock, price, image_path FROM products WHERE name ILIKE %s ORDER BY LENGTH(name) ASC LIMIT 1", (f"%{name.strip()}%",))
-                            prod_row = cursor.fetchone()
+                            try:
+                                cursor.execute("SELECT product_id, name, stock, price, image_path FROM products WHERE name ILIKE %s ORDER BY LENGTH(name) ASC LIMIT 1", (f"%{name.strip()}%",))
+                                prod_row = cursor.fetchone()
+                            except Exception as db_err:
+                                conn.rollback()
+                                logger.error(f"Database error during product pattern lookup '{name}': {db_err}")
+                                return False, 'Database error during catalog lookup', None
 
                         if not prod_row:
                             conn.rollback()
@@ -106,7 +120,14 @@ class OrderService:
                         r_pid = prod_row['product_id'] if isinstance(prod_row, dict) else prod_row[0]
                         r_name = prod_row['name'] if isinstance(prod_row, dict) else prod_row[1]
                         raw_price = prod_row.get('price') if isinstance(prod_row, dict) else prod_row[3]
-                        r_price = float(raw_price if raw_price is not None else item.get('price', 0.0))
+
+                        # Strictly enforce authoritative catalog price; reject if missing or corrupt in database
+                        if raw_price is None or float(raw_price) <= 0:
+                            conn.rollback()
+                            logger.error(f"Missing authoritative price in database for catalog item #{r_pid} ('{r_name}')")
+                            return False, f"Pricing error for product '{r_name}'. Order cannot proceed.", None
+
+                        r_price = float(raw_price)
                         r_img = (prod_row['image_path'] if isinstance(prod_row, dict) else prod_row[4]) or img
 
                         subtotal = round(r_price * qty, 2)
@@ -358,9 +379,10 @@ class OrderService:
 
 
     @classmethod
-    def update_status(cls, order_id: int, status: str) -> Tuple[bool, str]:
+    def update_status(cls, order_id: int, status: str, expected_current_status: Optional[str] = None) -> Tuple[bool, str]:
         """
-        Update status of an order according to strict payment and fulfillment lifecycle transitions.
+        Atomically update status of an order within a single transaction with row-level locking.
+        Guarantees strict state transitions and prevents race conditions under concurrent requests.
         """
         if status not in cls.VALID_ORDER_STATUSES:
             return False, f"Invalid status '{status}'. Must be one of: {', '.join(cls.VALID_ORDER_STATUSES)}"
@@ -368,31 +390,39 @@ class OrderService:
         try:
             with get_db_connection() as conn:
                 with conn.cursor() as cursor:
-                    cursor.execute("SELECT status FROM orders WHERE order_id = %s", (order_id,))
+                    # 1. Row-level exclusive lock within transaction (prevents concurrent race conditions)
+                    cursor.execute("SELECT status FROM orders WHERE order_id = %s FOR UPDATE", (order_id,))
                     row = cursor.fetchone()
                     if not row:
                         return False, f"Order #{order_id} not found"
                     curr_status = row['status'] if isinstance(row, dict) else row[0]
 
-                    # 1. Idempotent check
+                    # 2. Idempotent check
                     if curr_status == status:
                         return True, f"Order #{order_id} is already in {status} state"
 
-                    # 2. Terminal state enforcement
+                    # 3. Optimistic concurrency check (if expected status supplied)
+                    if expected_current_status and curr_status != expected_current_status:
+                        return False, f"Conflict: Order #{order_id} status changed to '{curr_status}' by another request."
+
+                    # 4. Terminal state enforcement
                     if curr_status in ['Delivered', 'Cancelled']:
                         return False, f"Cannot change status of a {curr_status} order to {status}."
 
-                    # 3. Valid transition enforcement
+                    # 5. Valid transition enforcement
                     allowed_targets = cls.VALID_TRANSITIONS.get(curr_status, set())
                     if status not in allowed_targets:
                         return False, f"Invalid status transition from '{curr_status}' to '{status}'"
 
-            success = db_update_order_status(order_id, status)
-            if success:
-                clear_analytics_cache()
-                _ANALYTICS_CACHE.clear()
-                return True, f"Order #{order_id} status updated to {status}"
-            return False, f"Order #{order_id} not found"
+                    # 6. Atomic write in the SAME transaction before commit
+                    cursor.execute("UPDATE orders SET status = %s WHERE order_id = %s", (status, order_id))
+                    if cursor.rowcount == 0:
+                        return False, f"Order #{order_id} not found"
+
+            # Both read, lock, validation, and write committed together atomically upon exiting with block
+            clear_analytics_cache()
+            _ANALYTICS_CACHE.clear()
+            return True, f"Order #{order_id} status updated to {status}"
         except DatabaseError as e:
             logger.error(f"Error updating status for order #{order_id}: {e}")
             return False, 'Failed to update order status'
