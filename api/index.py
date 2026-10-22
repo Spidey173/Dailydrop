@@ -9,29 +9,30 @@ if project_root not in sys.path:
 
 from flask import Flask, render_template_string, jsonify
 
-try:
-    from app import create_app
-    app = create_app(os.getenv('FLASK_ENV', 'production'))
-except Exception as exc:
-    # If environment variables (DATABASE_URL / SECRET_KEY) are not yet configured on Vercel,
-    # serve an informative diagnostic Flask app instead of crashing the serverless runtime with FUNCTION_INVOCATION_FAILED
-    init_err_msg = str(exc)
-    app = Flask(__name__)
+def _init_serverless_app():
+    try:
+        from app import create_app
+        return create_app(os.getenv('FLASK_ENV', 'production'))
+    except Exception as exc:
+        # If environment variables (DATABASE_URL / SECRET_KEY) are not yet configured on Vercel,
+        # serve an informative diagnostic Flask app instead of crashing the serverless runtime with FUNCTION_INVOCATION_FAILED
+        init_err_msg = str(exc)
+        fallback_app = Flask(__name__)
 
-    @app.route('/healthz')
-    @app.route('/api/v1/health')
-    def serverless_health():
-        return jsonify({
-            "status": "degraded",
-            "message": "DailyDrop serverless runtime active; configuration pending",
-            "diagnostic": init_err_msg,
-            "environment": os.getenv('FLASK_ENV', 'production')
-        }), 503
+        @fallback_app.route('/healthz')
+        @fallback_app.route('/api/v1/health')
+        def serverless_health():
+            return jsonify({
+                "status": "degraded",
+                "message": "DailyDrop serverless runtime active; configuration pending",
+                "diagnostic": init_err_msg,
+                "environment": os.getenv('FLASK_ENV', 'production')
+            }), 503
 
-    @app.route('/', defaults={'path': ''})
-    @app.route('/<path:path>')
-    def configuration_required(path):
-        return render_template_string('''<!DOCTYPE html>
+        @fallback_app.route('/', defaults={'path': ''})
+        @fallback_app.route('/<path:path>')
+        def configuration_required(path):
+            return render_template_string('''<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -71,3 +72,10 @@ except Exception as exc:
   </div>
 </body>
 </html>''', diagnostic=init_err_msg), 503
+
+        return fallback_app
+
+# Top-level ASGI/WSGI entrypoint instances recognized by Vercel's Python runtime
+app = _init_serverless_app()
+application = app
+handler = app
