@@ -10,6 +10,14 @@ if project_root not in sys.path:
 from flask import Flask, render_template_string, jsonify
 
 def _init_serverless_app():
+    # If not explicitly configured in Vercel project settings, provide live demo cloud DB & secure key
+    if not os.getenv('DATABASE_URL'):
+        os.environ['DATABASE_URL'] = 'postgresql://neondb_owner:npg_Kgh3pLGtWVE2@ep-aged-shape-axt5bimg-pooler.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require'
+    if not os.getenv('SECRET_KEY') or len(os.getenv('SECRET_KEY', '')) < 16:
+        os.environ['SECRET_KEY'] = 'dailydrop-demo-secure-prod-key-32bytes-live-store'
+    os.environ['DISABLE_FILE_UPLOADS'] = 'true'
+    os.environ['VERCEL'] = '1'
+
     try:
         from app import create_app
         return create_app(os.getenv('FLASK_ENV', 'production'))
