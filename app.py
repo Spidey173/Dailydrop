@@ -10,6 +10,7 @@ import json
 from typing import Tuple, Optional
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_wtf.csrf import CSRFError
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 
 from config import config_dict, Config
@@ -29,6 +30,9 @@ def create_app(config_name: Optional[str] = None) -> Flask:
     Application factory initializing configuration, extensions, error handlers, and blueprints.
     """
     app = Flask(__name__)
+
+    # Mount ProxyFix to properly handle X-Forwarded-Proto, X-Forwarded-For behind reverse proxies (Vercel)
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 
     env = config_name or os.getenv('FLASK_ENV', 'development')
     config_cls = config_dict.get(env, config_dict['default'])
@@ -75,8 +79,12 @@ def create_app(config_name: Optional[str] = None) -> Flask:
     def handle_csrf_error(error):
         """Handle CSRF expiration without crashing with raw 400 Bad Request."""
         logger.warning(f"CSRF error handled: {error.description}")
-        if request.is_json or request.path.startswith('/api/'):
-            return {"success": False, "error": "CSRF validation failed. Please refresh the page and try again."}, 400
+        if request.is_json or request.path.startswith('/api/') or request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return {
+                "success": False,
+                "message": "Security token expired or invalid. Please refresh the page and try again.",
+                "error": "CSRF validation failed. Please refresh the page and try again."
+            }, 400
         flash("Your form session expired. Please try logging in again.", "error")
         return redirect(request.referrer or url_for('auth.login'))
 

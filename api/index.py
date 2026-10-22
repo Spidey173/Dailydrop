@@ -14,12 +14,17 @@ def _init_serverless_app():
     if not os.getenv('DATABASE_URL'):
         os.environ['DATABASE_URL'] = 'postgresql://neondb_owner:npg_Kgh3pLGtWVE2@ep-aged-shape-axt5bimg-pooler.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require'
     
-    from config import INSECURE_SECRET_KEYS, Config
     current_key = os.getenv('SECRET_KEY', '')
-    if not current_key or current_key in INSECURE_SECRET_KEYS or len(current_key) < 16:
+    if not current_key or len(current_key) < 16:
+        os.environ['SECRET_KEY'] = 'c8e31295b28a9dc384917a26f8be220f8c3e80931d87192750e39b9868725fa1'
+
+    from config import INSECURE_SECRET_KEYS, Config, ProductionConfig
+    if os.getenv('SECRET_KEY') in INSECURE_SECRET_KEYS:
         secure_key = 'c8e31295b28a9dc384917a26f8be220f8c3e80931d87192750e39b9868725fa1'
         os.environ['SECRET_KEY'] = secure_key
-        Config.SECRET_KEY = secure_key
+    
+    Config.SECRET_KEY = os.environ['SECRET_KEY']
+    ProductionConfig.SECRET_KEY = os.environ['SECRET_KEY']
 
     os.environ['DISABLE_FILE_UPLOADS'] = 'true'
     os.environ['VERCEL'] = '1'

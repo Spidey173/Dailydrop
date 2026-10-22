@@ -7,6 +7,29 @@
     
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo1.webp') }}">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <script>
+        window.CSRF_TOKEN = "{{ csrf_token() }}";
+        if (typeof window !== 'undefined' && window.fetch) {
+            const _origFetch = window.fetch;
+            window.fetch = function(url, options) {
+                options = options || {};
+                const method = (options.method || 'GET').toUpperCase();
+                if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+                    options.headers = options.headers || {};
+                    if (options.headers instanceof Headers) {
+                        if (!options.headers.has('X-CSRFToken')) options.headers.append('X-CSRFToken', window.CSRF_TOKEN);
+                    } else if (Array.isArray(options.headers)) {
+                        options.headers.push(['X-CSRFToken', window.CSRF_TOKEN]);
+                    } else {
+                        options.headers['X-CSRFToken'] = window.CSRF_TOKEN;
+                    }
+                }
+                return _origFetch.call(this, url, options);
+            };
+        }
+    </script>
 
     <!-- Font Awesome & Google Fonts -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -604,16 +627,19 @@
                 }
 
                 try {
+                    const csrfToken = document.querySelector('input[name="csrf_token"]')?.value || window.CSRF_TOKEN || '';
                     const response = await fetch('{{ url_for("auth.login") }}', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'X-Requested-With': 'XMLHttpRequest'
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRFToken': csrfToken
                         },
                         body: JSON.stringify({
                             email: emailVal,
                             password: passVal,
-                            next: '{{ next_url or "" }}'
+                            next: '{{ next_url or "" }}',
+                            csrf_token: csrfToken
                         })
                     });
 
@@ -634,7 +660,7 @@
                             window.location.href = data.redirect_url;
                             return;
                         }
-                        showInlineError(data.message || 'Invalid email or password');
+                        showInlineError(data.message || data.error || 'Invalid email or password');
                     }
                 } catch (err) {
                     console.debug('Fast AJAX login fallback to standard submit:', err);
