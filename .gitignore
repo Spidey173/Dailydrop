@@ -173,3 +173,4 @@ product_users.db
 uploads/
 static/uploads/
 !static/uploads/.gitkeep
+.env*
