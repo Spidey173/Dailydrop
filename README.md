@@ -15,7 +15,7 @@
 
 | 📦 Catalog Scale | 🧪 Test Suite | 🛡️ Concurrency & Integrity | ⚡ Live Search | 🌐 Deployment |
 | :---: | :---: | :---: | :---: | :---: |
-| **200+ Products across 10 Categories** | **61 / 61 Pytest Tests Passed (100%)** | **Server-Authoritative Pricing & Atomic Transactions** | **Sub-Second Client-Side Filtering** | **Vercel Serverless WSGI + Neon Cloud DB** |
+| **200+ Products across 10 Categories** | **61 / 61 Pytest Tests Passing** | **Server-Authoritative Pricing & Atomic Transactions** | **Sub-Second Client-Side Filtering** | **Vercel Serverless WSGI + Neon Cloud DB** |
 
 ---
 
@@ -23,7 +23,7 @@
 
 ### 1. 🛡️ Server-Authoritative Checkout & Catalog Integrity
 * **Problem**: Untrusted client-side payloads can forge item prices, submit nonexistent or outdated product IDs, or cause negative stock under concurrent checkout spikes.
-* **Implementation**: Checkout is 100% server-authoritative. The backend validates every cart item against the live database catalog, strictly rejecting unlisted items. Product prices, discounts, delivery fees, and order totals are recomputed from database records and saved as immutable snapshots into `orders` and `order_items`.
+* **Implementation**: Checkout is strictly server-authoritative. The backend validates every cart item against the live database catalog, rejecting unlisted items. Product prices, discounts, delivery fees, and order totals are recomputed from database records and saved as immutable snapshots into `orders` and `order_items`.
 * **Atomic Concurrency**: Inventory decrements use conditional SQL (`UPDATE products SET stock = stock - %s WHERE stock >= %s`) within an atomic transaction. If any single item lacks sufficient stock, the entire checkout rolls back cleanly.
 
 ### 2. 💳 Strict Payment Lifecycle & State Machine
@@ -126,7 +126,7 @@ Daily-Drop/
 
 ---
 
-## 🧪 Reproducible Testing & Dependency Guide (100% Green)
+## 🧪 Reproducible Testing & Dependency Guide
 
 The project includes **61 automated tests** covering authentication, cart calculations, forged price rejection, unknown product blocking, atomic checkout, stock race conditions, payment signature verification, webhook idempotency, and order state machine validation.
 
@@ -141,7 +141,7 @@ pip install -r requirements.txt
 pytest -v
 ```
 
-### 🛡️ Why DailyDrop Tests are 100% Deterministic & Offline
+### 🛡️ Why DailyDrop Tests Run Deterministically Offline
 * **Zero External DB Dependency**: Neon PostgreSQL connection pooling is seamlessly redirected during tests to a shared, in-memory SQLite fixture with automatic query translation (including stripping PostgreSQL `FOR UPDATE` row locks).
 * **Zero External Redis Dependency**: A thread-safe `MockRedisClient` provides Lua script emulation, atomic stock decrement simulation, and catalog cache keys.
 * **Resilient Background Task Dispatch**: `TaskService` includes defensive fallbacks—tests verify clean task dispatch whether worker libraries (`rq`) are active or uninstalled.
@@ -187,9 +187,9 @@ To provide a zero-idle-cost, interactive portfolio demo without requiring paid m
 | :--- | :--- | :--- |
 | **Hosting Model** | **Vercel Serverless WSGI Functions** (Ephemeral, stateless compute) | **Persistent Container Platform / Kubernetes** (`gunicorn app:app -w 4 -k gthread`) |
 | **Relational Database** | **Neon Cloud PostgreSQL** (Serverless pooling with `psycopg2`) | **Neon PostgreSQL** or **AWS RDS PostgreSQL** |
-| **Catalog, Cart, Auth & Orders** | **100% Supported**: Full 200+ product catalog, instant search, session cart, wishlist, and user auth | **100% Supported** |
-| **Server-Authoritative Pricing** | **100% Supported**: Client prices are recomputed against database catalog; forged prices rejected | **100% Supported** |
-| **Payment Verification & FSM** | **100% Supported**: Razorpay HMAC-SHA256 signature verification & finite state machine | **100% Supported**: Live Razorpay webhook listener with replay idempotency |
+| **Catalog, Cart, Auth & Orders** | **Native**: Full 200+ product catalog, instant search, session cart, wishlist, and user auth | **Native** |
+| **Server-Authoritative Pricing** | **Native**: Client prices are recomputed against database catalog; forged prices rejected | **Native** |
+| **Payment Verification & FSM** | **Native**: Razorpay HMAC-SHA256 signature verification & finite state machine | **Native**: Live Razorpay webhook listener with replay idempotency |
 | **File Uploads (Product Images)** | **Pre-seeded static assets**: Write uploads disabled via `DISABLE_FILE_UPLOADS=true` with clean 400 error responses (serverless lambda disk is ephemeral & read-only) | **External Cloud Object Storage** (AWS S3, Cloudflare R2, or Google Cloud Storage) with presigned URLs for media persistence |
 | **Background Task Workers (`worker.py`)** | **Inline Synchronous Fallback**: Order confirmations & notifications execute in-request (serverless functions terminate immediately and cannot host daemons) | **Dedicated Worker Service**: Long-running background worker (`Procfile: worker: python worker.py`) on Render/Railway/ECS consuming from Redis & transactional outbox |
 | **Caching & Distributed Locks** | **In-Memory Thread-Safe Fallback**: Resilient fallback cache when external Redis is offline | **Managed Redis Cluster** (Upstash, AWS ElastiCache, or Redis Cloud) for sub-ms atomic Lua locking |
