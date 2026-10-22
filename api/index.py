@@ -7,42 +7,67 @@ project_root = os.path.dirname(current_dir)
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
+from flask import Flask, render_template_string, jsonify
+
 try:
     from app import create_app
     app = create_app(os.getenv('FLASK_ENV', 'production'))
 except Exception as exc:
+    # If environment variables (DATABASE_URL / SECRET_KEY) are not yet configured on Vercel,
+    # serve an informative diagnostic Flask app instead of crashing the serverless runtime with FUNCTION_INVOCATION_FAILED
     init_err_msg = str(exc)
+    app = Flask(__name__)
 
-    def app(environ, start_response):
-        status = '503 Service Unavailable'
-        error_msg = init_err_msg
-        body = (
-            "<!DOCTYPE html>"
-            "<html><head><title>DailyDrop — Configuration Required</title>"
-            "<meta name='viewport' content='width=device-width, initial-scale=1'>"
-            "<style>body{font-family:system-ui,-apple-system,sans-serif;background:#0d1117;color:#c9d1d9;padding:40px;line-height:1.6;}"
-            ".card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:30px;max-width:700px;margin:40px auto;box-shadow:0 8px 24px rgba(0,0,0,0.5);}"
-            "h1{color:#58a6ff;font-size:24px;margin-top:0;}code{background:#21262d;padding:3px 6px;border-radius:4px;color:#f0883e;font-size:13px;}"
-            ".notice{background:#1f2937;border-left:4px solid #f59e0b;padding:12px;margin:16px 0;border-radius:4px;}"
-            "ul{padding-left:20px;}li{margin-bottom:8px;}</style></head><body>"
-            "<div class='card'>"
-            "<h1>🚀 DailyDrop Serverless Deployment Notice</h1>"
-            "<div class='notice'>"
-            f"<strong>Startup Diagnostic:</strong> <code>{error_msg}</code>"
-            "</div>"
-            "<p>The application is deployed on Vercel, but required production environment variables have not been configured yet.</p>"
-            "<p>To activate the store, navigate to your <strong>Vercel Dashboard &rarr; Settings &rarr; Environment Variables</strong> and configure:</p>"
-            "<ul>"
-            "<li><code>DATABASE_URL</code> &mdash; Neon PostgreSQL connection string (e.g. <code>postgresql://user:password@ep-xyz.neon.tech/neondb?sslmode=require</code>)</li>"
-            "<li><code>SECRET_KEY</code> &mdash; A unique 32-byte secret key (e.g. from <code>python -c \"import secrets; print(secrets.token_hex(32))\"</code>)</li>"
-            "<li><code>DISABLE_FILE_UPLOADS</code> &mdash; Set to <code>true</code> (required for Vercel's read-only serverless filesystem)</li>"
-            "</ul>"
-            "<p style='color:#8b949e;font-size:13px;margin-top:24px;'>Once configured, redeploy or trigger a new build on Vercel to launch the live storefront.</p>"
-            "</div></body></html>"
-        )
-        response_headers = [
-            ('Content-Type', 'text/html; charset=utf-8'),
-            ('Content-Length', str(len(body.encode('utf-8'))))
-        ]
-        start_response(status, response_headers)
-        return [body.encode('utf-8')]
+    @app.route('/healthz')
+    @app.route('/api/v1/health')
+    def serverless_health():
+        return jsonify({
+            "status": "degraded",
+            "message": "DailyDrop serverless runtime active; configuration pending",
+            "diagnostic": init_err_msg,
+            "environment": os.getenv('FLASK_ENV', 'production')
+        }), 503
+
+    @app.route('/', defaults={'path': ''})
+    @app.route('/<path:path>')
+    def configuration_required(path):
+        return render_template_string('''<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DailyDrop — Configuration Required</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0b0f19; color: #f3f4f6; margin: 0; padding: 40px 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }
+    .card { background: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 36px; max-width: 640px; width: 100%; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+    h1 { color: #10b981; font-size: 26px; margin: 0 0 12px 0; display: flex; align-items: center; gap: 8px; }
+    p { color: #9ca3af; line-height: 1.6; margin: 0 0 16px 0; }
+    .badge { display: inline-block; background: #1e3a8a; color: #93c5fd; padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: 600; margin-bottom: 20px; }
+    .diagnostic { background: #1f2937; border-left: 4px solid #f59e0b; padding: 14px 16px; border-radius: 4px; font-family: monospace; font-size: 13px; color: #fbbf24; margin-bottom: 24px; word-break: break-word; }
+    h3 { color: #e5e7eb; font-size: 16px; margin: 20px 0 10px 0; }
+    ul { margin: 0; padding-left: 20px; color: #d1d5db; line-height: 1.8; }
+    code { background: #1f2937; padding: 2px 6px; border-radius: 4px; color: #34d399; font-size: 13px; font-family: monospace; }
+    .footer { margin-top: 28px; padding-top: 16px; border-top: 1px solid #1f2937; font-size: 13px; color: #6b7280; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="badge">Vercel Serverless WSGI Active</div>
+    <h1>DailyDrop 🛒</h1>
+    <p>The application server is successfully running on Vercel, but required database credentials have not been configured in your hosting environment variables yet.</p>
+    <div class="diagnostic">
+      <strong>Startup Notice:</strong> {{ diagnostic }}
+    </div>
+    <h3>Next Steps to Activate Live Storefront:</h3>
+    <p>Add the following environment variables in your <strong>Vercel Dashboard &rarr; Project Settings &rarr; Environment Variables</strong>:</p>
+    <ul>
+      <li><code>DATABASE_URL</code> &mdash; Your Neon PostgreSQL connection string</li>
+      <li><code>SECRET_KEY</code> &mdash; A unique 32-byte secret key</li>
+      <li><code>DISABLE_FILE_UPLOADS</code> &mdash; Set to <code>true</code> (required for Vercel serverless)</li>
+    </ul>
+    <div class="footer">
+      DailyDrop E-Commerce &bull; Flask &bull; PostgreSQL &bull; Pytest Verified
+    </div>
+  </div>
+</body>
+</html>''', diagnostic=init_err_msg), 503
