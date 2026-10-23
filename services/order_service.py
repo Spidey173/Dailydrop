@@ -271,9 +271,133 @@ class OrderService:
             logger.error(f"Error saving order: {e}")
             return False, 'Failed to save order to database', None
 
+    @classmethod
+    def get_delivery_tracking(cls, order_date: Any, current_status: str = 'Processing') -> Dict[str, Any]:
+        """
+        Authoritative 10-minute quick-commerce delivery tracker.
+        Progression:
+          Step 1: Order Placed   (0 - 2 mins)
+          Step 2: Packing Items  (2 - 5 mins)
+          Step 3: On the Way     (5 - 10 mins)
+          Step 4: Delivered      (10+ mins)
+        """
+        from datetime import timezone
+
+        if not order_date:
+            order_date = datetime.now(timezone.utc)
+        elif isinstance(order_date, str):
+            try:
+                order_date = datetime.fromisoformat(order_date)
+            except Exception:
+                order_date = datetime.now(timezone.utc)
+
+        # Standardize order_date and current time strictly to UTC
+        if hasattr(order_date, 'tzinfo') and order_date.tzinfo:
+            order_date_utc = order_date.astimezone(timezone.utc)
+        else:
+            order_date_utc = order_date.replace(tzinfo=timezone.utc)
+
+        now_utc = datetime.now(timezone.utc)
+        elapsed_seconds = max(0.0, (now_utc - order_date_utc).total_seconds())
+        remaining_seconds = max(0.0, 600.0 - elapsed_seconds)
+
+        if current_status == 'Cancelled':
+            return {
+                'current_step': 0,
+                'is_cancelled': True,
+                'is_delivered': False,
+                'effective_status': 'Cancelled',
+                'badge_text': 'Cancelled',
+                'badge_class': 'status-cancelled',
+                'badge_icon': 'fas fa-ban',
+                'status_message': 'This order was cancelled',
+                'progress_percent': 0,
+                'elapsed_seconds': int(elapsed_seconds),
+                'remaining_seconds': 0,
+                'eta_text': 'Cancelled',
+                'order_date_iso': order_date.isoformat() if hasattr(order_date, 'isoformat') else str(order_date),
+            }
+
+        # If manually marked Delivered or time elapsed >= 10 mins (600 seconds)
+        if current_status == 'Delivered' or elapsed_seconds >= 600.0:
+            effective_status = 'Delivered'
+            current_step = 4
+            is_delivered = True
+            progress_percent = 100
+            badge_text = 'Delivered'
+            badge_class = 'status-delivered'
+            badge_icon = 'fas fa-circle-check'
+            status_message = 'Delivered to your doorstep'
+            eta_text = 'Delivered in 10 mins'
+        elif current_status in ('Out for Delivery', 'Shipped') or elapsed_seconds >= 300.0:
+            # Stage 3: Out for Delivery (5 - 10 mins)
+            effective_status = 'Out for Delivery'
+            current_step = 3
+            is_delivered = False
+            progress_percent = min(95, 60 + int(((elapsed_seconds - 300.0) / 300.0) * 35))
+            badge_text = 'Out for Delivery'
+            badge_class = 'status-delivery'
+            badge_icon = 'fas fa-motorcycle'
+            rem_mins = max(1, int(remaining_seconds / 60))
+            status_message = 'Rider is on the way to your address'
+            eta_text = f'Arriving in ~{rem_mins} min{"s" if rem_mins > 1 else ""}'
+        elif current_status == 'Packed' or elapsed_seconds >= 120.0:
+            # Stage 2: Packing (2 - 5 mins)
+            effective_status = 'Packed'
+            current_step = 2
+            is_delivered = False
+            progress_percent = min(58, 25 + int(((elapsed_seconds - 120.0) / 180.0) * 33))
+            badge_text = 'Packing Order'
+            badge_class = 'status-packing'
+            badge_icon = 'fas fa-box-open'
+            rem_mins = max(1, int(remaining_seconds / 60))
+            status_message = 'Items packed & quality checked at dark store'
+            eta_text = f'Arriving in ~{rem_mins} mins'
+        else:
+            # Stage 1: Order Placed (0 - 2 mins)
+            effective_status = current_status if current_status not in ('Processing', 'Created') else 'Order Placed'
+            current_step = 1
+            is_delivered = False
+            progress_percent = min(22, 10 + int((elapsed_seconds / 120.0) * 12))
+            badge_text = 'Order Confirmed'
+            badge_class = 'status-processing'
+            badge_icon = 'fas fa-receipt'
+            status_message = 'Order placed & confirmed with nearby hub'
+            eta_text = '10-Min Fast Delivery'
+
+        return {
+            'current_step': current_step,
+            'effective_status': effective_status,
+            'is_cancelled': False,
+            'is_delivered': is_delivered,
+            'badge_text': badge_text,
+            'badge_class': badge_class,
+            'badge_icon': badge_icon,
+            'status_message': status_message,
+            'progress_percent': progress_percent,
+            'elapsed_seconds': int(elapsed_seconds),
+            'remaining_seconds': int(remaining_seconds),
+            'eta_text': eta_text,
+            'order_date_iso': order_date.isoformat() if hasattr(order_date, 'isoformat') else str(order_date),
+        }
+
     @staticmethod
-    def get_user_orders(user_id: int) -> List[Dict[str, Any]]:
-        """Retrieve order history for a customer with normalized order_items and sequential numbering."""
+    def get_order_by_id(order_id: int) -> Optional[Dict[str, Any]]:
+        """Retrieve a single order by order_id."""
+        from psycopg2.extras import RealDictCursor
+        try:
+            with get_db_connection() as conn:
+                with conn.cursor(cursor_factory=RealDictCursor) as cursor:
+                    cursor.execute("SELECT * FROM orders WHERE order_id = %s", (order_id,))
+                    row = cursor.fetchone()
+                    return dict(row) if row else None
+        except DatabaseError as e:
+            logger.error(f"Error fetching order #{order_id}: {e}")
+            return None
+
+    @classmethod
+    def get_user_orders(cls, user_id: int) -> List[Dict[str, Any]]:
+        """Retrieve order history for a customer with normalized order_items, sequential numbering, and live tracking."""
         from psycopg2.extras import RealDictCursor
         try:
             with get_db_connection() as conn:
@@ -349,7 +473,35 @@ class OrderService:
                         order_dict['order_date'] = datetime.fromisoformat(order_dict['order_date'])
                     except Exception:
                         pass
+
+                # Enrich with 10-minute delivery tracking stages
+                tracking = cls.get_delivery_tracking(order_dict.get('order_date'), order_dict.get('status', 'Processing'))
+                order_dict['tracking'] = tracking
+                if tracking.get('is_delivered') and order_dict.get('status') not in ('Delivered', 'Cancelled'):
+                    order_dict['status'] = 'Delivered'
                 parsed_orders.append(order_dict)
+
+            # Auto-promote orders older than 10 mins to 'Delivered' in DB if not already terminal
+            delivered_ids = [
+                parsed_orders[idx]['order_id']
+                for idx, raw_order in enumerate(order_rows)
+                if parsed_orders[idx].get('tracking', {}).get('is_delivered')
+                and str(parsed_orders[idx].get('status')) == 'Delivered'
+                and dict(raw_order).get('status') not in ('Delivered', 'Cancelled')
+            ]
+            if delivered_ids:
+                try:
+                    with get_db_connection() as conn:
+                        with conn.cursor() as cursor:
+                            format_strings = ','.join(['%s'] * len(delivered_ids))
+                            cursor.execute(f'''
+                                UPDATE orders
+                                SET status = 'Delivered'
+                                WHERE order_id IN ({format_strings})
+                                  AND status NOT IN ('Delivered', 'Cancelled')
+                            ''', tuple(delivered_ids))
+                except Exception as ex:
+                    logger.warning(f"Could not auto-promote orders to Delivered in DB: {ex}")
 
             return parsed_orders
         except DatabaseError as e:

@@ -194,3 +194,49 @@ def test_atomic_inventory_decrement_and_race_prevention(test_user):
 
     finally:
         delete_product(product_id)
+
+
+def test_ten_minute_delivery_tracking_progression(client, test_user):
+    """Verify that orders advance through all 4 stages within 10 minutes and transition to Delivered after 10m."""
+    from datetime import datetime, timedelta, timezone
+
+    now = datetime.now(timezone.utc)
+
+    # 1. Stage 1: Order Placed (< 2 minutes old)
+    t1 = OrderService.get_delivery_tracking(now - timedelta(minutes=1), 'Processing')
+    assert t1['current_step'] == 1
+    assert t1['is_delivered'] is False
+    assert t1['badge_text'] == 'Order Confirmed'
+    assert 'Arriving in' in t1['eta_text'] or '10-Min' in t1['eta_text']
+
+    # 2. Stage 2: Packing (2 to 5 minutes old)
+    t2 = OrderService.get_delivery_tracking(now - timedelta(minutes=3), 'Processing')
+    assert t2['current_step'] == 2
+    assert t2['is_delivered'] is False
+    assert t2['badge_text'] == 'Packing Order'
+    assert 'pack' in t2['status_message'].lower()
+
+    # 3. Stage 3: Out for Delivery (5 to 10 minutes old)
+    t3 = OrderService.get_delivery_tracking(now - timedelta(minutes=7), 'Processing')
+    assert t3['current_step'] == 3
+    assert t3['is_delivered'] is False
+    assert t3['badge_text'] == 'Out for Delivery'
+    assert 'Rider' in t3['status_message']
+
+    # 4. Stage 4: Delivered (>= 10 minutes old)
+    t4 = OrderService.get_delivery_tracking(now - timedelta(minutes=11), 'Processing')
+    assert t4['current_step'] == 4
+    assert t4['is_delivered'] is True
+    assert t4['badge_text'] == 'Delivered'
+    assert t4['progress_percent'] == 100
+    assert 'doorstep' in t4['status_message']
+
+    # 5. Verify /orders renders the 4-step tracker
+    res = client.get('/orders')
+    assert res.status_code == 200
+    assert b'progress-track-wrapper' in res.data
+    assert b'Order Placed' in res.data
+    assert b'Packing' in res.data
+    assert b'On the Way' in res.data
+    assert b'Delivered' in res.data
+

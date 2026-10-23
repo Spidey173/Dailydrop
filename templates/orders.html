@@ -11,6 +11,9 @@
   <!-- Bootstrap, FontAwesome & Google Fonts -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   
   <!-- Centralized Stylesheet -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
@@ -18,11 +21,12 @@
   <style>
     body {
       background-color: var(--bg-base);
+      font-family: 'Outfit', sans-serif;
     }
     
     .orders-page {
-      max-width: 1000px;
-      margin: 120px auto 60px;
+      max-width: 1040px;
+      margin: 110px auto 60px;
       padding: 0 20px;
     }
     
@@ -30,26 +34,47 @@
       font-size: 2.2rem;
       font-weight: 800;
       color: var(--text-primary);
-      margin-bottom: 30px;
+      margin-bottom: 24px;
       display: flex;
       align-items: center;
       gap: 12px;
     }
+
+    .orders-subtitle-banner {
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(52, 211, 153, 0.2);
+      border-radius: var(--radius-sm);
+      padding: 12px 18px;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #D1FAE5;
+      font-size: 0.92rem;
+    }
+    .orders-subtitle-banner i {
+      color: #34D399;
+      font-size: 1.25rem;
+    }
     
     .order-card {
-      background: rgba(255, 255, 255, 0.08);
+      background: rgba(16, 24, 18, 0.85);
       border-radius: var(--radius-md);
-      border: 1px solid var(--border-glass);
+      border: 1px solid rgba(52, 211, 153, 0.18);
       padding: 24px;
-      margin-bottom: 24px;
-      box-shadow: var(--shadow-md);
+      margin-bottom: 28px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
       transition: var(--transition-normal);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      position: relative;
+      overflow: hidden;
     }
     
     .order-card:hover {
       transform: translateY(-2px);
-      box-shadow: var(--shadow-md);
-      border-color: var(--border-glow);
+      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.5);
+      border-color: rgba(52, 211, 153, 0.4);
     }
     
     .order-card-header {
@@ -57,33 +82,20 @@
       justify-content: space-between;
       align-items: flex-start;
       padding-bottom: 18px;
-      border-bottom: 1px solid var(--border-subtle);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
       flex-wrap: wrap;
       gap: 16px;
     }
     
     .order-meta-info h3 {
-      font-size: 1.25rem;
+      font-size: 1.35rem;
       font-weight: 850;
       color: var(--accent);
       margin-bottom: 6px;
       display: flex;
       align-items: center;
       flex-wrap: wrap;
-      gap: 8px;
-    }
-    
-    .order-ref-badge {
-      font-size: 0.78rem;
-      font-weight: 600;
-      padding: 3px 10px;
-      border-radius: 20px;
-      background: rgba(16, 185, 129, 0.12);
-      color: var(--accent);
-      border: 1px solid rgba(52, 211, 153, 0.25);
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
+      gap: 10px;
     }
     
     .order-date-badge {
@@ -92,20 +104,60 @@
       display: flex;
       align-items: center;
       gap: 6px;
+      margin-bottom: 6px;
     }
     
+    /* Top Header Badge */
     .order-status-badge {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 7px;
       padding: 6px 14px;
       border-radius: 30px;
-      font-size: 0.8rem;
+      font-size: 0.82rem;
       font-weight: 700;
-      background: var(--accent-light);
-      color: var(--accent);
-      border: 1px solid rgba(12, 131, 31, 0.15);
-      margin-top: 10px;
+      letter-spacing: 0.2px;
+      transition: all 0.3s ease;
+      margin-top: 6px;
+    }
+
+    .order-status-badge.status-delivered,
+    .status-pill.status-delivered {
+      background: rgba(16, 185, 129, 0.16);
+      color: #34D399;
+      border: 1px solid rgba(52, 211, 153, 0.4);
+      box-shadow: 0 0 14px rgba(16, 185, 129, 0.25);
+    }
+
+    .order-status-badge.status-delivery,
+    .status-pill.status-delivery {
+      background: rgba(56, 189, 248, 0.16);
+      color: #38BDF8;
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      box-shadow: 0 0 14px rgba(56, 189, 248, 0.25);
+    }
+
+    .order-status-badge.status-packing,
+    .status-pill.status-packing {
+      background: rgba(245, 158, 11, 0.16);
+      color: #FBBF24;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      box-shadow: 0 0 14px rgba(245, 158, 11, 0.25);
+    }
+
+    .order-status-badge.status-processing,
+    .status-pill.status-processing {
+      background: rgba(168, 85, 247, 0.16);
+      color: #C084FC;
+      border: 1px solid rgba(168, 85, 247, 0.4);
+      box-shadow: 0 0 14px rgba(168, 85, 247, 0.25);
+    }
+
+    .order-status-badge.status-cancelled,
+    .status-pill.status-cancelled {
+      background: rgba(239, 68, 68, 0.16);
+      color: #F87171;
+      border: 1px solid rgba(239, 68, 68, 0.4);
     }
     
     .order-cost-info {
@@ -113,8 +165,8 @@
     }
     
     .order-total-amount {
-      font-size: 1.35rem;
-      font-weight: 800;
+      font-size: 1.45rem;
+      font-weight: 850;
       color: var(--text-primary);
       margin-bottom: 6px;
     }
@@ -125,7 +177,212 @@
       max-width: 320px;
       line-height: 1.4;
     }
+
+    /* ==============================================================
+       10-Minute 4-Step Quick Commerce Delivery Tracker
+       ============================================================== */
+    .order-tracker-container {
+      background: rgba(8, 16, 11, 0.7);
+      border: 1px solid rgba(52, 211, 153, 0.22);
+      border-radius: 16px;
+      padding: 22px 24px;
+      margin: 20px 0 24px;
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05), 0 8px 24px rgba(0, 0, 0, 0.25);
+      position: relative;
+    }
+
+    .tracker-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 24px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .tracker-status-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .tracker-message {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .tracker-timer {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      color: #FCD34D;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .tracker-timer strong {
+      font-weight: 800;
+      color: #FEF08A;
+      letter-spacing: 0.5px;
+    }
+
+    .tracker-delivered-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(16, 185, 129, 0.14);
+      border: 1px solid rgba(52, 211, 153, 0.35);
+      color: #34D399;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
+    }
+
+    .progress-track-wrapper {
+      position: relative;
+      padding: 12px 10px 4px;
+    }
+
+    .progress-bar-line {
+      position: absolute;
+      top: 34px;
+      left: 10%;
+      right: 10%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #10B981 0%, #34D399 50%, #6EE7B7 100%);
+      box-shadow: 0 0 12px rgba(52, 211, 153, 0.7);
+      border-radius: 4px;
+      transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .tracker-steps {
+      display: flex;
+      justify-content: space-between;
+      position: relative;
+      z-index: 2;
+    }
+
+    .step-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      width: 25%;
+    }
+
+    .step-node {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.05rem;
+      transition: all 0.3s ease;
+    }
+
+    .step-item.pending .step-node {
+      background: #09120c;
+      border: 2px solid rgba(255, 255, 255, 0.16);
+      color: rgba(255, 255, 255, 0.35);
+    }
+
+    .step-item.completed .step-node {
+      background: linear-gradient(135deg, #10B981, #059669);
+      border: 2px solid #34D399;
+      color: #ffffff;
+      box-shadow: 0 0 14px rgba(16, 185, 129, 0.45);
+    }
+
+    .step-item.active .step-node {
+      background: linear-gradient(135deg, #059669, #047857);
+      border: 2px solid #6EE7B7;
+      color: #ffffff;
+      animation: pulseGlow 1.8s infinite;
+    }
+
+    @keyframes pulseGlow {
+      0% {
+        box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7), 0 0 10px rgba(52, 211, 153, 0.4);
+        transform: scale(1);
+      }
+      50% {
+        box-shadow: 0 0 0 8px rgba(52, 211, 153, 0), 0 0 18px rgba(52, 211, 153, 0.7);
+        transform: scale(1.06);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(52, 211, 153, 0), 0 0 10px rgba(52, 211, 153, 0.4);
+        transform: scale(1);
+      }
+    }
+
+    .step-label {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .step-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      transition: color 0.3s;
+    }
+
+    .step-item.pending .step-title {
+      color: rgba(255, 255, 255, 0.45);
+    }
+
+    .step-item.completed .step-title {
+      color: #34D399;
+    }
+
+    .step-item.active .step-title {
+      color: #6EE7B7;
+    }
+
+    .step-time {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .step-item.completed .step-time {
+      color: rgba(52, 211, 153, 0.75);
+    }
     
+    /* Ordered Items Section */
     .order-items-section {
       margin-top: 20px;
     }
@@ -155,8 +412,8 @@
     }
     
     .product-row:hover {
-      border-color: var(--border-glass);
-      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(52, 211, 153, 0.3);
+      background: rgba(255, 255, 255, 0.05);
     }
     
     .product-row img {
@@ -200,9 +457,9 @@
     }
     
     .empty-orders-card {
-      background: rgba(255, 255, 255, 0.08);
+      background: rgba(16, 24, 18, 0.8);
       border-radius: var(--radius-lg);
-      border: 1px solid var(--border-glass);
+      border: 1px solid rgba(52, 211, 153, 0.2);
       padding: 60px;
       text-align: center;
       box-shadow: var(--shadow-lg);
@@ -244,11 +501,12 @@
       align-items: center;
       gap: 8px;
       transition: var(--transition-normal);
+      text-decoration: none;
     }
     
     .shop-now-btn:hover {
       transform: translateY(-2px);
-      box-shadow: var(--shadow-primary-glow);
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
       color: white;
     }
     
@@ -265,6 +523,28 @@
       .order-delivery-address {
         max-width: 100%;
       }
+      .order-tracker-container {
+        padding: 16px 14px;
+      }
+      .tracker-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+      .step-node {
+        width: 36px;
+        height: 36px;
+        font-size: 0.9rem;
+      }
+      .progress-bar-line {
+        top: 30px;
+      }
+      .step-title {
+        font-size: 0.74rem;
+      }
+      .step-time {
+        font-size: 0.65rem;
+      }
     }
   </style>
   <script src="{{ url_for('static', filename='js/wishlist.js') }}"></script>
@@ -280,8 +560,8 @@
           </a>
           <div class="nav-actions">
               {% if 'user_id' in session %}
-<a href="{{ url_for('orders') }}" class="login-btn-outline active"><i class="fas fa-box"></i> My Orders</a>
-                                    <a href="{{ url_for('wishlist') }}" class="wishlist-nav-icon" title="My Wishlist">
+                  <a href="{{ url_for('orders') }}" class="login-btn-outline active"><i class="fas fa-box"></i> My Orders</a>
+                  <a href="{{ url_for('wishlist') }}" class="wishlist-nav-icon" title="My Wishlist">
                       <i class="fas fa-heart"></i> <span class="nav-text">Wishlist</span> <span id="wishlist-count" class="wishlist-badge">0</span>
                   </a>
                   <a href="{{ url_for('logout') }}" class="login-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
@@ -297,28 +577,33 @@
 
   <div class="orders-page">
     <h2 class="orders-header"><i class="fas fa-box-open" style="color: var(--accent);"></i> My Orders</h2>
+    <div class="orders-subtitle-banner">
+        <i class="fas fa-bolt"></i>
+        <span><strong>10-Minute Express Grocery Guarantee:</strong> Watch your orders move live through our 4 fulfillment stages—from packing to delivery at your doorstep!</span>
+    </div>
 
     {% if not orders %}
     <div class="empty-orders-card">
         <div class="empty-orders-icon"><i class="fas fa-box-open"></i></div>
         <h3>No orders found</h3>
-        <p>You haven't placed any orders yet. Let's fill your kitchen with the fresh items!</p>
+        <p>You haven't placed any orders yet. Let's fill your kitchen with fresh items delivered in 10 minutes!</p>
         <a href="{{ url_for('index') }}" class="shop-now-btn">
             Start Shopping <i class="fas fa-shopping-basket"></i>
         </a>
     </div>
     {% else %}
         {% for order in orders %}
-        <div class="order-card">
+        <div class="order-card" id="order-card-{{ order.order_id }}">
             <div class="order-card-header">
                 <div class="order-meta-info">
                     <h3>Order #{{ order.user_order_number|default(loop.revindex) }}</h3>
                     <div class="order-date-badge">
                         <i class="far fa-calendar-alt"></i>
-                        Ordered on {{ order.order_date.strftime('%d %b') }}
+                        Ordered on {{ order.order_date.strftime('%d %b, %I:%M %p') if order.order_date.strftime is defined else order.order_date }}
                     </div>
-                    <span class="order-status-badge">
-                        <i class="fas fa-truck-loading"></i> On the Way (10 mins)
+                    <span class="order-status-badge {{ order.tracking.badge_class|default('status-processing') }}" id="header-badge-{{ order.order_id }}">
+                        <i class="{{ order.tracking.badge_icon|default('fas fa-receipt') }}"></i>
+                        <span class="badge-label">{{ order.tracking.badge_text|default('Order Confirmed') }}</span>
                     </span>
                 </div>
                 <div class="order-cost-info">
@@ -328,6 +613,89 @@
                     <div class="order-delivery-address">
                         <i class="fas fa-map-marker-alt me-1" style="color: var(--accent);"></i>
                         {{ order.address }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= Live 4-Process 10-Minute Order Tracker ================= -->
+            <div class="order-tracker-container" 
+                 id="tracker-{{ order.order_id }}" 
+                 data-order-id="{{ order.order_id }}"
+                 data-order-date="{{ order.tracking.order_date_iso|default('') }}"
+                 data-status="{{ order.status }}"
+                 data-delivered="{{ 'true' if (order.tracking and order.tracking.is_delivered) else 'false' }}">
+
+                <div class="tracker-header">
+                    <div class="tracker-status-info">
+                        <span class="status-pill {{ order.tracking.badge_class|default('status-processing') }}">
+                            <i class="{{ order.tracking.badge_icon|default('fas fa-receipt') }}"></i>
+                            <span class="status-text">{{ order.tracking.badge_text|default('Order Confirmed') }}</span>
+                        </span>
+                        <span class="tracker-message">{{ order.tracking.status_message|default('Fulfilling your 10-minute order') }}</span>
+                    </div>
+
+                    {% if order.tracking and order.tracking.is_delivered %}
+                    <div class="tracker-delivered-tag">
+                        <i class="fas fa-check-circle text-success"></i>
+                        <span>Delivered in 10 mins</span>
+                    </div>
+                    {% elif order.tracking and not order.tracking.is_cancelled %}
+                    <div class="tracker-timer" id="timer-{{ order.order_id }}">
+                        <i class="fas fa-bolt text-warning"></i>
+                        <span>Arriving in <strong class="timer-countdown">calculating...</strong></span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- 4-Step Progress Visualization -->
+                <div class="progress-track-wrapper">
+                    <div class="progress-bar-line">
+                        <div class="progress-bar-fill" style="width: {{ order.tracking.progress_percent|default(20) }}%;"></div>
+                    </div>
+                    <div class="tracker-steps">
+                        <!-- Step 1: Order Placed -->
+                        <div class="step-item step-1 {% if order.tracking and order.tracking.current_step > 1 %}completed{% elif order.tracking and order.tracking.current_step == 1 %}active{% else %}pending{% endif %}">
+                            <div class="step-node">
+                                <i class="fas fa-receipt"></i>
+                            </div>
+                            <div class="step-label">
+                                <span class="step-title">Order Placed</span>
+                                <span class="step-time">0 min</span>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Packing -->
+                        <div class="step-item step-2 {% if order.tracking and order.tracking.current_step > 2 %}completed{% elif order.tracking and order.tracking.current_step == 2 %}active{% else %}pending{% endif %}">
+                            <div class="step-node">
+                                <i class="fas fa-box-open"></i>
+                            </div>
+                            <div class="step-label">
+                                <span class="step-title">Packing</span>
+                                <span class="step-time">2 mins</span>
+                            </div>
+                        </div>
+
+                        <!-- Step 3: Out for Delivery -->
+                        <div class="step-item step-3 {% if order.tracking and order.tracking.current_step > 3 %}completed{% elif order.tracking and order.tracking.current_step == 3 %}active{% else %}pending{% endif %}">
+                            <div class="step-node">
+                                <i class="fas fa-motorcycle"></i>
+                            </div>
+                            <div class="step-label">
+                                <span class="step-title">On the Way</span>
+                                <span class="step-time">5 mins</span>
+                            </div>
+                        </div>
+
+                        <!-- Step 4: Delivered -->
+                        <div class="step-item step-4 {% if order.tracking and order.tracking.is_delivered %}completed active{% else %}pending{% endif %}">
+                            <div class="step-node">
+                                <i class="fas fa-house-circle-check"></i>
+                            </div>
+                            <div class="step-label">
+                                <span class="step-title">Delivered</span>
+                                <span class="step-time">10 mins</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -359,12 +727,165 @@
   <script>
     document.addEventListener('DOMContentLoaded', () => {
         updateCartCount();
+        initDeliveryTrackers();
     });
 
     function updateCartCount() {
         const cart = JSON.parse(localStorage.getItem('cart')) || [];
         const count = cart.reduce((total, item) => total + item.quantity, 0);
-        document.getElementById('cart-count').textContent = count;
+        const countEl = document.getElementById('cart-count');
+        if (countEl) countEl.textContent = count;
+    }
+
+    function initDeliveryTrackers() {
+        const trackers = document.querySelectorAll('.order-tracker-container');
+        if (!trackers.length) return;
+
+        function updateTrackers() {
+            const now = Date.now();
+
+            trackers.forEach(tracker => {
+                const isCancelled = tracker.getAttribute('data-status') === 'Cancelled';
+                if (isCancelled) return;
+
+                const dateStr = tracker.getAttribute('data-order-date');
+                if (!dateStr) return;
+
+                const orderDate = new Date(dateStr).getTime();
+                if (isNaN(orderDate)) return;
+
+                const elapsedSeconds = Math.max(0, (now - orderDate) / 1000);
+                const remainingSeconds = Math.max(0, 600 - elapsedSeconds);
+                const isDelivered = elapsedSeconds >= 600 || tracker.getAttribute('data-status') === 'Delivered';
+
+                const orderId = tracker.getAttribute('data-order-id');
+                const fillBar = tracker.querySelector('.progress-bar-fill');
+                const statusPill = tracker.querySelector('.status-pill');
+                const statusText = tracker.querySelector('.status-text');
+                const statusIcon = tracker.querySelector('.status-pill i');
+                const trackerMessage = tracker.querySelector('.tracker-message');
+                const timerEl = tracker.querySelector('.tracker-timer');
+                const headerBadge = document.getElementById(`header-badge-${orderId}`);
+                
+                const step1 = tracker.querySelector('.step-1');
+                const step2 = tracker.querySelector('.step-2');
+                const step3 = tracker.querySelector('.step-3');
+                const step4 = tracker.querySelector('.step-4');
+
+                if (isDelivered) {
+                    tracker.setAttribute('data-delivered', 'true');
+                    if (fillBar) fillBar.style.width = '100%';
+
+                    if (statusPill) {
+                        statusPill.className = 'status-pill status-delivered';
+                        if (statusIcon) statusIcon.className = 'fas fa-circle-check';
+                        if (statusText) statusText.textContent = 'Delivered';
+                    }
+                    if (trackerMessage) trackerMessage.textContent = 'Delivered to your doorstep';
+                    if (headerBadge) {
+                        headerBadge.className = 'order-status-badge status-delivered';
+                        headerBadge.innerHTML = '<i class="fas fa-circle-check"></i> <span class="badge-label">Delivered</span>';
+                    }
+
+                    if (timerEl) {
+                        const deliveredTag = document.createElement('div');
+                        deliveredTag.className = 'tracker-delivered-tag';
+                        deliveredTag.innerHTML = '<i class="fas fa-check-circle text-success"></i> <span>Delivered in 10 mins</span>';
+                        timerEl.replaceWith(deliveredTag);
+                    }
+
+                    [step1, step2, step3, step4].forEach(s => {
+                        if (s) {
+                            s.classList.remove('active', 'pending');
+                            s.classList.add('completed');
+                        }
+                    });
+                    if (step4) step4.classList.add('active');
+
+                    // If auto-transitioned on client, trigger silent background sync to update server DB
+                    if (tracker.getAttribute('data-synced') !== 'true') {
+                        tracker.setAttribute('data-synced', 'true');
+                        fetch(`/api/v1/orders/${orderId}/status`, { credentials: 'same-origin' }).catch(() => {});
+                    }
+                    return;
+                }
+
+                // In Progress (< 600 seconds)
+                const remMins = Math.floor(remainingSeconds / 60);
+                const remSecs = Math.floor(remainingSeconds % 60);
+                const formattedTime = `${remMins}m ${remSecs < 10 ? '0' : ''}${remSecs}s`;
+
+                const timerCount = tracker.querySelector('.timer-countdown');
+                if (timerCount) timerCount.textContent = formattedTime;
+
+                if (elapsedSeconds < 120) {
+                    // Stage 1: Order Placed (0 - 2 mins)
+                    const percent = Math.min(22, Math.max(10, (elapsedSeconds / 120) * 22));
+                    if (fillBar) fillBar.style.width = percent + '%';
+                    
+                    if (statusPill) {
+                        statusPill.className = 'status-pill status-processing';
+                        if (statusIcon) statusIcon.className = 'fas fa-receipt';
+                        if (statusText) statusText.textContent = 'Order Confirmed';
+                    }
+                    if (trackerMessage) trackerMessage.textContent = 'Order placed & confirmed with nearby hub';
+                    if (headerBadge) {
+                        headerBadge.className = 'order-status-badge status-processing';
+                        headerBadge.innerHTML = `<i class="fas fa-receipt"></i> <span class="badge-label">Order Confirmed (${formattedTime})</span>`;
+                    }
+
+                    if (step1) { step1.className = 'step-item step-1 active'; }
+                    if (step2) { step2.className = 'step-item step-2 pending'; }
+                    if (step3) { step3.className = 'step-item step-3 pending'; }
+                    if (step4) { step4.className = 'step-item step-4 pending'; }
+
+                } else if (elapsedSeconds < 300) {
+                    // Stage 2: Packing (2 - 5 mins)
+                    const percent = Math.min(58, Math.max(25, 25 + ((elapsedSeconds - 120) / 180) * 33));
+                    if (fillBar) fillBar.style.width = percent + '%';
+
+                    if (statusPill) {
+                        statusPill.className = 'status-pill status-packing';
+                        if (statusIcon) statusIcon.className = 'fas fa-box-open';
+                        if (statusText) statusText.textContent = 'Packing Order';
+                    }
+                    if (trackerMessage) trackerMessage.textContent = 'Items packed & quality checked at dark store';
+                    if (headerBadge) {
+                        headerBadge.className = 'order-status-badge status-packing';
+                        headerBadge.innerHTML = `<i class="fas fa-box-open"></i> <span class="badge-label">Packing Order (${formattedTime})</span>`;
+                    }
+
+                    if (step1) { step1.className = 'step-item step-1 completed'; }
+                    if (step2) { step2.className = 'step-item step-2 active'; }
+                    if (step3) { step3.className = 'step-item step-3 pending'; }
+                    if (step4) { step4.className = 'step-item step-4 pending'; }
+
+                } else {
+                    // Stage 3: Out for Delivery (5 - 10 mins)
+                    const percent = Math.min(95, Math.max(60, 60 + ((elapsedSeconds - 300) / 300) * 35));
+                    if (fillBar) fillBar.style.width = percent + '%';
+
+                    if (statusPill) {
+                        statusPill.className = 'status-pill status-delivery';
+                        if (statusIcon) statusIcon.className = 'fas fa-motorcycle';
+                        if (statusText) statusText.textContent = 'Out for Delivery';
+                    }
+                    if (trackerMessage) trackerMessage.textContent = 'Rider is on the way to your address';
+                    if (headerBadge) {
+                        headerBadge.className = 'order-status-badge status-delivery';
+                        headerBadge.innerHTML = `<i class="fas fa-motorcycle"></i> <span class="badge-label">On the Way (${formattedTime})</span>`;
+                    }
+
+                    if (step1) { step1.className = 'step-item step-1 completed'; }
+                    if (step2) { step2.className = 'step-item step-2 completed'; }
+                    if (step3) { step3.className = 'step-item step-3 active'; }
+                    if (step4) { step4.className = 'step-item step-4 pending'; }
+                }
+            });
+        }
+
+        updateTrackers();
+        setInterval(updateTrackers, 1000);
     }
   </script>
 </body>

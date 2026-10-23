@@ -533,6 +533,28 @@ def orders() -> str:
     return render_template('orders.html', orders=user_orders)
 
 
+@cart_bp.route('/api/v1/orders/<int:order_id>/status', methods=['GET', 'POST'], endpoint='api_order_status')
+@require_login
+def api_order_status(order_id: int):
+    """Return live 10-minute fulfillment status and auto-sync delivered state."""
+    user_id = session.get('user_id')
+    order = OrderService.get_order_by_id(order_id)
+    if not order or order.get('user_id') != user_id:
+        return jsonify({'success': False, 'message': 'Order not found'}), 404
+
+    tracking = OrderService.get_delivery_tracking(order.get('order_date'), order.get('status'))
+    if tracking.get('is_delivered') and order.get('status') not in ('Delivered', 'Cancelled'):
+        OrderService.update_status(order_id, 'Delivered')
+        order['status'] = 'Delivered'
+
+    return jsonify({
+        'success': True,
+        'order_id': order_id,
+        'status': order.get('status'),
+        'tracking': tracking
+    }), 200
+
+
 # ==================== Wishlist Routes ====================
 
 @cart_bp.route('/wishlist', endpoint='wishlist')
