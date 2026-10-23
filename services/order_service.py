@@ -271,17 +271,48 @@ class OrderService:
             logger.error(f"Error saving order: {e}")
             return False, 'Failed to save order to database', None
 
+    SCHEDULE_PROFILES = [
+        # Distinct fulfillment curves tailored per order (all guaranteed strictly under 10 minutes)
+        {"pack": 1.5, "transit": 4.0, "target": 7.0, "pack_text": "1.5 mins", "transit_text": "4 mins", "target_text": "7 mins"},
+        {"pack": 2.0, "transit": 5.0, "target": 8.0, "pack_text": "2 mins", "transit_text": "5 mins", "target_text": "8 mins"},
+        {"pack": 1.0, "transit": 3.5, "target": 6.0, "pack_text": "1 min", "transit_text": "3.5 mins", "target_text": "6 mins"},
+        {"pack": 2.0, "transit": 5.5, "target": 9.0, "pack_text": "2 mins", "transit_text": "5.5 mins", "target_text": "9 mins"},
+        {"pack": 1.0, "transit": 4.0, "target": 7.0, "pack_text": "1 min", "transit_text": "4 mins", "target_text": "7 mins"},
+        {"pack": 1.5, "transit": 4.5, "target": 8.0, "pack_text": "1.5 mins", "transit_text": "4.5 mins", "target_text": "8 mins"},
+    ]
+
     @classmethod
-    def get_delivery_tracking(cls, order_date: Any, current_status: str = 'Processing') -> Dict[str, Any]:
+    def get_delivery_tracking(cls, order_date: Any, current_status: str = 'Processing', order_id: Optional[int] = None) -> Dict[str, Any]:
         """
-        Authoritative 10-minute quick-commerce delivery tracker.
+        Authoritative quick-commerce delivery tracker with varied realistic timings strictly under 10 minutes.
         Progression:
-          Step 1: Order Placed   (0 - 2 mins)
-          Step 2: Packing Items  (2 - 5 mins)
-          Step 3: On the Way     (5 - 10 mins)
-          Step 4: Delivered      (10+ mins)
+          Step 1: Order Placed   (0 -> pack_seconds)
+          Step 2: Packing Items  (pack_seconds -> transit_seconds)
+          Step 3: On the Way     (transit_seconds -> target_seconds)
+          Step 4: Delivered      (target_seconds+ mins, guaranteed < 10 mins)
         """
-        from datetime import timezone
+        from datetime import timezone, timedelta
+
+        # Select deterministic profile per order so repeated page views remain consistent and authentic
+        if order_id is not None:
+            try:
+                profile_idx = abs(int(order_id)) % len(cls.SCHEDULE_PROFILES)
+            except (ValueError, TypeError):
+                profile_idx = 1
+        else:
+            profile_idx = 1  # Standard 8-min profile (< 10 mins)
+        profile = cls.SCHEDULE_PROFILES[profile_idx]
+
+        pack_seconds = profile['pack'] * 60.0
+        transit_seconds = profile['transit'] * 60.0
+        target_seconds = profile['target'] * 60.0
+        target_mins_int = int(profile['target']) if profile['target'].is_integer() else profile['target']
+
+        step1_time = "0 min"
+        step2_time = profile['pack_text']
+        step3_time = profile['transit_text']
+        step4_time = profile['target_text']
+        delivery_duration_text = f"Delivered in {profile['target_text']}"
 
         if not order_date:
             order_date = datetime.now(timezone.utc)
@@ -299,7 +330,12 @@ class OrderService:
 
         now_utc = datetime.now(timezone.utc)
         elapsed_seconds = max(0.0, (now_utc - order_date_utc).total_seconds())
-        remaining_seconds = max(0.0, 600.0 - elapsed_seconds)
+        remaining_seconds = max(0.0, target_seconds - elapsed_seconds)
+
+        step1_clock = order_date_utc.strftime('%I:%M %p')
+        step2_clock = (order_date_utc + timedelta(minutes=profile['pack'])).strftime('%I:%M %p')
+        step3_clock = (order_date_utc + timedelta(minutes=profile['transit'])).strftime('%I:%M %p')
+        step4_clock = (order_date_utc + timedelta(minutes=profile['target'])).strftime('%I:%M %p')
 
         if current_status == 'Cancelled':
             return {
@@ -316,10 +352,23 @@ class OrderService:
                 'remaining_seconds': 0,
                 'eta_text': 'Cancelled',
                 'order_date_iso': order_date.isoformat() if hasattr(order_date, 'isoformat') else str(order_date),
+                'target_minutes': profile['target'],
+                'target_seconds': int(target_seconds),
+                'pack_seconds': int(pack_seconds),
+                'transit_seconds': int(transit_seconds),
+                'step1_time': step1_time,
+                'step2_time': step2_time,
+                'step3_time': step3_time,
+                'step4_time': step4_time,
+                'step1_clock': step1_clock,
+                'step2_clock': step2_clock,
+                'step3_clock': step3_clock,
+                'step4_clock': step4_clock,
+                'delivery_duration_text': delivery_duration_text,
             }
 
-        # If manually marked Delivered or time elapsed >= 10 mins (600 seconds)
-        if current_status == 'Delivered' or elapsed_seconds >= 600.0:
+        # If manually marked Delivered or time elapsed >= target_seconds (strictly under 10 mins)
+        if current_status == 'Delivered' or elapsed_seconds >= target_seconds:
             effective_status = 'Delivered'
             current_step = 4
             is_delivered = True
@@ -328,42 +377,42 @@ class OrderService:
             badge_class = 'status-delivered'
             badge_icon = 'fas fa-circle-check'
             status_message = 'Delivered to your doorstep'
-            eta_text = 'Delivered in 10 mins'
-        elif current_status in ('Out for Delivery', 'Shipped') or elapsed_seconds >= 300.0:
-            # Stage 3: Out for Delivery (5 - 10 mins)
+            eta_text = delivery_duration_text
+        elif current_status in ('Out for Delivery', 'Shipped') or elapsed_seconds >= transit_seconds:
+            # Stage 3: Out for Delivery (transit_seconds -> target_seconds)
             effective_status = 'Out for Delivery'
             current_step = 3
             is_delivered = False
-            progress_percent = min(95, 60 + int(((elapsed_seconds - 300.0) / 300.0) * 35))
+            progress_percent = min(95, 60 + int(((elapsed_seconds - transit_seconds) / max(1.0, target_seconds - transit_seconds)) * 35))
             badge_text = 'Out for Delivery'
             badge_class = 'status-delivery'
             badge_icon = 'fas fa-motorcycle'
-            rem_mins = max(1, int(remaining_seconds / 60))
+            rem_mins = max(1, int(round(remaining_seconds / 60.0)))
             status_message = 'Rider is on the way to your address'
             eta_text = f'Arriving in ~{rem_mins} min{"s" if rem_mins > 1 else ""}'
-        elif current_status == 'Packed' or elapsed_seconds >= 120.0:
-            # Stage 2: Packing (2 - 5 mins)
+        elif current_status == 'Packed' or elapsed_seconds >= pack_seconds:
+            # Stage 2: Packing (pack_seconds -> transit_seconds)
             effective_status = 'Packed'
             current_step = 2
             is_delivered = False
-            progress_percent = min(58, 25 + int(((elapsed_seconds - 120.0) / 180.0) * 33))
+            progress_percent = min(58, 25 + int(((elapsed_seconds - pack_seconds) / max(1.0, transit_seconds - pack_seconds)) * 33))
             badge_text = 'Packing Order'
             badge_class = 'status-packing'
             badge_icon = 'fas fa-box-open'
-            rem_mins = max(1, int(remaining_seconds / 60))
+            rem_mins = max(1, int(round(remaining_seconds / 60.0)))
             status_message = 'Items packed & quality checked at dark store'
             eta_text = f'Arriving in ~{rem_mins} mins'
         else:
-            # Stage 1: Order Placed (0 - 2 mins)
+            # Stage 1: Order Placed (0 -> pack_seconds)
             effective_status = current_status if current_status not in ('Processing', 'Created') else 'Order Placed'
             current_step = 1
             is_delivered = False
-            progress_percent = min(22, 10 + int((elapsed_seconds / 120.0) * 12))
+            progress_percent = min(22, 10 + int((elapsed_seconds / max(1.0, pack_seconds)) * 12))
             badge_text = 'Order Confirmed'
             badge_class = 'status-processing'
             badge_icon = 'fas fa-receipt'
             status_message = 'Order placed & confirmed with nearby hub'
-            eta_text = '10-Min Fast Delivery'
+            eta_text = f'{target_mins_int}-Min Fast Delivery'
 
         return {
             'current_step': current_step,
@@ -379,6 +428,19 @@ class OrderService:
             'remaining_seconds': int(remaining_seconds),
             'eta_text': eta_text,
             'order_date_iso': order_date.isoformat() if hasattr(order_date, 'isoformat') else str(order_date),
+            'target_minutes': profile['target'],
+            'target_seconds': int(target_seconds),
+            'pack_seconds': int(pack_seconds),
+            'transit_seconds': int(transit_seconds),
+            'step1_time': step1_time,
+            'step2_time': step2_time,
+            'step3_time': step3_time,
+            'step4_time': step4_time,
+            'step1_clock': step1_clock,
+            'step2_clock': step2_clock,
+            'step3_clock': step3_clock,
+            'step4_clock': step4_clock,
+            'delivery_duration_text': delivery_duration_text,
         }
 
     @staticmethod
@@ -474,8 +536,12 @@ class OrderService:
                     except Exception:
                         pass
 
-                # Enrich with 10-minute delivery tracking stages
-                tracking = cls.get_delivery_tracking(order_dict.get('order_date'), order_dict.get('status', 'Processing'))
+                # Enrich with varied quick-commerce under-10-minute delivery tracking stages
+                tracking = cls.get_delivery_tracking(
+                    order_dict.get('order_date'),
+                    order_dict.get('status', 'Processing'),
+                    order_id=oid
+                )
                 order_dict['tracking'] = tracking
                 if tracking.get('is_delivered') and order_dict.get('status') not in ('Delivered', 'Cancelled'):
                     order_dict['status'] = 'Delivered'

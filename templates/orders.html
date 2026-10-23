@@ -579,14 +579,14 @@
     <h2 class="orders-header"><i class="fas fa-box-open" style="color: var(--accent);"></i> My Orders</h2>
     <div class="orders-subtitle-banner">
         <i class="fas fa-bolt"></i>
-        <span><strong>10-Minute Express Grocery Guarantee:</strong> Watch your orders move live through our 4 fulfillment stages—from packing to delivery at your doorstep!</span>
+        <span><strong>Express Ultra-Fast Delivery Guarantee:</strong> Watch your orders move live through our 4 fulfillment stages—guaranteed fresh delivery directly to your doorstep in under 10 minutes!</span>
     </div>
 
     {% if not orders %}
     <div class="empty-orders-card">
         <div class="empty-orders-icon"><i class="fas fa-box-open"></i></div>
         <h3>No orders found</h3>
-        <p>You haven't placed any orders yet. Let's fill your kitchen with fresh items delivered in 10 minutes!</p>
+        <p>You haven't placed any orders yet. Let's fill your kitchen with fresh items delivered in under 10 minutes!</p>
         <a href="{{ url_for('index') }}" class="shop-now-btn">
             Start Shopping <i class="fas fa-shopping-basket"></i>
         </a>
@@ -617,12 +617,16 @@
                 </div>
             </div>
 
-            <!-- ================= Live 4-Process 10-Minute Order Tracker ================= -->
+            <!-- ================= Live 4-Process Order Tracker (Tailored & Strictly Under 10 Mins) ================= -->
             <div class="order-tracker-container" 
                  id="tracker-{{ order.order_id }}" 
                  data-order-id="{{ order.order_id }}"
                  data-order-date="{{ order.tracking.order_date_iso|default('') }}"
                  data-status="{{ order.status }}"
+                 data-target-seconds="{{ order.tracking.target_seconds|default(480) }}"
+                 data-pack-seconds="{{ order.tracking.pack_seconds|default(120) }}"
+                 data-transit-seconds="{{ order.tracking.transit_seconds|default(300) }}"
+                 data-delivery-text="{{ order.tracking.delivery_duration_text|default('Delivered in 8 mins') }}"
                  data-delivered="{{ 'true' if (order.tracking and order.tracking.is_delivered) else 'false' }}">
 
                 <div class="tracker-header">
@@ -631,13 +635,13 @@
                             <i class="{{ order.tracking.badge_icon|default('fas fa-receipt') }}"></i>
                             <span class="status-text">{{ order.tracking.badge_text|default('Order Confirmed') }}</span>
                         </span>
-                        <span class="tracker-message">{{ order.tracking.status_message|default('Fulfilling your 10-minute order') }}</span>
+                        <span class="tracker-message">{{ order.tracking.status_message|default('Fulfilling your express order') }}</span>
                     </div>
 
                     {% if order.tracking and order.tracking.is_delivered %}
                     <div class="tracker-delivered-tag">
                         <i class="fas fa-check-circle text-success"></i>
-                        <span>Delivered in 10 mins</span>
+                        <span>{{ order.tracking.delivery_duration_text|default('Delivered in 8 mins') }}</span>
                     </div>
                     {% elif order.tracking and not order.tracking.is_cancelled %}
                     <div class="tracker-timer" id="timer-{{ order.order_id }}">
@@ -660,7 +664,7 @@
                             </div>
                             <div class="step-label">
                                 <span class="step-title">Order Placed</span>
-                                <span class="step-time">0 min</span>
+                                <span class="step-time" title="Placed at {{ order.tracking.step1_clock|default('') }}">{{ order.tracking.step1_time|default('0 min') }}</span>
                             </div>
                         </div>
 
@@ -671,7 +675,7 @@
                             </div>
                             <div class="step-label">
                                 <span class="step-title">Packing</span>
-                                <span class="step-time">2 mins</span>
+                                <span class="step-time" title="Packed at {{ order.tracking.step2_clock|default('') }}">{{ order.tracking.step2_time|default('2 mins') }}</span>
                             </div>
                         </div>
 
@@ -682,7 +686,7 @@
                             </div>
                             <div class="step-label">
                                 <span class="step-title">On the Way</span>
-                                <span class="step-time">5 mins</span>
+                                <span class="step-time" title="Out for delivery at {{ order.tracking.step3_clock|default('') }}">{{ order.tracking.step3_time|default('5 mins') }}</span>
                             </div>
                         </div>
 
@@ -693,7 +697,7 @@
                             </div>
                             <div class="step-label">
                                 <span class="step-title">Delivered</span>
-                                <span class="step-time">10 mins</span>
+                                <span class="step-time" title="Delivered at {{ order.tracking.step4_clock|default('') }}">{{ order.tracking.step4_time|default('8 mins') }}</span>
                             </div>
                         </div>
                     </div>
@@ -754,9 +758,14 @@
                 const orderDate = new Date(dateStr).getTime();
                 if (isNaN(orderDate)) return;
 
+                const targetSeconds = parseFloat(tracker.getAttribute('data-target-seconds')) || 480;
+                const packSeconds = parseFloat(tracker.getAttribute('data-pack-seconds')) || 120;
+                const transitSeconds = parseFloat(tracker.getAttribute('data-transit-seconds')) || 300;
+                const deliveryText = tracker.getAttribute('data-delivery-text') || `Delivered in ${Math.round(targetSeconds / 60)} mins`;
+
                 const elapsedSeconds = Math.max(0, (now - orderDate) / 1000);
-                const remainingSeconds = Math.max(0, 600 - elapsedSeconds);
-                const isDelivered = elapsedSeconds >= 600 || tracker.getAttribute('data-status') === 'Delivered';
+                const remainingSeconds = Math.max(0, targetSeconds - elapsedSeconds);
+                const isDelivered = elapsedSeconds >= targetSeconds || tracker.getAttribute('data-status') === 'Delivered';
 
                 const orderId = tracker.getAttribute('data-order-id');
                 const fillBar = tracker.querySelector('.progress-bar-fill');
@@ -790,7 +799,7 @@
                     if (timerEl) {
                         const deliveredTag = document.createElement('div');
                         deliveredTag.className = 'tracker-delivered-tag';
-                        deliveredTag.innerHTML = '<i class="fas fa-check-circle text-success"></i> <span>Delivered in 10 mins</span>';
+                        deliveredTag.innerHTML = `<i class="fas fa-check-circle text-success"></i> <span>${deliveryText}</span>`;
                         timerEl.replaceWith(deliveredTag);
                     }
 
@@ -810,7 +819,7 @@
                     return;
                 }
 
-                // In Progress (< 600 seconds)
+                // In Progress (< targetSeconds, guaranteed under 10 mins)
                 const remMins = Math.floor(remainingSeconds / 60);
                 const remSecs = Math.floor(remainingSeconds % 60);
                 const formattedTime = `${remMins}m ${remSecs < 10 ? '0' : ''}${remSecs}s`;
@@ -818,9 +827,9 @@
                 const timerCount = tracker.querySelector('.timer-countdown');
                 if (timerCount) timerCount.textContent = formattedTime;
 
-                if (elapsedSeconds < 120) {
-                    // Stage 1: Order Placed (0 - 2 mins)
-                    const percent = Math.min(22, Math.max(10, (elapsedSeconds / 120) * 22));
+                if (elapsedSeconds < packSeconds) {
+                    // Stage 1: Order Placed (0 -> packSeconds)
+                    const percent = Math.min(22, Math.max(10, (elapsedSeconds / Math.max(1, packSeconds)) * 22));
                     if (fillBar) fillBar.style.width = percent + '%';
                     
                     if (statusPill) {
@@ -839,9 +848,9 @@
                     if (step3) { step3.className = 'step-item step-3 pending'; }
                     if (step4) { step4.className = 'step-item step-4 pending'; }
 
-                } else if (elapsedSeconds < 300) {
-                    // Stage 2: Packing (2 - 5 mins)
-                    const percent = Math.min(58, Math.max(25, 25 + ((elapsedSeconds - 120) / 180) * 33));
+                } else if (elapsedSeconds < transitSeconds) {
+                    // Stage 2: Packing (packSeconds -> transitSeconds)
+                    const percent = Math.min(58, Math.max(25, 25 + ((elapsedSeconds - packSeconds) / Math.max(1, transitSeconds - packSeconds)) * 33));
                     if (fillBar) fillBar.style.width = percent + '%';
 
                     if (statusPill) {
@@ -861,8 +870,8 @@
                     if (step4) { step4.className = 'step-item step-4 pending'; }
 
                 } else {
-                    // Stage 3: Out for Delivery (5 - 10 mins)
-                    const percent = Math.min(95, Math.max(60, 60 + ((elapsedSeconds - 300) / 300) * 35));
+                    // Stage 3: Out for Delivery (transitSeconds -> targetSeconds)
+                    const percent = Math.min(95, Math.max(60, 60 + ((elapsedSeconds - transitSeconds) / Math.max(1, targetSeconds - transitSeconds)) * 35));
                     if (fillBar) fillBar.style.width = percent + '%';
 
                     if (statusPill) {

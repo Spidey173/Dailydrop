@@ -207,7 +207,7 @@ def test_ten_minute_delivery_tracking_progression(client, test_user):
     assert t1['current_step'] == 1
     assert t1['is_delivered'] is False
     assert t1['badge_text'] == 'Order Confirmed'
-    assert 'Arriving in' in t1['eta_text'] or '10-Min' in t1['eta_text']
+    assert 'Arriving in' in t1['eta_text'] or 'Fast Delivery' in t1['eta_text']
 
     # 2. Stage 2: Packing (2 to 5 minutes old)
     t2 = OrderService.get_delivery_tracking(now - timedelta(minutes=3), 'Processing')
@@ -239,4 +239,29 @@ def test_ten_minute_delivery_tracking_progression(client, test_user):
     assert b'Packing' in res.data
     assert b'On the Way' in res.data
     assert b'Delivered' in res.data
+
+
+def test_varied_order_timings_strictly_under_ten_minutes():
+    """Verify that different order IDs produce different step timings and delivered timings strictly under 10 minutes."""
+    from datetime import datetime, timezone
+    now = datetime.now(timezone.utc)
+
+    # Test orders with IDs 1 to 6
+    trackings = [OrderService.get_delivery_tracking(now, 'Processing', order_id=oid) for oid in range(1, 7)]
+
+    # 1. Every single order has target delivery minutes strictly under 10 minutes
+    for t in trackings:
+        assert t['target_minutes'] < 10, f"Delivery time {t['target_minutes']} is not under 10 mins!"
+        assert t['target_seconds'] < 600
+        assert 'Delivered in' in t['delivery_duration_text']
+        assert int(t['target_seconds'] / 60) < 10
+
+    # 2. Timing variations across orders (not all identical)
+    pack_times = {t['step2_time'] for t in trackings}
+    transit_times = {t['step3_time'] for t in trackings}
+    delivered_times = {t['step4_time'] for t in trackings}
+
+    assert len(pack_times) > 1, f"Packing times {pack_times} must vary across orders"
+    assert len(transit_times) > 1, f"Transit times {transit_times} must vary across orders"
+    assert len(delivered_times) > 1, f"Delivered times {delivered_times} must vary across orders"
 

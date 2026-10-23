@@ -542,7 +542,7 @@ def api_order_status(order_id: int):
     if not order or order.get('user_id') != user_id:
         return jsonify({'success': False, 'message': 'Order not found'}), 404
 
-    tracking = OrderService.get_delivery_tracking(order.get('order_date'), order.get('status'))
+    tracking = OrderService.get_delivery_tracking(order.get('order_date'), order.get('status'), order_id=order_id)
     if tracking.get('is_delivered') and order.get('status') not in ('Delivered', 'Cancelled'):
         OrderService.update_status(order_id, 'Delivered')
         order['status'] = 'Delivered'
