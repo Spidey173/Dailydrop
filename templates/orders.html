@@ -39,23 +39,6 @@
       align-items: center;
       gap: 12px;
     }
-
-    .orders-subtitle-banner {
-      background: rgba(16, 185, 129, 0.08);
-      border: 1px solid rgba(52, 211, 153, 0.2);
-      border-radius: var(--radius-sm);
-      padding: 12px 18px;
-      margin-bottom: 28px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      color: #D1FAE5;
-      font-size: 0.92rem;
-    }
-    .orders-subtitle-banner i {
-      color: #34D399;
-      font-size: 1.25rem;
-    }
     
     .order-card {
       background: rgba(16, 24, 18, 0.85);
@@ -577,10 +560,6 @@
 
   <div class="orders-page">
     <h2 class="orders-header"><i class="fas fa-box-open" style="color: var(--accent);"></i> My Orders</h2>
-    <div class="orders-subtitle-banner">
-        <i class="fas fa-bolt"></i>
-        <span><strong>Express Ultra-Fast Delivery Guarantee:</strong> Watch your orders move live through our 4 fulfillment stages—guaranteed fresh delivery directly to your doorstep in under 10 minutes!</span>
-    </div>
 
     {% if not orders %}
     <div class="empty-orders-card">
