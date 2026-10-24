@@ -128,7 +128,7 @@ Daily-Drop/
 │   └── runner.py           # Idempotent migration runner (python -m migrations.runner)
 ├── static/                 # Stylesheets, UI icons, and product images
 ├── templates/              # Jinja2 HTML templates with CSRF token meta tags
-└── tests/                  # 72 automated Pytest test suites (unit, integration, security)
+└── tests/                  # 72 automated Pytest tests (unit, integration, security)
 ```
 
 ---
@@ -150,28 +150,31 @@ pytest -v
 
 ### 🛡️ Testing Architecture: Execution Tiers & Concurrency Proof Path
 
-DailyDrop maintains two distinct testing tiers to balance deterministic, zero-idle-cost CI runs with production concurrency guarantees:
+To balance fast, deterministic, zero-cost CI checks with production relational guarantees, DailyDrop explicitly separates its testing into two tiers:
 
-#### 1. Fast Deterministic CI/CD Tier (GitHub Actions — 72 Automated Pytests)
-* **Execution Environment**: Runs automatically on every push/PR across Python 3.10, 3.11, and 3.12 on `ubuntu-latest`.
-* **Database & Concurrency Fixture**: `conftest.py` seamlessly redirects the application's connection pool to an in-memory, thread-safe SQLite fixture (`_SHARED_SQLITE_CONN`) with dynamic PostgreSQL-to-SQLite query translation.
-* **What This Tier Proves**: Complete end-to-end business contracts, state-machine transitions (e.g. Razorpay HMAC signature validation FSM, order status idempotency), Decimal monetary arithmetic, Redis Lua fast-rejections, and transactional rollback paths in **under 2 seconds**.
-* **Precise Concurrency Limitation**: Because SQLite operates under a database-level lock rather than row-level locking, `conftest.py` explicitly strips `FOR UPDATE` and `FOR UPDATE SKIP LOCKED` clauses. Therefore, **PostgreSQL row-level write-lock serialization (`SELECT ... FOR UPDATE`) is simulated in CI and local test runs**, rather than exercising a native PostgreSQL lock manager.
+#### Tier 1: Fast Deterministic CI Suite (GitHub Actions — 72 Automated Pytests)
+* **Does CI actually run PostgreSQL locking tests? No.**
+  - The GitHub Actions workflow (`.github/workflows/ci.yml`) runs on `ubuntu-latest` and provisions an ephemeral Redis service, but **does not provision a PostgreSQL service container**.
+  - While `ci.yml` passes `DATABASE_URL: ${{ secrets.DATABASE_URL }}` as an environment secret, **Pytest in CI intentionally bypasses external database connections**. The fixture in `conftest.py` redirects the application's connection pool to an in-memory SQLite fixture (`_SHARED_SQLITE_CONN`).
+  - **Why CI uses SQLite simulation**: This keeps the CI pipeline hermetic, fully offline, and lightning-fast (~1.5–2s for all 72 tests across Python 3.10, 3.11, and 3.12) with zero risk of intermittent network failures or idle cloud database costs.
+  - **Simulated Concurrency Behavior**: Because SQLite operates with database-level locks rather than PostgreSQL row-level locks, `conftest.py` translates queries and strips `FOR UPDATE` and `SKIP LOCKED` clauses. Concurrency safety in CI is verified via multi-threaded race simulation against conditional SQL updates (`UPDATE products SET stock = stock - %s WHERE product_id = %s AND stock >= %s`).
 
-#### 2. Live Relational Concurrency Tier (PostgreSQL / Neon Instance)
-* **Configuration**: Exercised when connected to an actual PostgreSQL instance (Neon Cloud PostgreSQL or local container with `docker run -p 5432:5432 postgres:16-alpine`).
-* **Verified Row-Locking Paths**:
-  - **Orders FSM State Lock** (`services/order_service.py`): Executes `SELECT status FROM orders WHERE order_id = %s FOR UPDATE` inside an isolated transaction to serialize concurrent payment webhook deliveries and prevent terminal-state regressions.
-  - **Transactional Outbox Worker** (`services/outbox_service.py`): Employs `SELECT event_id, ... FROM outbox_events WHERE status = 'PENDING' FOR UPDATE SKIP LOCKED LIMIT %s` to ensure multi-threaded or multi-instance queue workers safely claim mutually exclusive event batches without worker contention or duplicate publishing.
-* **How to Verify Against Native PostgreSQL**:
+#### Tier 2: Native PostgreSQL Concurrency & Row-Locking Verification
+* **When It Runs**: Outside of GitHub Actions CI, either locally or against staging containers.
+* **Verified Native PostgreSQL Locking Mechanisms**:
+  - **Payment Webhook FSM Serialization** (`services/order_service.py`): Executes `SELECT status FROM orders WHERE order_id = %s FOR UPDATE` inside an isolated transaction to serialize concurrent webhook events and prevent terminal status regressions.
+  - **Transactional Outbox Worker** (`services/outbox_service.py`): Uses `SELECT event_id, ... FROM outbox_events WHERE status = 'PENDING' FOR UPDATE SKIP LOCKED LIMIT %s` so multiple background workers claim mutually exclusive batches without lock contention.
+* **How Any Reviewer Can Verify Native PostgreSQL Locking**:
+  `conftest.py` includes an opt-out toggle (`TEST_USE_REAL_POSTGRES=true`) that disables the SQLite patch and connects directly to a live PostgreSQL pool:
+
   ```bash
-  # Launch a native PostgreSQL container
+  # 1. Start a local PostgreSQL container
   docker run -d --name dailydrop-pg -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=dailydrop -p 5432:5432 postgres:16-alpine
 
-  # Run migration runner to establish schema and constraints
-  python migrations/run_migrations.py
+  # 2. Run idempotent migrations to create schema and constraints
+  DATABASE_URL="postgresql://postgres:postgres@localhost:5432/dailydrop" python migrations/run_migrations.py
 
-  # Run without conftest SQLite override against local PostgreSQL
+  # 3. Run Pytest with real PostgreSQL enabled (bypasses SQLite mock)
   TEST_USE_REAL_POSTGRES=true DATABASE_URL="postgresql://postgres:postgres@localhost:5432/dailydrop" pytest tests/test_inventory_consistency.py -v
   ```
 

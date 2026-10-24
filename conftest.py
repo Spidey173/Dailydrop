@@ -365,47 +365,51 @@ def _seed_test_database():
 
 
 
-# Seed SQLite database immediately upon conftest load
-_seed_test_database()
-_MOCK_POOL = MockPool(_SHARED_SQLITE_CONN)
+USE_REAL_POSTGRES = os.environ.get("TEST_USE_REAL_POSTGRES", "").lower() in ("true", "1", "yes")
+
+if not USE_REAL_POSTGRES:
+    # Seed SQLite database immediately upon conftest load
+    _seed_test_database()
+    _MOCK_POOL = MockPool(_SHARED_SQLITE_CONN)
 
 
-@contextmanager
-def _sqlite_get_db_connection():
-    """Context manager yielding SQLiteConnectionWrapper."""
-    wrapper = SQLiteConnectionWrapper(_SHARED_SQLITE_CONN)
+    @contextmanager
+    def _sqlite_get_db_connection():
+        """Context manager yielding SQLiteConnectionWrapper."""
+        wrapper = SQLiteConnectionWrapper(_SHARED_SQLITE_CONN)
+        try:
+            yield wrapper
+            wrapper.commit()
+        except Exception as e:
+            wrapper.rollback()
+            raise e
+
+
+    # Immediately patch database module at conftest load time so app imports never hit Neon
+    import database
+    database._IS_DB_INITIALIZED = True
+    database._db_pool = _MOCK_POOL
+    database.get_pool = lambda: _MOCK_POOL
+    database.get_db_connection = _sqlite_get_db_connection
+
+    # Pre-warm catalog and user caches in database module
     try:
-        yield wrapper
-        wrapper.commit()
+        database.clear_product_cache()
+        database.clear_user_cache()
+        database.clear_analytics_cache()
+        database.get_all_products()
+        database.get_user_by_email('admin_dailydrop@gmail.com')
+        database.get_user_by_email('demo_dailydrop@gmail.com')
     except Exception as e:
-        wrapper.rollback()
-        raise e
-
-
-# Immediately patch database module at conftest load time so app imports never hit Neon
-import database
-database._IS_DB_INITIALIZED = True
-database._db_pool = _MOCK_POOL
-database.get_pool = lambda: _MOCK_POOL
-database.get_db_connection = _sqlite_get_db_connection
-
-# Pre-warm catalog and user caches in database module
-try:
-    database.clear_product_cache()
-    database.clear_user_cache()
-    database.clear_analytics_cache()
-    database.get_all_products()
-    database.get_user_by_email('admin_dailydrop@gmail.com')
-    database.get_user_by_email('demo_dailydrop@gmail.com')
-except Exception as e:
-    print(f"Warning pre-warming in-memory cache: {e}")
+        print(f"Warning pre-warming in-memory cache: {e}")
 
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_in_memory_sqlite_db():
     """Session-level autouse fixture verifying SQLite in-memory backend."""
     yield
-    _MOCK_POOL.closeall()
+    if not USE_REAL_POSTGRES:
+        _MOCK_POOL.closeall()
 
 
 @pytest.fixture(autouse=True)

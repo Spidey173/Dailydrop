@@ -48,9 +48,12 @@ jobs:
           # Exit-zero treats all errors as warnings
           flake8 . --count --exit-zero --max-complexity=15 --max-line-length=140 --statistics --exclude=venv,.venv,docs
 
-      - name: Run Pytest Suite
+      - name: Run Pytest Suite (72 Offline Tests)
         env:
           FLASK_ENV: testing
+          # Note: Pytest executes against the deterministic in-memory SQLite fixture (72 tests in ~2s).
+          # CI does not provision a PostgreSQL service container to maintain fast, hermetic PR runs.
+          # To run against native PostgreSQL locally or in integration, pass TEST_USE_REAL_POSTGRES=true.
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           REDIS_URL: redis://127.0.0.1:6379/0
           REDIS_ENABLED: "true"
