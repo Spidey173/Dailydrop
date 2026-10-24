@@ -148,15 +148,32 @@ pip install -r requirements.txt
 pytest -v
 ```
 
-### 🛡️ Testing Architecture: Deterministic Offline Suite & Concurrency Scope
-* **Zero External DB Dependency for Offline Test Runs**: Neon PostgreSQL connection pooling is redirected during local/offline tests to an in-memory SQLite fixture with query translation (simulating transactional logic while stripping PostgreSQL-specific `FOR UPDATE` row locks).
-* **Concurrency Coverage Scope**:
-  - *Offline Suite (SQLite fixture)*: Verifies the full application contract, idempotency state machine, Redis cache fast-rejection, Decimal precision, and retry logic in under 2 seconds. Because SQLite does not support row-level write locks (`SELECT ... FOR UPDATE`), the true multi-client row-lock serialization under PostgreSQL is explicitly **simulated** in this offline tier.
-  - *Production & CI Integration*: True multi-transaction PostgreSQL locking (`SELECT ... FOR UPDATE` row-level isolation) runs against PostgreSQL instances (e.g. Neon Cloud PostgreSQL or containerized Postgres services).
-* **Zero External Redis Dependency**: A thread-safe `MockRedisClient` provides Lua script emulation, atomic stock decrement simulation, and catalog cache keys.
-* **Resilient Background Task Dispatch**: `TaskService` includes defensive fallbacks—tests verify clean task dispatch whether worker libraries (`rq`) are active or uninstalled.
+### 🛡️ Testing Architecture: Execution Tiers & Concurrency Proof Path
 
-All 72 tests run completely offline with zero skips in ~2 seconds, and pass across Python 3.10, 3.11, and 3.12 in GitHub Actions CI.
+DailyDrop maintains two distinct testing tiers to balance deterministic, zero-idle-cost CI runs with production concurrency guarantees:
+
+#### 1. Fast Deterministic CI/CD Tier (GitHub Actions — 72 Automated Pytests)
+* **Execution Environment**: Runs automatically on every push/PR across Python 3.10, 3.11, and 3.12 on `ubuntu-latest`.
+* **Database & Concurrency Fixture**: `conftest.py` seamlessly redirects the application's connection pool to an in-memory, thread-safe SQLite fixture (`_SHARED_SQLITE_CONN`) with dynamic PostgreSQL-to-SQLite query translation.
+* **What This Tier Proves**: Complete end-to-end business contracts, state-machine transitions (e.g. Razorpay HMAC signature validation FSM, order status idempotency), Decimal monetary arithmetic, Redis Lua fast-rejections, and transactional rollback paths in **under 2 seconds**.
+* **Precise Concurrency Limitation**: Because SQLite operates under a database-level lock rather than row-level locking, `conftest.py` explicitly strips `FOR UPDATE` and `FOR UPDATE SKIP LOCKED` clauses. Therefore, **PostgreSQL row-level write-lock serialization (`SELECT ... FOR UPDATE`) is simulated in CI and local test runs**, rather than exercising a native PostgreSQL lock manager.
+
+#### 2. Live Relational Concurrency Tier (PostgreSQL / Neon Instance)
+* **Configuration**: Exercised when connected to an actual PostgreSQL instance (Neon Cloud PostgreSQL or local container with `docker run -p 5432:5432 postgres:16-alpine`).
+* **Verified Row-Locking Paths**:
+  - **Orders FSM State Lock** (`services/order_service.py`): Executes `SELECT status FROM orders WHERE order_id = %s FOR UPDATE` inside an isolated transaction to serialize concurrent payment webhook deliveries and prevent terminal-state regressions.
+  - **Transactional Outbox Worker** (`services/outbox_service.py`): Employs `SELECT event_id, ... FROM outbox_events WHERE status = 'PENDING' FOR UPDATE SKIP LOCKED LIMIT %s` to ensure multi-threaded or multi-instance queue workers safely claim mutually exclusive event batches without worker contention or duplicate publishing.
+* **How to Verify Against Native PostgreSQL**:
+  ```bash
+  # Launch a native PostgreSQL container
+  docker run -d --name dailydrop-pg -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=dailydrop -p 5432:5432 postgres:16-alpine
+
+  # Run migration runner to establish schema and constraints
+  python migrations/run_migrations.py
+
+  # Run without conftest SQLite override against local PostgreSQL
+  TEST_USE_REAL_POSTGRES=true DATABASE_URL="postgresql://postgres:postgres@localhost:5432/dailydrop" pytest tests/test_inventory_consistency.py -v
+  ```
 
 ---
 
