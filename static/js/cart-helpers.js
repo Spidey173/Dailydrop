@@ -376,3 +376,12 @@ document.addEventListener('DOMContentLoaded', () => {
     updateCartCount();
     updateProductButtons();
 });
+
+// Global modal backdrop lockup prevention:
+// Ensures that after any modal action or navigation, stale backdrops never freeze the user interface
+document.addEventListener('hidden.bs.modal', function () {
+    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+    document.body.classList.remove('modal-open');
+    document.body.style.removeProperty('overflow');
+    document.body.style.removeProperty('padding-right');
+});

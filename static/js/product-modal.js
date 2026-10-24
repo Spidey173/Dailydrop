@@ -571,22 +571,66 @@ function renderFallbackMatrix(profile) {
 // Add item to cart from modal
 window.addModalItemToCart = function() {
   const titleEl = document.getElementById('modalTitle');
-  const name = titleEl ? titleEl.innerText : 'Product';
-  const priceText = document.getElementById('modalPrice').innerText;
-  const image = document.getElementById('modalImage').src;
+  const name = titleEl ? titleEl.innerText.trim() : 'Product';
+  const priceEl = document.getElementById('modalPrice');
+  const priceText = priceEl ? priceEl.innerText : '0';
+  const imgEl = document.getElementById('modalImage');
+  const image = imgEl ? imgEl.src : '/static/logo1.webp';
   const price = parseFloat(priceText.replace(/[^0-9.]/g, '')) || 0;
-  const modalImgEl = document.getElementById('modalImage');
+  const qtyToAdd = Math.max(1, parseInt(modalItemQty) || 1);
 
-  for (let i = 0; i < modalItemQty; i++) {
-    if (typeof addToCart === 'function') {
-      addToCart(name, price, image, modalImgEl);
+  // 1. Hide modal cleanly first using Bootstrap instance
+  const modalEl = document.getElementById('productModal');
+  if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+    const bsModal = bootstrap.Modal.getInstance(modalEl) || bootstrap.Modal.getOrCreateInstance(modalEl);
+    if (bsModal) {
+      bsModal.hide();
     }
   }
 
-  // Hide modal
-  const modalEl = document.getElementById('productModal');
-  const bsModal = bootstrap.Modal.getInstance(modalEl);
-  if (bsModal) bsModal.hide();
+  // 2. Cleanup backdrop and restore body scroll immediately so the page never hangs
+  setTimeout(() => {
+    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+    document.body.classList.remove('modal-open');
+    document.body.style.removeProperty('overflow');
+    document.body.style.removeProperty('padding-right');
+  }, 150);
+
+  // 3. Batch add items to cart to avoid repeated freeze and trigger animation once
+  if (!isUserLoggedIn()) {
+    showGuestLoginAlert();
+    return;
+  }
+
+  let cart = JSON.parse(localStorage.getItem('cart')) || [];
+  const existingItem = cart.find(item => item.name === name);
+  if (existingItem) {
+    existingItem.quantity += qtyToAdd;
+  } else {
+    cart.push({
+      name: name,
+      price: price,
+      image: image,
+      quantity: qtyToAdd
+    });
+  }
+  localStorage.setItem('cart', JSON.stringify(cart));
+
+  // 4. Smooth visual feedback and cart updates
+  if (typeof animateFlyToCart === 'function') {
+    animateFlyToCart(image, imgEl || window.event);
+  }
+  if (typeof updateCartCount === 'function') {
+    updateCartCount();
+  }
+  if (typeof updateProductButtons === 'function') {
+    updateProductButtons();
+  }
+  if (typeof showAddedToCartAlert === 'function') {
+    showAddedToCartAlert(name);
+  }
+
+  window.dispatchEvent(new Event('storage'));
 };
 
 // Initialize modal on DOM load and preload Chart.js
