@@ -38,11 +38,15 @@
 
 ### 4. 🔒 Defensive Security & Redacted Structured Logging
 * **CSRF & Session Security**: Flask-WTF CSRF tokens are validated across all state-mutating requests with automated JavaScript meta injection. Sessions are regenerated upon login/logout to prevent session fixation.
+* **Distributed Rate Limiting**: Flask-Limiter is backed by a distributed Redis storage backend (`REDIS_URL`) across multi-worker Gunicorn nodes, coupled with `in_memory_fallback_enabled=True` and `swallow_errors=True` to guarantee zero-downtime rate enforcement even during transient cache restarts.
 * **Structured & Sanitized Logging**: A custom `SanitizingLogFormatter` scrubs passwords, session secrets, API keys, webhook signatures, and payment details from application logs across stdout and file handlers.
 * **Defensive HTTP Headers**: Enforces `X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`, and strict cookie flags (`HttpOnly`, `SameSite=Lax`, `Secure` in production).
 
 ### 5. 🩺 Production Observability & Health Monitoring
 * **Liveness & Readiness Probes**: `/healthz` and `/api/v1/health` provide real-time diagnostics on database connectivity, round-trip query latency, Redis cache availability, storage mode, and background queue status.
+* **Resilient Glassmorphic Error Templates**: Dedicated `404.html` and `500.html` error templates styled to the application design system handle routing misses and server faults gracefully without unformatted HTML or stack trace leakage.
+* **Cross-Platform Asynchronous Worker**: `worker.py` provides an RQ background consumer with automatic `SimpleWorker` selection on macOS (`darwin`) and Windows to prevent multi-threading fork crashes (`Signal 11 SIGSEGV`), supporting continuous daemon consumption and `--burst` queue draining.
+* **Transaction Failure Isolation**: Database writes during checkout utilize PostgreSQL `SAVEPOINT`s and defensive validation, preventing foreign key exceptions from triggering cascading transaction aborts.
 * **Hosting Alignment**: Gracefully detects serverless environments (Vercel) vs persistent containers. Ephemeral local uploads are safely blocked (`DISABLE_FILE_UPLOADS`) in serverless demos with clean HTTP 400 feedback.
 
 ---
@@ -83,8 +87,9 @@ Ready-to-use accounts for immediate testing:
 * **Architecture**: Service-Oriented Layer (`services/`), Repository Pattern
 * **Database**: PostgreSQL (Neon Serverless, Connection Pooling with `psycopg2`), SQLite (Deterministic In-Memory Test Fixture)
 * **Migrations**: Custom versioned migration runner (`migrations/`) with `schema_migrations` audit tracking
-* **Caching & Queue**: Redis (Read-through catalog caching, atomic stock decrement helpers, background queue)
-* **Security & Auth**: Flask-WTF CSRF Tokens, Werkzeug Scrypt Password Hashing, Role-Based Route Guards (`@admin_required`), Defensive Security Headers
+* **Caching & Queue**: Redis (Read-through catalog caching, atomic stock decrement helpers, background queue, distributed rate limiting with resilient in-memory fallback)
+* **Security & Auth**: Flask-WTF CSRF Tokens, Distributed Flask-Limiter, Werkzeug Scrypt Password Hashing, Role-Based Route Guards (`@admin_required`), Defensive Security Headers
+* **Resilience**: PostgreSQL `SAVEPOINT` transaction failure isolation, branded glassmorphic 404/500 Jinja2 error templates
 * **Frontend**: HTML5, Vanilla CSS3, JavaScript (ES6+), Bootstrap 5
 * **Testing & CI**: Pytest (72 automated unit, integration, concurrency & security regression tests), GitHub Actions CI (matrix across Python 3.10, 3.11, 3.12), Flake8 Linting
 * **Deployment**: Vercel Serverless WSGI (demo storefront) / Docker & Procfile compatible (production worker PaaS)
@@ -96,9 +101,10 @@ Ready-to-use accounts for immediate testing:
 ```
 Daily-Drop/
 ├── app.py                  # Application factory (create_app), health routes & security headers
-├── database.py             # Database connection pooling & schema execution
+├── extensions.py           # Extensions (CSRFProtect, Redis-backed distributed Limiter)
+├── database.py             # Database connection pooling, SAVEPOINT isolation & schema execution
 ├── config.py               # Central environment configuration & fail-fast validation
-├── worker.py               # Background transactional outbox worker
+├── worker.py               # Background transactional outbox worker (RQ with macOS fork-safe SimpleWorker)
 ├── Procfile                # Production process specification (web + background worker)
 ├── blueprints/             # Route controllers
 │   ├── auth.py             # User signup, login, session clearance
@@ -127,8 +133,8 @@ Daily-Drop/
 │   ├── 004_state_machine_and_inventory_checks.sql
 │   └── runner.py           # Idempotent migration runner (python -m migrations.runner)
 ├── static/                 # Stylesheets, UI icons, and product images
-├── templates/              # Jinja2 HTML templates with CSRF token meta tags
-└── tests/                  # 72 automated Pytest tests (unit, integration, security)
+├── templates/              # Jinja2 HTML templates, error templates (404.html, 500.html) & CSRF meta
+└── tests/                  # 72 automated Pytest tests (unit, integration, security, PostgreSQL toggle)
 ```
 
 ---
@@ -204,6 +210,11 @@ python -m migrations.runner
 
 # 6. Run local development server
 python app.py
+
+# 7. (Optional) Run background task worker (processes email receipts & stock alerts)
+python worker.py
+# Or run in burst mode to process pending tasks and exit:
+python worker.py --burst
 ```
 Open [http://localhost:5000](http://localhost:5000) in your browser.
 
