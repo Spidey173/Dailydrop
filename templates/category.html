@@ -110,7 +110,7 @@
     }
 
     // Load products from centralized products database
-    const categoryName = "{{ category_config.db_name }}";
+    const categoryName = {{ category_config.db_name | tojson }};
     let products = [];
 
     function getCategoryProducts() {
