@@ -121,14 +121,14 @@ Daily-Drop/
 │   └── runner.py           # Idempotent migration runner (python -m migrations.runner)
 ├── static/                 # Stylesheets, UI icons, and product images
 ├── templates/              # Jinja2 HTML templates with CSRF token meta tags
-└── tests/                  # 61 automated Pytest test suites (unit, integration, security)
+└── tests/                  # 63 automated Pytest test suites (unit, integration, security)
 ```
 
 ---
 
 ## 🧪 Reproducible Testing & Dependency Guide
 
-The project includes **61 automated tests** covering authentication, cart calculations, forged price rejection, unknown product blocking, atomic checkout, stock race conditions, payment signature verification, webhook idempotency, and order state machine validation.
+The project includes **63 automated tests** covering authentication, cart calculations, forged price rejection, unknown product blocking, atomic checkout, stock race conditions, payment signature verification, webhook idempotency, and order state machine validation.
 
 ### One-Command Test Execution
 ```bash
@@ -146,7 +146,7 @@ pytest -v
 * **Zero External Redis Dependency**: A thread-safe `MockRedisClient` provides Lua script emulation, atomic stock decrement simulation, and catalog cache keys.
 * **Resilient Background Task Dispatch**: `TaskService` includes defensive fallbacks—tests verify clean task dispatch whether worker libraries (`rq`) are active or uninstalled.
 
-All 61 tests run completely offline with zero skips in ~2 seconds, and pass across Python 3.10, 3.11, and 3.12 in GitHub Actions CI.
+All 63 tests run completely offline with zero skips in ~2 seconds, and pass across Python 3.10, 3.11, and 3.12 in GitHub Actions CI.
 
 ---
 
@@ -205,7 +205,7 @@ To provide a zero-idle-cost, interactive portfolio demo without requiring paid m
 
 > *"DailyDrop is a full-stack quick-commerce application built with Flask and PostgreSQL. Rather than placing business logic inside route functions, I designed it with Flask Blueprints and a dedicated Service layer.*  
 >  
-> *The central engineering focus was **server-authoritative checkout and payment integrity**: cart prices are recalculated strictly against database records, inventory decrements happen atomically within a single transaction to prevent overselling, and payment webhooks use cryptographic HMAC validation with an order state machine. The application includes 61 automated Pytest tests, versioned database migrations, and health check observability endpoints."*
+> *The central engineering focus was **server-authoritative checkout and payment integrity**: cart prices are recalculated strictly against database records, inventory decrements happen atomically within a single transaction to prevent overselling, and payment webhooks use cryptographic HMAC validation with an order state machine. The application includes 63 automated Pytest tests, versioned database migrations, and health check observability endpoints."*
 
 ---
 
