@@ -384,25 +384,44 @@ searchInput.addEventListener('input', function() {
   filteredProducts.forEach(product => {
     const productCard = document.createElement('div');
     productCard.className = 'product-card';
+    const pId = product.id || product.product_id;
+    const pTitle = product.title || product.name || 'Product';
+    const safeTitle = pTitle.replace(/'/g, "\\'");
+    const pImg = product.image || product.image_path || '/static/logo1.webp';
+    const pCat = product.category || 'Grocery';
+    const pPrice = parseFloat(product.price || 0).toFixed(2);
+
+    productCard.setAttribute('data-title', pTitle);
+    productCard.setAttribute('data-category', pCat);
+    productCard.setAttribute('data-product-id', pId);
+
+    const isWishlisted = typeof isInWishlist === 'function' && isInWishlist(pId);
+
     productCard.innerHTML = `
-      <img src="${product.image || product.image_path || "/static/logo1.webp"}" alt="${product.title}" class="product-image" />
+      <div class="product-image-container">
+        <button class="wishlist-heart-btn ${isWishlisted ? 'active' : ''}" data-product-id="${pId}" onclick="toggleWishlist(${pId}, event)" title="Save to Wishlist">
+          <i class="${isWishlisted ? 'fas' : 'far'} fa-heart"></i>
+        </button>
+        <img src="${pImg}" alt="${pTitle}" class="product-image" loading="lazy" decoding="async" onclick="showDetails('${safeTitle}', ${product.price}, '${pImg}', '${pCat}')" style="cursor: pointer;" onerror="this.onerror=null; this.src='/static/logo1.webp'" />
+      </div>
       <div class="product-details">
-        <div class="product-title">${product.title}</div>
-        <div class="product-category">${product.category}</div>
+        <div class="product-title" onclick="showDetails('${safeTitle}', ${product.price}, '${pImg}', '${pCat}')" style="cursor: pointer;">${pTitle}</div>
+        <div class="product-category">${pCat}</div>
         <div class="product-pricing">
-          <span class="current-price">Rs.${product.price}</span>
+          <span class="current-price">Rs.${pPrice}</span>
           ${product.discount ? `
             <span class="original-price">Rs.${Math.round(product.price/(1-product.discount/100))}</span>
             <span class="discount">${product.discount}% OFF</span>
           ` : ''}
         </div>
-        <button class="add-to-cart-btn" onclick="addToCart('${product.title.replace(/'/g, "\\'")}', ${product.price}, '${product.image || product.image_path || "/static/logo1.webp"}')">ADD</button>
+        <button class="add-to-cart-btn" onclick="addToCart('${safeTitle}', ${product.price}, '${pImg}', this)">ADD</button>
       </div>
     `;
 
     searchResultsGrid.appendChild(productCard);
   });
-  updateProductButtons();
+  if (typeof updateProductButtons === 'function') updateProductButtons();
+  if (typeof updateWishlistHeartButtons === 'function') updateWishlistHeartButtons();
 });
 
 // Category Filtering
