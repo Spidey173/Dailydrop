@@ -391,17 +391,14 @@ def api_razorpay_webhook() -> Tuple[Any, int]:
                         ord_id = existing_order['order_id'] if isinstance(existing_order, dict) else existing_order[0]
                         # Safe transition: only mark Paid if not already past in lifecycle
                         cursor.execute("UPDATE orders SET status = 'Paid' WHERE order_id = %s AND status IN ('Processing', 'Created')", (ord_id,))
-                        try:
-                            from services.outbox_service import OutboxService
-                            OutboxService.record_event(
-                                cursor=cursor,
-                                event_type='PAYMENT_CONFIRMED',
-                                aggregate_type='order',
-                                aggregate_id=ord_id,
-                                payload={'order_id': ord_id, 'payment_id': rzp_payment_id, 'event': event_type}
-                            )
-                        except Exception:
-                            pass
+                        from services.outbox_service import OutboxService
+                        OutboxService.record_event(
+                            cursor=cursor,
+                            event_type='PAYMENT_CONFIRMED',
+                            aggregate_type='order',
+                            aggregate_id=ord_id,
+                            payload={'order_id': ord_id, 'payment_id': rzp_payment_id, 'event': event_type}
+                        )
                         if rzp_order_id:
                             delete_pending_order(rzp_order_id)
                         logger.info(f"Webhook: Order #{ord_id} already exists. Idempotently acknowledged.")

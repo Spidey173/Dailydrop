@@ -222,28 +222,26 @@ class OrderService:
                         ))
 
                     # 6. Transactional Outbox Pattern: Record ORDER_CREATED event in SAME atomic transaction
-                    try:
-                        from services.outbox_service import OutboxService
-                        outbox_payload = {
-                            'order_id': order_id,
-                            'user_id': user_id,
-                            'full_name': full_name,
-                            'phone_number': phone_number,
-                            'total_amount': total_amount,
-                            'payment_method': payment_method,
-                            'payment_id': payment_id,
-                            'status': status,
-                            'products': resolved_items
-                        }
-                        OutboxService.record_event(
-                            cursor=cursor,
-                            event_type='ORDER_CREATED',
-                            aggregate_type='order',
-                            aggregate_id=order_id,
-                            payload=outbox_payload
-                        )
-                    except Exception as outbox_err:
-                        logger.warning(f"Could not record outbox event: {outbox_err}")
+                    # Guarantees true atomicity: if writing the outbox event fails, the entire transaction rolls back
+                    from services.outbox_service import OutboxService
+                    outbox_payload = {
+                        'order_id': order_id,
+                        'user_id': user_id,
+                        'full_name': full_name,
+                        'phone_number': phone_number,
+                        'total_amount': total_amount,
+                        'payment_method': payment_method,
+                        'payment_id': payment_id,
+                        'status': status,
+                        'products': resolved_items
+                    }
+                    OutboxService.record_event(
+                        cursor=cursor,
+                        event_type='ORDER_CREATED',
+                        aggregate_type='order',
+                        aggregate_id=order_id,
+                        payload=outbox_payload
+                    )
 
             clear_product_cache()
             clear_analytics_cache()
