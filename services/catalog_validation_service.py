@@ -1,13 +1,20 @@
 """
 Catalog validation service.
-Validates cart items against database catalog and computes authoritative totals.
+Validates cart items against database catalog and computes authoritative totals
+using exact Decimal arithmetic.
 """
 import json
 import logging
 from collections import defaultdict
+from decimal import Decimal, ROUND_HALF_UP, InvalidOperation
 from typing import Any, Dict, List, Optional, Tuple
+from services.currency_service import CurrencyService
 
 logger = logging.getLogger(__name__)
+
+DELIVERY_THRESHOLD = Decimal('500.00')
+DELIVERY_FEE = Decimal('30.00')
+FREE_FEE = Decimal('0.00')
 
 
 class CatalogValidationService:
@@ -20,7 +27,7 @@ class CatalogValidationService:
         items_list: List[Dict[str, Any]]
     ) -> Tuple[bool, Optional[str], List[Dict[str, Any]], Dict[int, int], float]:
         """
-        Inspect cart items and strictly resolve against real catalog products.
+        Inspect cart items and strictly resolve against real catalog products using Decimal calculations.
         Returns:
             (success, error_message, resolved_items, item_quantities, authoritative_total)
         """
@@ -74,14 +81,22 @@ class CatalogValidationService:
             r_name = prod_row['name'] if isinstance(prod_row, dict) else prod_row[1]
             raw_price = prod_row.get('price') if isinstance(prod_row, dict) else prod_row[3]
 
-            if raw_price is None or float(raw_price) <= 0:
-                logger.error(f"Missing authoritative price in database for catalog item #{r_pid} ('{r_name}')")
+            try:
+                dec_price = CurrencyService.to_decimal(raw_price)
+                if dec_price <= Decimal('0.00'):
+                    logger.error(f"Non-positive authoritative price in catalog item #{r_pid} ('{r_name}')")
+                    return False, f"Pricing error for product '{r_name}'. Order cannot proceed.", [], {}, 0.0
+            except (ValueError, InvalidOperation):
+                logger.error(f"Missing or invalid authoritative price for catalog item #{r_pid} ('{r_name}')")
                 return False, f"Pricing error for product '{r_name}'. Order cannot proceed.", [], {}, 0.0
 
-            r_price = float(raw_price)
+            r_price = float(dec_price)
             r_img = (prod_row['image_path'] if isinstance(prod_row, dict) else prod_row[4]) or img
 
-            subtotal = round(r_price * qty, 2)
+            dec_qty = Decimal(qty)
+            subtotal_dec = CurrencyService.round_money(dec_price * dec_qty)
+            subtotal = float(subtotal_dec)
+
             item_quantities[r_pid] += qty
             resolved_items.append({
                 'product_id': r_pid,
@@ -89,10 +104,17 @@ class CatalogValidationService:
                 'price': r_price,
                 'quantity': qty,
                 'image': r_img,
-                'subtotal': subtotal
+                'subtotal': subtotal,
+                '_subtotal_dec': subtotal_dec
             })
 
-        computed_subtotal = round(sum(i['subtotal'] for i in resolved_items), 2)
-        computed_fee = 0.0 if computed_subtotal >= 500.0 else 30.0
-        authoritative_total = round(computed_subtotal + computed_fee, 2)
+        computed_subtotal_dec = sum((i['_subtotal_dec'] for i in resolved_items), Decimal('0.00'))
+        computed_fee_dec = FREE_FEE if computed_subtotal_dec >= DELIVERY_THRESHOLD else DELIVERY_FEE
+        authoritative_total_dec = CurrencyService.round_money(computed_subtotal_dec + computed_fee_dec)
+
+        # Remove internal decimal calculation helper before serialization
+        for i in resolved_items:
+            i.pop('_subtotal_dec', None)
+
+        authoritative_total = float(authoritative_total_dec)
         return True, None, resolved_items, item_quantities, authoritative_total

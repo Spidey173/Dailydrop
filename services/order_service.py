@@ -1,3 +1,5 @@
+from decimal import Decimal
+from services.currency_service import CurrencyService
 """
 Order service managing checkout, order history retrieval, status updates, and analytics.
 """
@@ -46,9 +48,10 @@ class OrderService:
             return False, error_msg, None
 
         try:
-            total_amount = float(total_amount)
-            if total_amount <= 0:
+            dec_total = CurrencyService.to_decimal(total_amount)
+            if dec_total <= Decimal('0.00'):
                 return False, 'Invalid total amount', None
+            total_amount = float(dec_total)
         except (ValueError, TypeError):
             return False, 'Invalid total amount format', None
 

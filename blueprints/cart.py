@@ -1,3 +1,4 @@
+from services.currency_service import CurrencyService
 """
 Cart and checkout blueprint managing shopping cart, payment, order placement, and history.
 """
@@ -75,7 +76,7 @@ def api_create_order() -> Tuple[Any, int]:
             return jsonify({'success': False, 'error': 'Amount too small', 'message': 'Amount must be at least 100 paise'}), 400
 
         receipt = data.get('receipt', f"rcpt_{int(time.time())}")
-        subtotal = round(amount_in_paise / 100.0, 2)
+        subtotal = float(CurrencyService.from_paise(amount_in_paise))
         fee = 0.0
         final_total = subtotal
 
@@ -85,7 +86,7 @@ def api_create_order() -> Tuple[Any, int]:
         if not valid:
             return jsonify({'success': False, 'error': err_msg, 'message': err_msg}), 400
 
-        amount_in_paise = int(round(final_total * 100))
+        amount_in_paise = CurrencyService.to_paise(final_total)
         if amount_in_paise < 100:
             return jsonify({'success': False, 'error': 'Amount too small', 'message': 'Amount must be at least 100 paise'}), 400
 

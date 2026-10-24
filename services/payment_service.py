@@ -1,3 +1,5 @@
+from decimal import Decimal, ROUND_HALF_UP
+from services.currency_service import CurrencyService
 """
 Payment service providing Razorpay payment integration, order creation,
 and cryptographic signature verification.
@@ -32,8 +34,7 @@ class PaymentService:
     ) -> Tuple[bool, str, float, float, float]:
         """
         Authoritatively calculates subtotal, delivery fee, and final payable amount
-        to prevent client-side price tampering. Resolves authoritative prices from catalog
-        database and rejects uncataloged items when require_catalog=True.
+        using exact Decimal precision to prevent client-side price tampering and rounding anomalies.
 
         Returns:
             Tuple of (success, message, subtotal, delivery_fee, final_total)
@@ -43,7 +44,10 @@ class PaymentService:
 
         from services.product_service import ProductService
 
-        subtotal = 0.0
+        subtotal_dec = Decimal('0.00')
+        DELIVERY_THRESHOLD = Decimal('500.00')
+        DELIVERY_FEE = Decimal('30.00')
+
         for item in products:
             if not isinstance(item, dict):
                 return False, "Invalid product data format", 0.0, 0.0, 0.0
@@ -72,34 +76,33 @@ class PaymentService:
                         prod = None
 
                 if prod and 'price' in prod:
-                    authoritative_price = float(prod['price'])
-                    item['price'] = authoritative_price
+                    dec_price = CurrencyService.to_decimal(prod['price'])
+                    item['price'] = float(dec_price)
                     item['product_id'] = prod.get('product_id') or prod.get('id')
                     item['name'] = prod.get('name', name)
                     item['image'] = prod.get('image_path') or item.get('image', '/static/logo1.webp')
-                    price = authoritative_price
                 elif require_catalog:
                     identifier = name or (f"ID #{prod_id}" if prod_id else "item")
                     return False, f"Product '{identifier}' not found in catalog", 0.0, 0.0, 0.0
                 else:
-                    price = float(item.get('price', 0))
+                    dec_price = CurrencyService.to_decimal(item.get('price', 0))
 
-                if price <= 0:
+                if dec_price <= Decimal('0.00'):
                     return False, f"Invalid price or quantity for item: {item.get('name', 'product')}", 0.0, 0.0, 0.0
 
-                item['subtotal'] = round(price * quantity, 2)
-                subtotal += item['subtotal']
+                item_subtotal_dec = CurrencyService.round_money(dec_price * Decimal(quantity))
+                item['subtotal'] = float(item_subtotal_dec)
+                subtotal_dec += item_subtotal_dec
 
             except (ValueError, TypeError):
                 return False, "Invalid product data format", 0.0, 0.0, 0.0
 
         # Business Rule: Free delivery for orders >= Rs. 500, else Rs. 30 delivery charge
-        delivery_fee = 0.0 if subtotal >= 500.0 else 30.0
-        final_total = round(subtotal + delivery_fee, 2)
-        subtotal = round(subtotal, 2)
+        delivery_fee_dec = Decimal('0.00') if subtotal_dec >= DELIVERY_THRESHOLD else DELIVERY_FEE
+        final_total_dec = CurrencyService.round_money(subtotal_dec + delivery_fee_dec)
+        subtotal_dec = CurrencyService.round_money(subtotal_dec)
 
-        return True, "", subtotal, delivery_fee, final_total
-
+        return True, "", float(subtotal_dec), float(delivery_fee_dec), float(final_total_dec)
 
     @classmethod
     def create_order(
@@ -178,7 +181,7 @@ class PaymentService:
         Backwards-compatible helper accepting amount in Rupees (INR).
         Converts Rupees to paise and delegates to create_order.
         """
-        amount_in_paise = int(round(amount * 100))
+        amount_in_paise = CurrencyService.to_paise(amount)
         success, message, data, _ = cls.create_order(
             amount_in_paise=amount_in_paise,
             receipt=receipt,
