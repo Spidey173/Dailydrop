@@ -580,9 +580,9 @@
                         <i class="far fa-calendar-alt"></i>
                         Ordered on {{ order.order_date.strftime('%d %b, %I:%M %p') if order.order_date.strftime is defined else order.order_date }}
                     </div>
-                    <span class="order-status-badge {{ order.tracking.badge_class|default('status-processing') }}" id="header-badge-{{ order.order_id }}">
-                        <i class="{{ order.tracking.badge_icon|default('fas fa-receipt') }}"></i>
-                        <span class="badge-label">{{ order.tracking.badge_text|default('Order Confirmed') }}</span>
+                    <span class="order-status-badge status-{{ order.status|lower }}" id="header-badge-{{ order.order_id }}" title="Official Database Status">
+                        <i class="fas fa-database me-1" style="font-size: 0.75rem;"></i>
+                        <span class="badge-label">DB: {{ order.status }}</span>
                     </span>
                 </div>
                 <div class="order-cost-info">
@@ -596,7 +596,7 @@
                 </div>
             </div>
 
-            <!-- ================= Live 4-Process Order Tracker (Tailored & Strictly Under 10 Mins) ================= -->
+            <!-- ================= Live 4-Process Order Tracker (Demo Simulation) ================= -->
             <div class="order-tracker-container" 
                  id="tracker-{{ order.order_id }}" 
                  data-order-id="{{ order.order_id }}"
@@ -610,6 +610,7 @@
 
                 <div class="tracker-header">
                     <div class="tracker-status-info">
+                        <span class="badge bg-secondary me-2" style="font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.85;" title="Simulated 10-minute dispatch sequence for demo preview">Demo Simulation</span>
                         <span class="status-pill {{ order.tracking.badge_class|default('status-processing') }}">
                             <i class="{{ order.tracking.badge_icon|default('fas fa-receipt') }}"></i>
                             <span class="status-text">{{ order.tracking.badge_text|default('Order Confirmed') }}</span>

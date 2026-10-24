@@ -360,6 +360,7 @@ class OrderService:
                 'step3_clock': step3_clock,
                 'step4_clock': step4_clock,
                 'delivery_duration_text': delivery_duration_text,
+                'is_simulation': True,
             }
 
         # If manually marked Delivered or time elapsed >= target_seconds (strictly under 10 mins)
@@ -436,6 +437,7 @@ class OrderService:
             'step3_clock': step3_clock,
             'step4_clock': step4_clock,
             'delivery_duration_text': delivery_duration_text,
+                'is_simulation': True,
         }
 
     @staticmethod
@@ -531,39 +533,16 @@ class OrderService:
                     except Exception:
                         pass
 
-                # Enrich with varied quick-commerce under-10-minute delivery tracking stages
+                # Enrich with client-side demo simulation tracking without mutating real order state
+                raw_status = order_dict.get('status', 'Processing')
+                order_dict['real_status'] = raw_status
                 tracking = cls.get_delivery_tracking(
                     order_dict.get('order_date'),
-                    order_dict.get('status', 'Processing'),
+                    raw_status,
                     order_id=oid
                 )
                 order_dict['tracking'] = tracking
-                if tracking.get('is_delivered') and order_dict.get('status') not in ('Delivered', 'Cancelled'):
-                    order_dict['status'] = 'Delivered'
                 parsed_orders.append(order_dict)
-
-            # Auto-promote orders older than 10 mins to 'Delivered' in DB if not already terminal
-            delivered_ids = [
-                parsed_orders[idx]['order_id']
-                for idx, raw_order in enumerate(order_rows)
-                if parsed_orders[idx].get('tracking', {}).get('is_delivered')
-                and str(parsed_orders[idx].get('status')) == 'Delivered'
-                and dict(raw_order).get('status') not in ('Delivered', 'Cancelled')
-            ]
-            if delivered_ids:
-                try:
-                    with get_db_connection() as conn:
-                        with conn.cursor() as cursor:
-                            format_strings = ','.join(['%s'] * len(delivered_ids))
-                            cursor.execute(f'''
-                                UPDATE orders
-                                SET status = 'Delivered'
-                                WHERE order_id IN ({format_strings})
-                                  AND status NOT IN ('Delivered', 'Cancelled')
-                            ''', tuple(delivered_ids))
-                except Exception as ex:
-                    logger.warning(f"Could not auto-promote orders to Delivered in DB: {ex}")
-
             return parsed_orders
         except DatabaseError as e:
             logger.error(f"Error fetching orders for user #{user_id}: {e}")
