@@ -148,8 +148,11 @@ pip install -r requirements.txt
 pytest -v
 ```
 
-### 🛡️ Why DailyDrop Tests Run Deterministically Offline
-* **Zero External DB Dependency**: Neon PostgreSQL connection pooling is seamlessly redirected during tests to a shared, in-memory SQLite fixture with automatic query translation (including stripping PostgreSQL `FOR UPDATE` row locks).
+### 🛡️ Testing Architecture: Deterministic Offline Suite & Concurrency Scope
+* **Zero External DB Dependency for Offline Test Runs**: Neon PostgreSQL connection pooling is redirected during local/offline tests to an in-memory SQLite fixture with query translation (simulating transactional logic while stripping PostgreSQL-specific `FOR UPDATE` row locks).
+* **Concurrency Coverage Scope**:
+  - *Offline Suite (SQLite fixture)*: Verifies the full application contract, idempotency state machine, Redis cache fast-rejection, Decimal precision, and retry logic in under 2 seconds. Because SQLite does not support row-level write locks (`SELECT ... FOR UPDATE`), the true multi-client row-lock serialization under PostgreSQL is explicitly **simulated** in this offline tier.
+  - *Production & CI Integration*: True multi-transaction PostgreSQL locking (`SELECT ... FOR UPDATE` row-level isolation) runs against PostgreSQL instances (e.g. Neon Cloud PostgreSQL or containerized Postgres services).
 * **Zero External Redis Dependency**: A thread-safe `MockRedisClient` provides Lua script emulation, atomic stock decrement simulation, and catalog cache keys.
 * **Resilient Background Task Dispatch**: `TaskService` includes defensive fallbacks—tests verify clean task dispatch whether worker libraries (`rq`) are active or uninstalled.
 

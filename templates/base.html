@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}DailyDrop | Instant Grocery Delivery{% endblock %}</title>
+  <title>{% block title %}DailyDrop — Portfolio Demo{% endblock %}</title>
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo1.webp') }}">
@@ -29,6 +29,15 @@
   {% block head_extra %}{% endblock %}
 </head>
 <body>
+
+  <!-- Portfolio Demo Disclaimer Banner -->
+  <div style="background: linear-gradient(90deg, #1e293b, #0f172a); color: #cbd5e1; border-bottom: 1px solid rgba(255,255,255,0.1); padding: 0.45rem 1rem; font-size: 0.8rem; text-align: center; position: sticky; top: 0; z-index: 1050; letter-spacing: 0.2px;">
+    <span style="display: inline-flex; align-items: center; gap: 0.4rem; justify-content: center; flex-wrap: wrap;">
+      <span style="background: rgba(249, 115, 22, 0.2); color: #f97316; border: 1px solid rgba(249, 115, 22, 0.35); padding: 0.1rem 0.5rem; border-radius: 4px; font-weight: 600; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.5px;">Portfolio Demo</span>
+      <span>DailyDrop is a simulated full-stack engineering demonstration. No actual grocery orders, transactions, or live deliveries take place.</span>
+    </span>
+  </div>
+
   <!-- Global Portfolio Demo Notice Banner -->
   <div class="portfolio-demo-banner" style="background: linear-gradient(90deg, #1e293b 0%, #0f172a 100%); border-bottom: 1px solid rgba(245, 158, 11, 0.35); padding: 7px 16px; text-align: center; font-size: 12.5px; color: #f1f5f9; display: flex; align-items: center; justify-content: center; gap: 10px; position: relative; z-index: 1001;">
       <span style="background: rgba(245, 158, 11, 0.2); border: 1px solid rgba(245, 158, 11, 0.5); color: #fcd34d; font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.05em;">Portfolio Demo</span>
@@ -75,7 +84,7 @@
       <div class="container footer-content">
           <div class="footer-column">
               <h4>Daily<span>Drop</span></h4>
-              <p>Fresh Groceries Delivered in 10-15 Minutes.</p>
+              <p>Full-Stack Portfolio Engineering Demonstration • Simulated Quick-Commerce Architecture.</p>
           </div>
           <div class="footer-column">
               <h4>Quick Links</h4>
