@@ -14,7 +14,7 @@ window.productsDB = [
     "category": "Household",
     "subcategory": "freshners",
     "price": 65.0,
-    "image": "/static/household/aer.jpeg",
+    "image": "/static/household/Aer.jpeg",
     "description": "Unique power gel technology keeping bathrooms fragrant for 30 days."
   },
   {
@@ -104,7 +104,7 @@ window.productsDB = [
     "category": "Household",
     "subcategory": "cleaning tools",
     "price": 210.0,
-    "image": "/static/household/attack.jpeg",
+    "image": "/static/household/Attack.jpeg",
     "description": "Deep stain penetrating liquid laundry cleaner for bright clothes."
   },
   {
@@ -806,7 +806,7 @@ window.productsDB = [
     "category": "Household",
     "subcategory": "cleaning tools",
     "price": 145.0,
-    "image": "/static/household/fairy.jpeg",
+    "image": "/static/household/Fairy.jpeg",
     "description": "Cuts through tough grease instantly for squeaky-clean cookware."
   },
   {
@@ -833,7 +833,7 @@ window.productsDB = [
     "category": "Household",
     "subcategory": "freshners",
     "price": 299.0,
-    "image": "/static/household/febreze.jpeg",
+    "image": "/static/household/Febreze.jpeg",
     "description": "Eliminates trapped odors and refreshes indoor air with a light scent."
   },
   {
@@ -905,7 +905,7 @@ window.productsDB = [
     "category": "Household",
     "subcategory": "freshners",
     "price": 225.0,
-    "image": "/static/household/glade.jpeg",
+    "image": "/static/household/Glade.jpeg",
     "description": "Time-released continuous fragrance spray for living rooms and bedrooms."
   },
   {
@@ -1013,7 +1013,7 @@ window.productsDB = [
     "category": "Household",
     "subcategory": "cleaning tools",
     "price": 93.0,
-    "image": "/static/household/harpic.jpeg",
+    "image": "/static/household/Harpic.jpeg",
     "description": "Powerful disinfectant cleaner removing tough yellow stains and limescale."
   },
   {
@@ -1301,7 +1301,7 @@ window.productsDB = [
     "category": "Household",
     "subcategory": "cleaning tools",
     "price": 350.0,
-    "image": "/static/household/lenor.jpeg",
+    "image": "/static/household/Lenor.jpeg",
     "description": "Fragrance perfume pearls infusing laundry with lasting freshness."
   },
   {
@@ -1832,7 +1832,7 @@ window.productsDB = [
     "category": "Household",
     "subcategory": "cleaning tools",
     "price": 95.0,
-    "image": "/static/household/pril.jpeg",
+    "image": "/static/household/Pril.jpeg",
     "description": "High-degreasing formula with active lime molecules for spotless utensils."
   },
   {
@@ -1931,7 +1931,7 @@ window.productsDB = [
     "category": "Household",
     "subcategory": "cleaning tools",
     "price": 190.0,
-    "image": "/static/household/softouch.jpeg",
+    "image": "/static/household/Softouch.jpeg",
     "description": "Antibacterial fabric softener keeping clothes fluffy and fragrant."
   },
   {
@@ -2102,7 +2102,7 @@ window.productsDB = [
     "category": "Household",
     "subcategory": "cleaning tools",
     "price": 165.0,
-    "image": "/static/household/vanish.jpeg",
+    "image": "/static/household/Vanish.jpeg",
     "description": "Chlorine-free active oxygen powder removing stubborn stains in 1 wash."
   },
   {
