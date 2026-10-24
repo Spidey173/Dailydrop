@@ -1,16 +1,31 @@
 """
 Inventory reservation service.
-Handles distributed Redis Lua atomic decrements and relational PostgreSQL row-level reservations.
+Defines PostgreSQL as the authoritative single source of truth for all inventory levels,
+with Redis serving as a discardable, sub-millisecond fast-fail cache.
+
+Includes:
+1. Two-tier stock reservation (Redis Lua fast-fail -> PostgreSQL ACID lock).
+2. Automatic compensating rollback of Redis cache mutations upon any DB commit failure.
+3. Active reconciliation mechanism: re-syncs or evicts Redis cache keys to reflect PostgreSQL truth.
 """
 import logging
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 from services.redis_service import RedisService
 
 logger = logging.getLogger(__name__)
 
 
 class InventoryReservationService:
-    """Manages multi-tier inventory reservation across Redis and PostgreSQL."""
+    """
+    Manages multi-tier inventory reservation across Redis and PostgreSQL.
+    
+    ARCHITECTURAL PRINCIPLE:
+    - PostgreSQL is the SINGLE SOURCE OF TRUTH (SSOT).
+    - Redis is an ephemeral fast-rejection cache used to protect the relational database
+      during concurrent traffic surges (e.g., flash sales).
+    - If a failure, exception, crash, or constraint violation occurs between cache mutation
+      and database commit, the Redis cache mutation is rolled back or reconciled to match PostgreSQL.
+    """
 
     @classmethod
     def reserve_inventory(
@@ -28,7 +43,7 @@ class InventoryReservationService:
         """
         redis_decrements: Dict[int, int] = {}
 
-        # 1. Distributed Redis Lua Script (< 1ms)
+        # 1. Distributed Redis Lua Script (< 1ms fast-fail)
         for r_pid, required_qty in item_quantities.items():
             cursor.execute("SELECT name, stock FROM products WHERE product_id = %s", (r_pid,))
             p_info = cursor.fetchone()
@@ -47,7 +62,7 @@ class InventoryReservationService:
 
             redis_decrements[r_pid] = required_qty
 
-        # 2. Relational PostgreSQL Atomic Update:
+        # 2. Relational PostgreSQL Atomic Update (Authoritative Source of Truth):
         # UPDATE products SET stock = stock - %s WHERE product_id = %s AND stock >= %s
         for r_pid, required_qty in item_quantities.items():
             cursor.execute(
@@ -68,9 +83,49 @@ class InventoryReservationService:
 
     @classmethod
     def rollback_reservations(cls, redis_decrements: Dict[int, int]) -> None:
-        """Compensates any prior items decremented in Redis memory."""
+        """
+        Compensates any prior items decremented in Redis memory.
+        Ensures that if DB transaction aborts or fails before commit,
+        Redis cache is restored immediately.
+        """
         for rolled_pid, rolled_qty in redis_decrements.items():
             try:
                 RedisService.atomic_rollback_stock(rolled_pid, rolled_qty)
             except Exception as e:
                 logger.error(f"Failed to rollback Redis stock for product #{rolled_pid}: {e}")
+
+    @classmethod
+    def reconcile_stock_with_database(cls, cursor: Any, product_ids: Optional[List[int]] = None) -> Dict[str, Any]:
+        """
+        Actively audits and synchronizes Redis cached inventory with PostgreSQL authoritative records.
+        Corrects any cache drift caused by hard crashes between cache mutation and DB commit.
+
+        Returns:
+            Dict summarizing checked, drifted, and corrected items.
+        """
+        if product_ids:
+            format_strings = ','.join(['%s'] * len(product_ids))
+            cursor.execute(f"SELECT product_id, stock FROM products WHERE product_id IN ({format_strings})", tuple(product_ids))
+        else:
+            cursor.execute("SELECT product_id, stock FROM products")
+
+        db_rows = cursor.fetchall()
+        report = {'checked': 0, 'synced': 0, 'discrepancies': []}
+
+        for row in db_rows:
+            pid = row['product_id'] if isinstance(row, dict) else row[0]
+            db_stock = row['stock'] if isinstance(row, dict) else row[1]
+            report['checked'] += 1
+
+            cached_stock = RedisService.get_stock(pid)
+            if cached_stock is not None and cached_stock != db_stock:
+                report['discrepancies'].append({
+                    'product_id': pid,
+                    'redis_stock': cached_stock,
+                    'authoritative_db_stock': db_stock
+                })
+                # Re-align Redis to match the authoritative PostgreSQL database
+                RedisService.set_stock(pid, db_stock)
+                report['synced'] += 1
+
+        return report

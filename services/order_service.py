@@ -147,7 +147,7 @@ class OrderService:
             logger.info(f"Order #{order_id} ({payment_method}) placed successfully with {len(resolved_items)} items for user #{user_id}")
             return True, 'Order placed successfully', order_id
 
-        except DatabaseError as e:
+        except (DatabaseError, Exception) as e:
             InventoryReservationService.rollback_reservations(redis_decrements)
             logger.error(f"Error saving order: {e}")
             return False, 'Failed to save order to database', None

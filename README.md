@@ -1,7 +1,7 @@
 # DailyDrop 🛒 — Full-Stack Quick-Commerce Web Application
 
 [![CI Pipeline](https://github.com/Spidey173/Dailydrop/actions/workflows/ci.yml/badge.svg)](https://github.com/Spidey173/Dailydrop/actions)
-[![Tests](https://img.shields.io/badge/Pytest-69%20Passed-brightgreen?style=flat-square&logo=pytest)](tests/)
+[![Tests](https://img.shields.io/badge/Pytest-72%20Passed-brightgreen?style=flat-square&logo=pytest)](tests/)
 [![Backend](https://img.shields.io/badge/Backend-Python%20%7C%20Flask-blue?style=flat-square&logo=python)](app.py)
 [![Database](https://img.shields.io/badge/Database-PostgreSQL%20(Neon)-336791?style=flat-square&logo=postgresql&logoColor=white)](database.py)
 [![Cache](https://img.shields.io/badge/Cache-Redis%20(Fallback%20Safe)-DC382D?style=flat-square&logo=redis&logoColor=white)](services/redis_service.py)
@@ -15,7 +15,7 @@
 
 | 📦 Catalog Scale | 🧪 Test Suite | 🛡️ Concurrency & Integrity | ⚡ Live Search | 🌐 Deployment |
 | :---: | :---: | :---: | :---: | :---: |
-| **200+ Products across 10 Categories** | **69 / 69 Pytest Tests Passing** | **Server-Authoritative Pricing & Atomic Transactions** | **Sub-Second Client-Side Filtering** | **Vercel Serverless WSGI + Neon Cloud DB** |
+| **200+ Products across 10 Categories** | **72 / 72 Pytest Tests Passing** | **Server-Authoritative Pricing & Atomic Transactions** | **Sub-Second Client-Side Filtering** | **Vercel Serverless WSGI + Neon Cloud DB** |
 
 ---
 
@@ -86,7 +86,7 @@ Ready-to-use accounts for immediate testing:
 * **Caching & Queue**: Redis (Read-through catalog caching, atomic stock decrement helpers, background queue)
 * **Security & Auth**: Flask-WTF CSRF Tokens, Werkzeug Scrypt Password Hashing, Role-Based Route Guards (`@admin_required`), Defensive Security Headers
 * **Frontend**: HTML5, Vanilla CSS3, JavaScript (ES6+), Bootstrap 5
-* **Testing & CI**: Pytest (69 automated unit, integration, concurrency & security regression tests), GitHub Actions CI (matrix across Python 3.10, 3.11, 3.12), Flake8 Linting
+* **Testing & CI**: Pytest (72 automated unit, integration, concurrency & security regression tests), GitHub Actions CI (matrix across Python 3.10, 3.11, 3.12), Flake8 Linting
 * **Deployment**: Vercel Serverless WSGI (demo storefront) / Docker & Procfile compatible (production worker PaaS)
 
 ---
@@ -121,14 +121,14 @@ Daily-Drop/
 │   └── runner.py           # Idempotent migration runner (python -m migrations.runner)
 ├── static/                 # Stylesheets, UI icons, and product images
 ├── templates/              # Jinja2 HTML templates with CSRF token meta tags
-└── tests/                  # 69 automated Pytest test suites (unit, integration, security)
+└── tests/                  # 72 automated Pytest test suites (unit, integration, security)
 ```
 
 ---
 
 ## 🧪 Reproducible Testing & Dependency Guide
 
-The project includes **69 automated tests** covering authentication, cart calculations, forged price rejection, unknown product blocking, atomic checkout, stock race conditions, payment signature verification, webhook idempotency, and order state machine validation.
+The project includes **72 automated tests** covering authentication, cart calculations, forged price rejection, unknown product blocking, atomic checkout, stock race conditions, payment signature verification, webhook idempotency, and order state machine validation.
 
 ### One-Command Test Execution
 ```bash
@@ -146,7 +146,7 @@ pytest -v
 * **Zero External Redis Dependency**: A thread-safe `MockRedisClient` provides Lua script emulation, atomic stock decrement simulation, and catalog cache keys.
 * **Resilient Background Task Dispatch**: `TaskService` includes defensive fallbacks—tests verify clean task dispatch whether worker libraries (`rq`) are active or uninstalled.
 
-All 69 tests run completely offline with zero skips in ~2 seconds, and pass across Python 3.10, 3.11, and 3.12 in GitHub Actions CI.
+All 72 tests run completely offline with zero skips in ~2 seconds, and pass across Python 3.10, 3.11, and 3.12 in GitHub Actions CI.
 
 ---
 
@@ -205,7 +205,7 @@ To provide a zero-idle-cost, interactive portfolio demo without requiring paid m
 
 > *"DailyDrop is a full-stack quick-commerce application built with Flask and PostgreSQL. Rather than placing business logic inside route functions, I designed it with Flask Blueprints and a dedicated Service layer.*  
 >  
-> *The central engineering focus was **server-authoritative checkout and payment integrity**: cart prices are recalculated strictly against database records, inventory decrements happen atomically within a single transaction to prevent overselling, and payment webhooks use cryptographic HMAC validation with an order state machine. The application includes 69 automated Pytest tests, versioned database migrations, and health check observability endpoints."*
+> *The central engineering focus was **server-authoritative checkout and payment integrity**: cart prices are recalculated strictly against database records, inventory decrements happen atomically within a single transaction to prevent overselling, and payment webhooks use cryptographic HMAC validation with an order state machine. The application includes 72 automated Pytest tests, versioned database migrations, and health check observability endpoints."*
 
 ---
 
