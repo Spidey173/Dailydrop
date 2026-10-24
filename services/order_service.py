@@ -229,7 +229,7 @@ class OrderService:
                         'user_id': user_id,
                         'full_name': full_name,
                         'phone_number': phone_number,
-                        'total_amount': total_amount,
+                        'total_amount': authoritative_total,
                         'payment_method': payment_method,
                         'payment_id': payment_id,
                         'status': status,
