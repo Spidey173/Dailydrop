@@ -106,13 +106,20 @@ Daily-Drop/
 │   ├── products.py         # Catalog views & search endpoints
 │   ├── admin.py            # Admin dashboard, order fulfillment, upload controls
 │   └── main.py             # Public pages & health check endpoints (/healthz)
-├── services/               # Core business logic layer
-│   ├── auth_service.py     # Password hashing & user validation
-│   ├── order_service.py    # Order creation, items normalization, FSM status transitions
-│   ├── product_service.py  # Catalog querying & admin updates
-│   ├── payment_service.py  # Authoritative price resolution & HMAC verification
-│   ├── idempotency_service.py # Redis idempotency tokens & user isolation
-│   └── redis_service.py    # Read-through cache & atomic stock decrement helpers
+├── services/               # Modular single-responsibility domain services
+│   ├── catalog_validation_service.py    # Catalog resolution & authoritative price calculation
+│   ├── inventory_reservation_service.py  # Two-tier Redis Lua (<1ms) & PostgreSQL ACID reservation
+│   ├── order_persistence_service.py     # Order master record & normalized order_items persistence
+│   ├── currency_service.py              # Decimal monetary precision & exact paise conversion
+│   ├── payment_service.py               # Razorpay order generation & HMAC-SHA256 signature verification
+│   ├── outbox_service.py                # Transactional outbox pattern & atomic event persistence
+│   ├── order_service.py                 # Checkout orchestration, delivery progression, and order history
+│   ├── auth_service.py                  # User authentication, password hashing & session management
+│   ├── product_service.py               # Catalog queries, admin CRUD, and cache invalidation
+│   ├── idempotency_service.py           # Distributed Redis idempotency tokens & replay defense
+│   ├── redis_service.py                 # Resilient Redis pooling & atomic Lua decrement scripts
+│   ├── task_service.py                  # Background Celery / RQ worker queue task dispatch
+│   └── contact_service.py               # Customer inquiry submission & validation
 ├── migrations/             # Versioned SQL migrations & runner
 │   ├── 001_initial_schema.sql
 │   ├── 002_add_order_items_and_pending_orders.sql
