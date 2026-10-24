@@ -23,8 +23,7 @@ import pytest
 from app import create_app
 from config import Config
 from database import (
-    get_db_connection, add_product, get_product_by_id,
-    save_pending_order, get_pending_order
+    add_product, get_product_by_id, save_pending_order
 )
 from services.order_service import OrderService
 from services.payment_service import PaymentService

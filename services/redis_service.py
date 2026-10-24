@@ -11,7 +11,7 @@ Provides:
 import json
 import logging
 import time
-from typing import Optional, Any, Tuple, Dict, List
+from typing import Optional, Any, Tuple
 import redis
 from config import Config
 

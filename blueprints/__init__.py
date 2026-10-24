@@ -25,9 +25,12 @@ ENDPOINT_ALIASES = {
     'privacy_policy_signup': 'main.privacy_policy_signup',
     'privacy_policy_login': 'main.privacy_policy_login',
     'privacy_policy_signup_home': 'main.privacy_policy_signup_home',
+    'privacy_policy': 'main.privacy_policy',
+    'privacy': 'main.privacy',
     'terms_login': 'main.terms_login',
     'terms_signup': 'main.terms_signup',
     'terms_signup_home': 'main.terms_signup_home',
+    'terms': 'main.terms',
     'faqs': 'main.faqs',
     'about_us': 'main.about_us',
     # Products

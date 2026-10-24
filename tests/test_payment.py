@@ -3,7 +3,6 @@ Unit and integration tests for Razorpay PaymentService and payment endpoints.
 """
 import hmac
 import hashlib
-import pytest
 from app import create_app
 from services.payment_service import PaymentService
 from config import Config

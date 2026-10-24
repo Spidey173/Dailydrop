@@ -14,7 +14,6 @@ from typing import Optional, List, Dict, Any, Tuple
 from datetime import datetime, timedelta
 from contextlib import contextmanager
 
-import psycopg2
 from psycopg2 import pool
 from psycopg2.extras import RealDictCursor
 from werkzeug.security import generate_password_hash

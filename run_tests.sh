@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # =============================================================================
 # DailyDrop Automated Test Runner
-# Guarantees 100% deterministic, offline test execution across all 61 tests.
+# Guarantees 100% deterministic, offline test execution across all 63 tests.
 # =============================================================================
 set -e
 
@@ -15,7 +15,7 @@ if ! command -v pytest &> /dev/null && ! python3 -m pytest --version &> /dev/nul
     pip install -r requirements.txt
 fi
 
-echo "Running 61 automated tests (Offline In-Memory SQLite + Mocked Redis)..."
+echo "Running 63 automated tests (Offline In-Memory SQLite + Mocked Redis)..."
 python3 -m pytest -v --color=yes
 
 echo "==============================================="

@@ -8,7 +8,7 @@ import sys
 # Ensure workspace is in python path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from database import init_database, get_db_connection
+from database import init_database
 
 def main():
     print("Reinitializing Neon PostgreSQL database...")

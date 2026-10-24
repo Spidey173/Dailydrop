@@ -4,7 +4,7 @@ Admin blueprint managing dashboard analytics, customer order management, and pro
 import os
 import logging
 from datetime import datetime
-from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, current_app
+from flask import Blueprint, render_template, request, jsonify, current_app
 from werkzeug.utils import secure_filename
 
 from services.product_service import ProductService
@@ -12,7 +12,6 @@ from services.order_service import OrderService
 from services.contact_service import ContactService
 from blueprints.helpers import admin_required
 from utils import sanitize_string
-from extensions import csrf
 
 logger = logging.getLogger(__name__)
 

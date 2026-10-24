@@ -8,13 +8,11 @@ Tests for DailyDrop Distributed Architecture & Production Upgrades:
 """
 
 import uuid
-import json
 import pytest
 from services.redis_service import RedisService
 from services.idempotency_service import IdempotencyService
 from services.outbox_service import OutboxService
 from services.task_service import TaskService
-from services.order_service import OrderService
 from app import create_app
 from database import get_all_products, get_product_by_id, update_product_stock, get_db_connection, clear_product_cache
 

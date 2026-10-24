@@ -2,7 +2,7 @@
 Cart and checkout blueprint managing shopping cart, payment, order placement, and history.
 """
 import time
-from typing import Tuple, Dict, Any
+from typing import Tuple, Any
 import logging
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify
 from config import Config

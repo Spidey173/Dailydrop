@@ -28,9 +28,11 @@ def index() -> str:
 
 @main_bp.route('/dashboard', endpoint='dashboard')
 @require_login
-def dashboard() -> str:
-    """Display user dashboard."""
-    return render_template('dashboard.html')
+def dashboard():
+    """Redirect to the appropriate dashboard based on user role."""
+    if session.get('user_role') == 'admin':
+        return redirect(url_for('admin.admin_dashboard'))
+    return redirect(url_for('cart.orders'))
 
 
 @main_bp.route('/contact_us', methods=['GET', 'POST'], endpoint='contact_us')

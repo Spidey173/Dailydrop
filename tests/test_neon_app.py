@@ -1,8 +1,7 @@
-import json
 import pytest
 from app import create_app
 from database import (
-    get_db_connection, get_all_products, get_user_by_email,
+    get_all_products, get_user_by_email,
     get_dashboard_stats
 )
 

@@ -13,7 +13,7 @@ from flask_wtf.csrf import CSRFError
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 
-from config import config_dict, Config
+from config import config_dict
 from database import init_database, DatabaseError
 from extensions import csrf, limiter
 from blueprints import register_blueprints

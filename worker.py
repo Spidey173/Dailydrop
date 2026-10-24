@@ -16,7 +16,6 @@ Or in burst mode (processes remaining queue and exits):
 
 import sys
 import logging
-from config import Config
 from services.redis_service import RedisService
 
 logging.basicConfig(

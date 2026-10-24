@@ -3,8 +3,6 @@ Unit and integration tests for Admin Blueprint, permissions, and management APIs
 """
 import pytest
 from app import create_app
-from services.product_service import ProductService
-from services.order_service import OrderService
 
 
 @pytest.fixture

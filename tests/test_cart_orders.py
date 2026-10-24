@@ -2,7 +2,6 @@
 Unit and integration tests for Cart & Orders Blueprint & OrderService.
 """
 import pytest
-import json
 from app import create_app
 from services.auth_service import AuthService
 from services.order_service import OrderService

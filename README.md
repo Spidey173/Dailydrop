@@ -1,7 +1,7 @@
 # DailyDrop 🛒 — Full-Stack Quick-Commerce Web Application
 
 [![CI Pipeline](https://github.com/Spidey173/Dailydrop/actions/workflows/ci.yml/badge.svg)](https://github.com/Spidey173/Dailydrop/actions)
-[![Tests](https://img.shields.io/badge/Pytest-61%20Passed-brightgreen?style=flat-square&logo=pytest)](tests/)
+[![Tests](https://img.shields.io/badge/Pytest-63%20Passed-brightgreen?style=flat-square&logo=pytest)](tests/)
 [![Backend](https://img.shields.io/badge/Backend-Python%20%7C%20Flask-blue?style=flat-square&logo=python)](app.py)
 [![Database](https://img.shields.io/badge/Database-PostgreSQL%20(Neon)-336791?style=flat-square&logo=postgresql&logoColor=white)](database.py)
 [![Cache](https://img.shields.io/badge/Cache-Redis%20(Fallback%20Safe)-DC382D?style=flat-square&logo=redis&logoColor=white)](services/redis_service.py)
@@ -15,7 +15,7 @@
 
 | 📦 Catalog Scale | 🧪 Test Suite | 🛡️ Concurrency & Integrity | ⚡ Live Search | 🌐 Deployment |
 | :---: | :---: | :---: | :---: | :---: |
-| **200+ Products across 10 Categories** | **61 / 61 Pytest Tests Passing** | **Server-Authoritative Pricing & Atomic Transactions** | **Sub-Second Client-Side Filtering** | **Vercel Serverless WSGI + Neon Cloud DB** |
+| **200+ Products across 10 Categories** | **63 / 63 Pytest Tests Passing** | **Server-Authoritative Pricing & Atomic Transactions** | **Sub-Second Client-Side Filtering** | **Vercel Serverless WSGI + Neon Cloud DB** |
 
 ---
 
@@ -86,7 +86,7 @@ Ready-to-use accounts for immediate testing:
 * **Caching & Queue**: Redis (Read-through catalog caching, atomic stock decrement helpers, background queue)
 * **Security & Auth**: Flask-WTF CSRF Tokens, Werkzeug Scrypt Password Hashing, Role-Based Route Guards (`@admin_required`), Defensive Security Headers
 * **Frontend**: HTML5, Vanilla CSS3, JavaScript (ES6+), Bootstrap 5
-* **Testing & CI**: Pytest (61 automated unit, integration, concurrency & security regression tests), GitHub Actions CI (matrix across Python 3.10, 3.11, 3.12), Flake8 Linting
+* **Testing & CI**: Pytest (63 automated unit, integration, concurrency & security regression tests), GitHub Actions CI (matrix across Python 3.10, 3.11, 3.12), Flake8 Linting
 * **Deployment**: Vercel Serverless WSGI (demo storefront) / Docker & Procfile compatible (production worker PaaS)
 
 ---

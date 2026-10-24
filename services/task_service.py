@@ -6,8 +6,7 @@ Falls back safely to synchronous or non-blocking dispatch if Redis is disabled o
 """
 
 import logging
-from typing import Optional, List, Any
-from config import Config
+from typing import Optional, List
 from services.redis_service import RedisService
 
 logger = logging.getLogger(__name__)
@@ -22,7 +21,7 @@ class TaskService:
     def get_queue(cls):
         """Get or initialize the RQ queue using the shared Redis connection."""
         try:
-            from rq import Queue, Retry
+            from rq import Queue
             client = RedisService.get_raw_client()
             if client is None:
                 return None

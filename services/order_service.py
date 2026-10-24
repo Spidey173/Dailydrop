@@ -3,13 +3,10 @@ Order service managing checkout, order history retrieval, status updates, and an
 """
 from typing import Optional, List, Dict, Any, Tuple
 import json
-import time
 import logging
 from datetime import datetime
 from database import (
     get_db_connection, DatabaseError, get_all_orders_with_user_info,
-    update_order_status as db_update_order_status, get_dashboard_stats,
-    get_sales_data, get_category_revenue, get_hourly_order_distribution,
     clear_analytics_cache, get_unified_analytics
 )
 from utils import validate_order_data, sanitize_string
