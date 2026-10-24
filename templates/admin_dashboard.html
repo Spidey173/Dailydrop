@@ -742,7 +742,7 @@
                     <i class="fa-solid fa-dollar-sign"></i>
                 </div>
                 <div class="stat-content">
-                    <h3>Rs. {{ "%.2f"|format(stats.total_revenue|default(0)) }}</h3>
+                    <h3>Rs. {{ "%.2f"|format(stats.total_revenue|default(0)|float) }}</h3>
                     <p>Total Sales Revenue</p>
                 </div>
             </div>
@@ -903,7 +903,7 @@
                             <td>
                                 <div class="price-wrapper"
                                     onclick="enablePriceEdit(this, {{ p.product_id }}, {{ p.price }})">
-                                    <span class="price-value">Rs. {{ "%.2f"|format(p.price) }}</span>
+                                    <span class="price-value">Rs. {{ "%.2f"|format(p.price|float) }}</span>
                                     <i class="fa-solid fa-pen price-edit-icon"></i>
                                 </div>
                             </td>

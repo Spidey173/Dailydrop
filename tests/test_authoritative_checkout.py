@@ -222,16 +222,21 @@ def test_verify_payment_invalid_signature(auth_client):
 
 def test_verify_payment_mismatched_user(test_app):
     """Payment verification must reject if pending order belongs to a different user (HTTP 403)."""
+    from database import get_user_by_email
     key_secret = "test_key_secret_for_mismatch"
     Config.RAZORPAY_KEY_SECRET = key_secret
 
     rzp_order_id = "order_user_mismatch_999"
     rzp_pay_id = "pay_user_mismatch_999"
 
-    # Pending order created by User #2
+    # Pending order created by an existing customer (victim)
+    victim_user = get_user_by_email('demo_dailydrop@gmail.com')
+    victim_id = victim_user['id'] if victim_user else 2
+    attacker_id = 99999 if victim_id != 99999 else 99998
+
     save_pending_order(
         razorpay_order_id=rzp_order_id,
-        user_id=2,
+        user_id=victim_id,
         full_name='Victim User',
         phone_number='9876543210',
         address='Victim Rd',
@@ -245,10 +250,10 @@ def test_verify_payment_mismatched_user(test_app):
         hashlib.sha256
     ).hexdigest()
 
-    # User #1 attempts to verify payment for User #2's order
+    # Different user (attacker) attempts to verify payment for victim's order
     with test_app.test_client() as client:
         with client.session_transaction() as sess:
-            sess['user_id'] = 1  # Attacker
+            sess['user_id'] = attacker_id
 
         resp = client.post('/api/verify-payment', json={
             'razorpay_order_id': rzp_order_id,
@@ -257,6 +262,7 @@ def test_verify_payment_mismatched_user(test_app):
         })
         assert resp.status_code == 403
         assert 'Unauthorized' in resp.get_json()['message']
+
 
 
 def test_verify_payment_missing_pending_order(auth_client):

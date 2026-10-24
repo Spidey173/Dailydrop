@@ -3,10 +3,9 @@ Catalog validation service.
 Validates cart items against database catalog and computes authoritative totals
 using exact Decimal arithmetic.
 """
-import json
 import logging
 from collections import defaultdict
-from decimal import Decimal, ROUND_HALF_UP, InvalidOperation
+from decimal import Decimal, InvalidOperation
 from typing import Any, Dict, List, Optional, Tuple
 from services.currency_service import CurrencyService
 

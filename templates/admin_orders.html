@@ -752,7 +752,7 @@
                     <i class="fa-solid fa-indian-rupee-sign"></i>
                 </div>
                 <div class="stat-content">
-                    <h3>₹{{ "%.2f"|format(stats.total_revenue|default(0)) }}</h3>
+                    <h3>₹{{ "%.2f"|format(stats.total_revenue|default(0)|float) }}</h3>
                     <p>Total Order Volume</p>
                 </div>
             </div>
@@ -860,7 +860,7 @@
                                 </div>
                             </td>
                             <td>
-                                <div class="price-badge">₹{{ "%.2f"|format(ord.total_amount) }}</div>
+                                <div class="price-badge">₹{{ "%.2f"|format(ord.total_amount|float) }}</div>
                                 <span
                                     style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">
                                     {{ ord.payment_method|default('COD') }}

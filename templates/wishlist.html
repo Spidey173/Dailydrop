@@ -132,7 +132,7 @@
             <div class="product-details">
               <div class="product-category">{{ item.category }} {% if item.subcategory %}&bull; {{ item.subcategory }}{% endif %}</div>
               <div class="product-title" title="{{ item.name }}">{{ item.name }}</div>
-              <div class="product-price">Rs. {{ "%.2f"|format(item.price) }}</div>
+              <div class="product-price">Rs. {{ "%.2f"|format(item.price|float) }}</div>
               <div class="product-actions mt-3">
                 <button class="add-to-cart-btn" onclick="moveToCartFromWishlist('{{ item.name|replace("'", "\\'") }}', {{ item.price }}, '{{ item.image_path }}', {{ item.product_id }}, this)">
                   <i class="fas fa-shopping-basket"></i> Move to Cart

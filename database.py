@@ -432,6 +432,12 @@ def get_all_products(category: Optional[str] = None) -> List[Dict[str, Any]]:
         from services.redis_service import RedisService
         cached_catalog = RedisService.get_json('catalog:all_products')
         if cached_catalog and isinstance(cached_catalog, list):
+            for p in cached_catalog:
+                if p.get('price') is not None:
+                    try:
+                        p['price'] = float(p['price'])
+                    except (ValueError, TypeError):
+                        pass
             if category:
                 return [p for p in cached_catalog if p.get('category', '').lower() == category.lower()]
             return cached_catalog
@@ -466,6 +472,11 @@ def get_all_products(category: Optional[str] = None) -> List[Dict[str, Any]]:
                     item['id'] = item.get('product_id')
                     item['title'] = item.get('name')
                     item['image'] = item.get('image_path')
+                    if item.get('price') is not None:
+                        try:
+                            item['price'] = float(item['price'])
+                        except (ValueError, TypeError):
+                            pass
                     all_products.append(item)
 
                 # Hydrate in-memory cache
@@ -519,6 +530,11 @@ def get_product_by_id(product_id: int) -> Optional[Dict[str, Any]]:
                     item['id'] = item.get('product_id')
                     item['title'] = item.get('name')
                     item['image'] = item.get('image_path')
+                    if item.get('price') is not None:
+                        try:
+                            item['price'] = float(item['price'])
+                        except (ValueError, TypeError):
+                            pass
                     try:
                         from services.redis_service import RedisService
                         RedisService.set_json(f"catalog:product:{product_id}", item, ttl=600)
@@ -562,6 +578,11 @@ def get_product_by_name(name: str) -> Optional[Dict[str, Any]]:
                     item['id'] = item.get('product_id')
                     item['title'] = item.get('name')
                     item['image'] = item.get('image_path')
+                    if item.get('price') is not None:
+                        try:
+                            item['price'] = float(item['price'])
+                        except (ValueError, TypeError):
+                            pass
                     return item
                 return None
     except Exception as e:
@@ -1033,24 +1054,42 @@ def save_pending_order(razorpay_order_id: str, user_id: Optional[int], full_name
         products_json = json.dumps(products) if not isinstance(products, str) else products
         with get_db_connection() as conn:
             with conn.cursor() as cursor:
+                # Validate user_id exists if provided to prevent foreign key aborts on live DB
+                validated_user_id = user_id
+                if user_id is not None:
+                    try:
+                        cursor.execute("SELECT id FROM users WHERE id = %s", (user_id,))
+                        if not cursor.fetchone():
+                            logger.warning(f"User ID #{user_id} not found in users table. Setting pending_order user_id to None.")
+                            validated_user_id = None
+                    except Exception:
+                        pass
+
                 try:
+                    cursor.execute("SAVEPOINT save_pending_sp")
                     cursor.execute('''
                         INSERT INTO pending_orders (razorpay_order_id, user_id, full_name, phone_number, address, products_data, total_amount)
                         VALUES (%s, %s, %s, %s, %s, %s, %s)
                         ON CONFLICT (razorpay_order_id) DO UPDATE SET
+                            user_id = EXCLUDED.user_id,
                             full_name = EXCLUDED.full_name,
                             phone_number = EXCLUDED.phone_number,
                             address = EXCLUDED.address,
                             products_data = EXCLUDED.products_data,
                             total_amount = EXCLUDED.total_amount
-                    ''', (razorpay_order_id, user_id, full_name, phone_number, address, products_json, total_amount))
-                except Exception:
+                    ''', (razorpay_order_id, validated_user_id, full_name, phone_number, address, products_json, total_amount))
+                    cursor.execute("RELEASE SAVEPOINT save_pending_sp")
+                except Exception as query_err:
+                    try:
+                        cursor.execute("ROLLBACK TO SAVEPOINT save_pending_sp")
+                    except Exception:
+                        pass
                     # Fallback for environments or SQLite without ON CONFLICT DO UPDATE
                     cursor.execute('DELETE FROM pending_orders WHERE razorpay_order_id = %s', (razorpay_order_id,))
                     cursor.execute('''
                         INSERT INTO pending_orders (razorpay_order_id, user_id, full_name, phone_number, address, products_data, total_amount)
                         VALUES (%s, %s, %s, %s, %s, %s, %s)
-                    ''', (razorpay_order_id, user_id, full_name, phone_number, address, products_json, total_amount))
+                    ''', (razorpay_order_id, validated_user_id, full_name, phone_number, address, products_json, total_amount))
                 return True
     except Exception as e:
         logger.error(f"Error saving pending order for {razorpay_order_id}: {e}")

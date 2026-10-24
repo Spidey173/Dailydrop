@@ -2,7 +2,6 @@
 Order persistence service.
 Handles database persistence of orders and normalized relational order_items.
 """
-import json
 import logging
 from typing import Any, Dict, List, Optional
 
