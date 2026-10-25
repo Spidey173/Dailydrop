@@ -617,7 +617,7 @@ function initializeCart() {
     document.getElementById('cart-count').textContent = count;
 }
 
-// Render Popular Products dynamically from database prioritizing most-used staple essentials
+// Render Popular Products dynamically from database prioritizing most-used staple essentials (capped to 16)
 function renderPopularProducts() {
     const grid = document.getElementById('popular-products-grid');
     if (!grid) return;
@@ -626,25 +626,53 @@ function renderPopularProducts() {
     const dbProducts = window.productsDB || [];
     if (dbProducts.length === 0) return;
 
-    // List of most popular daily staple product keywords
-    const stapleKeywords = [
-        'tomato', 'brinjal', 'apples', 'capsicum', 'cauliflower', 'broccoli', 
-        'bananas', 'black grapes', 'milk', 'bread', 'butter', 'cheese', 
-        'horlicks', 'gulab jamun', 'kurkure', 'kitkat', 'fanta', 'pepsi', 
-        'amul lassi', 'pampers', 'colgate', 'dove soap', 'jeera powder', 'attack'
+    // 16 curated high-frequency daily staple essentials across diverse aisles
+    const curatedStaples = [
+        'hybrid tomatoes',
+        'fresh apples',
+        'robusta bananas',
+        'taaza',
+        'sandwich bread',
+        'table butter',
+        'cheese block',
+        'maggi 2-minute',
+        'chakki atta',
+        'kitkat',
+        'kurkure masala',
+        'pepsi cola',
+        'sweet lassi',
+        'colgate strong',
+        'dove cream beauty',
+        'attack concentrated'
     ];
 
-    // Priority 1: Match staple essentials from database
-    let popularProducts = dbProducts.filter(p => 
-        stapleKeywords.some(keyword => p.title.toLowerCase().includes(keyword))
-    );
+    let popularProducts = [];
+    const usedIds = new Set();
 
-    // Priority 2: Fill remaining slots if under 24
-    if (popularProducts.length < 24) {
-        const remaining = dbProducts.filter(p => !popularProducts.includes(p));
-        popularProducts = popularProducts.concat(remaining).slice(0, 24);
+    curatedStaples.forEach(key => {
+        const found = dbProducts.find(p => {
+            const pid = p.id || p.product_id;
+            const name = (p.title || p.name || '').toLowerCase();
+            return !usedIds.has(pid) && name.includes(key);
+        });
+        if (found) {
+            popularProducts.push(found);
+            usedIds.add(found.id || found.product_id);
+        }
+    });
+
+    // Fallback: fill up to exactly 16 if any staple wasn't matched
+    if (popularProducts.length < 16) {
+        for (const p of dbProducts) {
+            const pid = p.id || p.product_id;
+            if (!usedIds.has(pid)) {
+                popularProducts.push(p);
+                usedIds.add(pid);
+                if (popularProducts.length >= 16) break;
+            }
+        }
     } else {
-        popularProducts = popularProducts.slice(0, 24);
+        popularProducts = popularProducts.slice(0, 16);
     }
 
     popularProducts.forEach(product => {
