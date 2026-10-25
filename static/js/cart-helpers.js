@@ -346,6 +346,16 @@ function updateCartCount() {
       localStorage.removeItem('cart');
       const cartCountEl = document.getElementById('cart-count');
       if (cartCountEl) cartCountEl.textContent = '0';
+      const mobileTopBadge = document.getElementById('mobile-top-cart-badge');
+      if (mobileTopBadge) {
+          mobileTopBadge.textContent = '0';
+          mobileTopBadge.style.display = 'none';
+      }
+      const drawerCartBadge = document.getElementById('drawer-cart-badge');
+      if (drawerCartBadge) {
+          drawerCartBadge.textContent = '0';
+          drawerCartBadge.style.display = 'none';
+      }
       const mobileNavBadge = document.getElementById('mobile-nav-cart-badge');
       if (mobileNavBadge) {
           mobileNavBadge.textContent = '0';
@@ -365,6 +375,20 @@ function updateCartCount() {
       cartCountEl.textContent = count;
   }
 
+  // Mobile Top Cart button badge
+  const mobileTopBadge = document.getElementById('mobile-top-cart-badge');
+  if (mobileTopBadge) {
+      mobileTopBadge.textContent = count;
+      mobileTopBadge.style.display = count > 0 ? 'flex' : 'none';
+  }
+
+  // Drawer Cart link badge
+  const drawerCartBadge = document.getElementById('drawer-cart-badge');
+  if (drawerCartBadge) {
+      drawerCartBadge.textContent = count;
+      drawerCartBadge.style.display = count > 0 ? 'inline-block' : 'none';
+  }
+
   // Mobile Bottom Nav badge
   const mobileNavBadge = document.getElementById('mobile-nav-cart-badge');
   if (mobileNavBadge) {
@@ -372,13 +396,20 @@ function updateCartCount() {
       mobileNavBadge.style.display = count > 0 ? 'flex' : 'none';
   }
 
-  // Sync mobile wishlist badge if available
+  // Sync mobile wishlist badges if available
   const desktopWishlist = document.getElementById('wishlist-count');
   const mobileWishlist = document.getElementById('mobile-nav-wishlist-badge');
-  if (desktopWishlist && mobileWishlist) {
+  const drawerWishlist = document.getElementById('drawer-wishlist-badge');
+  if (desktopWishlist) {
       const wCount = parseInt(desktopWishlist.textContent) || 0;
-      mobileWishlist.textContent = wCount;
-      mobileWishlist.style.display = wCount > 0 ? 'flex' : 'none';
+      if (mobileWishlist) {
+          mobileWishlist.textContent = wCount;
+          mobileWishlist.style.display = wCount > 0 ? 'flex' : 'none';
+      }
+      if (drawerWishlist) {
+          drawerWishlist.textContent = wCount;
+          drawerWishlist.style.display = wCount > 0 ? 'inline-block' : 'none';
+      }
   }
 
   // Blinkit Floating Mini-Cart Bar
@@ -428,14 +459,38 @@ function initMobileExperience() {
   const currentPath = window.location.pathname;
   if (currentPath.includes('/admin')) return;
 
-  // Render Mobile Bottom Navigation Bar if not already present
-  if (!document.getElementById('mobileBottomNav')) {
-      const isHome = currentPath === '/' || currentPath.includes('/intro');
-      const isCategory = ['/vegetables', '/dairy_breakfast', '/snacks', '/baby_care', '/personal_care', '/household_items', '/home_kitchen', '/grocery', '/beverages', '/frozen_foods'].some(p => currentPath.includes(p));
-      const isWishlist = currentPath.includes('/wishlist');
-      const isOrders = currentPath.includes('/orders');
-      const isCart = currentPath.includes('/cart');
+  const isHome = currentPath === '/' || currentPath.includes('/intro');
+  const isCategory = ['/vegetables', '/dairy_breakfast', '/snacks', '/baby_care', '/personal_care', '/household_items', '/home_kitchen', '/grocery', '/beverages', '/frozen_foods'].some(p => currentPath.includes(p));
+  const isWishlist = currentPath.includes('/wishlist');
+  const isOrders = currentPath.includes('/orders');
+  const isCart = currentPath.includes('/cart');
+  const isAbout = currentPath.includes('/about');
+  const isContact = currentPath.includes('/contact');
+  const isFaqs = currentPath.includes('/faqs');
+  const loggedIn = isUserLoggedIn();
 
+  // 1. Render Mobile Top Header Controls (Cart + "Three -" Hamburger Menu) inside .navbar-container
+  const navbarContainer = document.querySelector('.navbar-container');
+  if (navbarContainer && !document.getElementById('mobileHeaderControls')) {
+      const controls = document.createElement('div');
+      controls.className = 'mobile-header-controls';
+      controls.id = 'mobileHeaderControls';
+      controls.innerHTML = `
+          <a href="/cart" class="mobile-top-cart-btn" aria-label="Shopping Cart">
+              <i class="fas fa-shopping-cart"></i>
+              <span class="mobile-top-cart-badge" id="mobile-top-cart-badge" style="display: none;">0</span>
+          </a>
+          <button class="mobile-hamburger-btn" id="mobileHamburgerBtn" aria-label="Open navigation menu" type="button">
+              <span class="bar"></span>
+              <span class="bar"></span>
+              <span class="bar"></span>
+          </button>
+      `;
+      navbarContainer.appendChild(controls);
+  }
+
+  // 2. Render Mobile Bottom Navigation Bar if not already present
+  if (!document.getElementById('mobileBottomNav')) {
       const bottomNav = document.createElement('nav');
       bottomNav.id = 'mobileBottomNav';
       bottomNav.className = 'mobile-bottom-nav';
@@ -467,6 +522,159 @@ function initMobileExperience() {
       `;
       document.body.appendChild(bottomNav);
   }
+
+  // 3. Render Mobile Slide-Out Drawer (The "Three -" Hamburger Menu Drawer)
+  if (!document.getElementById('mobileDrawerNav')) {
+      const backdrop = document.createElement('div');
+      backdrop.className = 'mobile-drawer-backdrop';
+      backdrop.id = 'mobileDrawerBackdrop';
+      document.body.appendChild(backdrop);
+
+      const drawer = document.createElement('aside');
+      drawer.className = 'mobile-drawer-nav';
+      drawer.id = 'mobileDrawerNav';
+      drawer.setAttribute('aria-label', 'Mobile Navigation Drawer');
+
+      drawer.innerHTML = `
+          <div class="drawer-header">
+              <a href="/" class="logo">
+                  <i class="fas fa-shopping-basket"></i> Daily<span>Drop</span>
+              </a>
+              <button class="drawer-close-btn" id="drawerCloseBtn" aria-label="Close navigation menu" type="button">
+                  <i class="fas fa-times"></i>
+              </button>
+          </div>
+          <div class="drawer-user-info">
+              <div class="drawer-avatar">
+                  <i class="fas ${loggedIn ? 'fa-user-check' : 'fa-user'}"></i>
+              </div>
+              <div class="drawer-user-details">
+                  <h5>${loggedIn ? 'Welcome Back!' : 'Welcome to DailyDrop'}</h5>
+                  <p>${loggedIn ? 'Simulated Quick Delivery' : 'Log in for orders & wishlist'}</p>
+              </div>
+          </div>
+          <div class="drawer-links-group">
+              <a href="/orders" class="drawer-link ${isOrders ? 'active' : ''}">
+                  <div class="drawer-link-content">
+                      <i class="fas fa-box"></i>
+                      <span>My Orders</span>
+                  </div>
+                  <i class="fas fa-chevron-right" style="font-size: 0.75rem; opacity: 0.5;"></i>
+              </a>
+              <a href="/wishlist" class="drawer-link ${isWishlist ? 'active' : ''}">
+                  <div class="drawer-link-content">
+                      <i class="fas fa-heart"></i>
+                      <span>Wishlist</span>
+                  </div>
+                  <span class="drawer-badge" id="drawer-wishlist-badge" style="display: none;">0</span>
+              </a>
+              <a href="/cart" class="drawer-link ${isCart ? 'active' : ''}">
+                  <div class="drawer-link-content">
+                      <i class="fas fa-shopping-cart"></i>
+                      <span>My Cart</span>
+                  </div>
+                  <span class="drawer-badge" id="drawer-cart-badge" style="display: none;">0</span>
+              </a>
+          </div>
+          <div class="drawer-divider"></div>
+          <div class="drawer-links-group">
+              <a href="/vegetables" class="drawer-link ${isCategory ? 'active' : ''}">
+                  <div class="drawer-link-content">
+                      <i class="fas fa-carrot"></i>
+                      <span>All Categories</span>
+                  </div>
+                  <i class="fas fa-chevron-right" style="font-size: 0.75rem; opacity: 0.5;"></i>
+              </a>
+              <a href="/about-us" class="drawer-link ${isAbout ? 'active' : ''}">
+                  <div class="drawer-link-content">
+                      <i class="fas fa-info-circle"></i>
+                      <span>About Us</span>
+                  </div>
+              </a>
+              <a href="/contact-us" class="drawer-link ${isContact ? 'active' : ''}">
+                  <div class="drawer-link-content">
+                      <i class="fas fa-envelope"></i>
+                      <span>Contact Us</span>
+                  </div>
+              </a>
+              <a href="/faqs" class="drawer-link ${isFaqs ? 'active' : ''}">
+                  <div class="drawer-link-content">
+                      <i class="fas fa-question-circle"></i>
+                      <span>FAQs & Help</span>
+                  </div>
+              </a>
+          </div>
+          ${loggedIn ? `
+              <a href="/logout" class="drawer-auth-btn logout">
+                  <i class="fas fa-sign-out-alt"></i> Logout
+              </a>
+          ` : `
+              <a href="/login" class="drawer-auth-btn login">
+                  <i class="fas fa-sign-in-alt"></i> Login / Sign Up
+              </a>
+          `}
+      `;
+      document.body.appendChild(drawer);
+  }
+
+  // Always bind drawer event listeners (works for both SSR and dynamically rendered drawer)
+  const drawer = document.getElementById('mobileDrawerNav');
+  const backdrop = document.getElementById('mobileDrawerBackdrop');
+  const hamburgerBtn = document.getElementById('mobileHamburgerBtn');
+  const drawerCloseBtn = document.getElementById('drawerCloseBtn');
+
+  const openDrawer = () => {
+      drawer?.classList.add('show');
+      backdrop?.classList.add('show');
+      document.body.style.overflow = 'hidden';
+  };
+
+  const closeDrawer = () => {
+      drawer?.classList.remove('show');
+      backdrop?.classList.remove('show');
+      document.body.style.overflow = '';
+  };
+
+  if (hamburgerBtn && !hamburgerBtn.dataset.bound) {
+      hamburgerBtn.dataset.bound = 'true';
+      hamburgerBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          openDrawer();
+      });
+  }
+
+  if (drawerCloseBtn && !drawerCloseBtn.dataset.bound) {
+      drawerCloseBtn.dataset.bound = 'true';
+      drawerCloseBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          closeDrawer();
+      });
+  }
+
+  if (backdrop && !backdrop.dataset.bound) {
+      backdrop.dataset.bound = 'true';
+      backdrop.addEventListener('click', closeDrawer);
+  }
+
+  if (!window._drawerEscapeBound) {
+      window._drawerEscapeBound = true;
+      document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && drawer?.classList.contains('show')) {
+              closeDrawer();
+          }
+      });
+  }
+
+  drawer?.querySelectorAll('.drawer-link').forEach(link => {
+      if (!link.dataset.bound) {
+          link.dataset.bound = 'true';
+          link.addEventListener('click', () => {
+              closeDrawer();
+          });
+      }
+  });
 
   updateCartCount();
 }
