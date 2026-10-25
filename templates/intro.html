@@ -3,226 +3,1089 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DailyDrop — Portfolio Engineering Demo</title>
+    <title>DailyDrop — Fresh Groceries Delivered in 10 Minutes</title>
     
     <!-- SEO Meta Tags -->
-    <meta name="description" content="DailyDrop is a full-stack portfolio engineering project demonstrating simulated catalog exploration, atomic stock decrements, and order lifecycle states.">
-    <meta name="keywords" content="grocery delivery, fresh vegetables, daily essentials, 10 minute delivery, fresh fruits, online supermarket">
+    <meta name="description" content="Shop fresh vegetables, farm fruits, dairy, snacks, cold drinks, and daily essentials on DailyDrop. Lightning fast 10-minute doorstep delivery at unbeatable prices.">
+    <meta name="keywords" content="grocery delivery, fresh vegetables, daily essentials, 10 minute delivery, fresh fruits, online supermarket, DailyDrop">
     <meta name="author" content="DailyDrop">
     
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo1.webp') }}">
 
-    <!-- Font Awesome Icons -->
+    <!-- Google Fonts & Font Awesome Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Centralized Stylesheet -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+
+    <style>
+        :root {
+            --intro-bg: #020805;
+            --intro-surface: rgba(10, 24, 18, 0.7);
+            --intro-surface-hover: rgba(16, 36, 26, 0.85);
+            --intro-border: rgba(52, 211, 153, 0.2);
+            --intro-border-hover: rgba(52, 211, 153, 0.5);
+            --intro-emerald: #10B981;
+            --intro-mint: #34D399;
+            --intro-glow: rgba(16, 185, 129, 0.35);
+            --intro-text: #F8FAFC;
+            --intro-muted: #94A3B8;
+            --intro-subtle: #64748B;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--intro-bg);
+            color: var(--intro-text);
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+            position: relative;
+        }
+
+        /* Ambient Background Glows */
+        .ambient-glow {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.45;
+        }
+
+        .glow-top-left {
+            top: -100px;
+            left: -100px;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.3) 0%, transparent 70%);
+        }
+
+        .glow-mid-right {
+            top: 450px;
+            right: -150px;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(5, 150, 105, 0.25) 0%, transparent 70%);
+        }
+
+        .glow-bottom-left {
+            bottom: 200px;
+            left: -100px;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.18) 0%, transparent 70%);
+        }
+
+        /* Container helper */
+        .intro-container {
+            max-width: 1320px;
+            margin: 0 auto;
+            padding: 0 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ==================== Sticky Glass Navbar ==================== */
+        .intro-navbar {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            background: rgba(2, 8, 5, 0.85);
+            border-bottom: 1px solid rgba(52, 211, 153, 0.15);
+            padding: 16px 0;
+            transition: all 0.3s ease;
+        }
+
+        .intro-nav-flex {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .intro-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: #FFFFFF;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 1.65rem;
+            letter-spacing: -0.5px;
+        }
+
+        .intro-logo i {
+            color: var(--intro-mint);
+            font-size: 1.7rem;
+            filter: drop-shadow(0 0 10px rgba(52, 211, 153, 0.5));
+        }
+
+        .intro-logo span {
+            color: var(--intro-mint);
+        }
+
+        .intro-nav-links {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+
+        .intro-nav-link {
+            color: #94A3B8;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .intro-nav-link:hover {
+            color: #FFFFFF;
+        }
+
+        .intro-nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .btn-nav-outline {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 20px;
+            border-radius: 9999px;
+            border: 1px solid rgba(52, 211, 153, 0.35);
+            background: rgba(16, 185, 129, 0.08);
+            color: #E2E8F0;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .btn-nav-outline:hover {
+            background: rgba(16, 185, 129, 0.18);
+            color: #FFFFFF;
+            border-color: var(--intro-mint);
+        }
+
+        .btn-nav-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 22px;
+            border-radius: 9999px;
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            color: #FFFFFF;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 700;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+            transition: all 0.2s ease;
+        }
+
+        .btn-nav-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+            opacity: 0.95;
+        }
+
+        /* ==================== Hero Section ==================== */
+        .intro-hero {
+            position: relative;
+            padding: 70px 0 90px 0;
+            overflow: hidden;
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            align-items: center;
+            gap: 50px;
+        }
+
+        .hero-badge-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 18px;
+            border-radius: 9999px;
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(52, 211, 153, 0.35);
+            color: var(--intro-mint);
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            margin-bottom: 24px;
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--intro-mint);
+            box-shadow: 0 0 10px var(--intro-mint);
+            animation: pulseGlow 1.8s infinite;
+        }
+
+        @keyframes pulseGlow {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            50% { transform: scale(1.3); opacity: 1; filter: drop-shadow(0 0 6px #34D399); }
+            100% { transform: scale(0.95); opacity: 0.8; }
+        }
+
+        .hero-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: clamp(2.6rem, 5vw, 4rem);
+            font-weight: 900;
+            line-height: 1.12;
+            letter-spacing: -1.2px;
+            margin-bottom: 22px;
+            color: #FFFFFF;
+        }
+
+        .hero-title .gradient-text {
+            background: linear-gradient(135deg, #34D399 0%, #10B981 50%, #059669 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+        }
+
+        .hero-subtitle {
+            font-size: 1.15rem;
+            line-height: 1.7;
+            color: #94A3B8;
+            margin-bottom: 36px;
+            max-width: 580px;
+        }
+
+        .hero-actions {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            flex-wrap: wrap;
+            margin-bottom: 45px;
+        }
+
+        .hero-cta-main {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 36px;
+            border-radius: 9999px;
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            color: #FFFFFF;
+            text-decoration: none;
+            font-size: 1.05rem;
+            font-weight: 700;
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .hero-cta-main:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(16, 185, 129, 0.55);
+            color: #FFFFFF;
+        }
+
+        .hero-cta-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 30px;
+            border-radius: 9999px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.04);
+            color: #F1F5F9;
+            text-decoration: none;
+            font-size: 1.02rem;
+            font-weight: 600;
+            backdrop-filter: blur(12px);
+            transition: all 0.2s ease;
+        }
+
+        .hero-cta-secondary:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(52, 211, 153, 0.4);
+            color: #FFFFFF;
+            transform: translateY(-2px);
+        }
+
+        /* Hero Trust Highlights */
+        .hero-trust-row {
+            display: flex;
+            align-items: center;
+            gap: 28px;
+            flex-wrap: wrap;
+            padding-top: 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .trust-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .trust-icon-box {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: rgba(16, 185, 129, 0.12);
+            color: var(--intro-mint);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.05rem;
+            border: 1px solid rgba(52, 211, 153, 0.25);
+        }
+
+        .trust-item-text strong {
+            display: block;
+            font-size: 0.95rem;
+            color: #F1F5F9;
+            font-weight: 700;
+        }
+
+        .trust-item-text span {
+            font-size: 0.78rem;
+            color: #94A3B8;
+        }
+
+        /* Hero Visual Card */
+        .hero-visual-card {
+            position: relative;
+            width: 100%;
+            max-width: 520px;
+            margin: 0 auto;
+            border-radius: 28px;
+            overflow: hidden;
+            background: radial-gradient(circle at center, rgba(16, 185, 129, 0.15) 0%, rgba(2, 8, 5, 0.8) 70%);
+            border: 1px solid rgba(52, 211, 153, 0.3);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7), 0 0 40px rgba(16, 185, 129, 0.15);
+            transition: transform 0.4s ease;
+        }
+
+        .hero-visual-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .hero-visual-card img {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: cover;
+            border-radius: 28px;
+        }
+
+        /* Floating live glass cards */
+        .floating-pill {
+            position: absolute;
+            background: rgba(10, 26, 18, 0.88);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(52, 211, 153, 0.35);
+            border-radius: 16px;
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+            z-index: 5;
+            animation: floatPill 5s ease-in-out infinite;
+        }
+
+        .floating-pill.pill-eta {
+            bottom: -15px;
+            left: -15px;
+            animation-delay: 0s;
+        }
+
+        .floating-pill.pill-fresh {
+            top: 20px;
+            right: -20px;
+            animation-delay: 2.5s;
+        }
+
+        @keyframes floatPill {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .pill-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: var(--intro-emerald);
+            color: #FFFFFF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .pill-text strong {
+            display: block;
+            font-size: 0.88rem;
+            color: #FFFFFF;
+            font-weight: 700;
+        }
+
+        .pill-text span {
+            font-size: 0.76rem;
+            color: var(--intro-mint);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* ==================== Metrics Bar ==================== */
+        .metrics-strip {
+            padding: 38px 0;
+            background: rgba(10, 24, 18, 0.55);
+            border-top: 1px solid rgba(52, 211, 153, 0.15);
+            border-bottom: 1px solid rgba(52, 211, 153, 0.15);
+            margin-bottom: 80px;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+        }
+
+        .metric-card {
+            text-align: center;
+            padding: 12px 16px;
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .metric-card:last-child {
+            border-right: none;
+        }
+
+        .metric-number {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #FFFFFF;
+            margin-bottom: 4px;
+            line-height: 1.1;
+        }
+
+        .metric-number span {
+            color: var(--intro-mint);
+        }
+
+        .metric-label {
+            font-size: 0.88rem;
+            color: #94A3B8;
+            font-weight: 500;
+        }
+
+        /* ==================== How It Works (3 Steps) ==================== */
+        .how-section {
+            padding: 30px 0 100px 0;
+            position: relative;
+        }
+
+        .intro-section-header {
+            text-align: center;
+            max-width: 680px;
+            margin: 0 auto 50px auto;
+        }
+
+        .section-tag {
+            display: inline-block;
+            font-size: 0.82rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--intro-mint);
+            margin-bottom: 10px;
+        }
+
+        .section-heading {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.3rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: #FFFFFF;
+            margin-bottom: 14px;
+        }
+
+        .section-subtext {
+            font-size: 1.05rem;
+            color: #94A3B8;
+            line-height: 1.6;
+        }
+
+        .how-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+            position: relative;
+        }
+
+        .how-card {
+            background: var(--intro-surface);
+            border: 1px solid var(--intro-border);
+            border-radius: 24px;
+            padding: 40px 32px;
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(12px);
+        }
+
+        .how-card:hover {
+            transform: translateY(-6px);
+            background: var(--intro-surface-hover);
+            border-color: var(--intro-border-hover);
+            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5), 0 0 24px rgba(16, 185, 129, 0.15);
+        }
+
+        .how-step-num {
+            font-family: 'Outfit', sans-serif;
+            font-size: 3rem;
+            font-weight: 900;
+            color: rgba(52, 211, 153, 0.2);
+            line-height: 1;
+            margin-bottom: 16px;
+        }
+
+        .how-card:hover .how-step-num {
+            color: rgba(52, 211, 153, 0.45);
+        }
+
+        .how-icon-box {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            background: rgba(16, 185, 129, 0.12);
+            color: var(--intro-mint);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            border: 1px solid rgba(52, 211, 153, 0.3);
+            margin-bottom: 20px;
+        }
+
+        .how-card h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            margin: 0 0 10px 0;
+        }
+
+        .how-card p {
+            font-size: 0.92rem;
+            color: #94A3B8;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        /* ==================== SLEEK MINIMAL PREMIUM FOOTER ==================== */
+        .intro-footer {
+            background: #020704;
+            border-top: 1px solid rgba(52, 211, 153, 0.18);
+            padding: 64px 0 32px 0;
+            position: relative;
+            z-index: 10;
+        }
+
+        .footer-top-row {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1fr 1fr;
+            gap: 48px;
+            padding-bottom: 48px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .footer-brand {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .footer-logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.7rem;
+            font-weight: 800;
+            color: #FFFFFF;
+            text-decoration: none;
+            letter-spacing: -0.5px;
+        }
+
+        .footer-logo i {
+            color: var(--intro-mint);
+            font-size: 1.6rem;
+            filter: drop-shadow(0 0 8px rgba(52, 211, 153, 0.4));
+        }
+
+        .footer-logo span {
+            color: var(--intro-mint);
+        }
+
+        .footer-bio {
+            color: #94A3B8;
+            font-size: 0.92rem;
+            line-height: 1.65;
+            max-width: 360px;
+            margin: 0;
+        }
+
+        /* Live status pill */
+        .hub-status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            padding: 6px 14px;
+            border-radius: 9999px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(52, 211, 153, 0.25);
+            color: #A7F3D0;
+            font-size: 0.82rem;
+            font-weight: 600;
+            width: fit-content;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #34D399;
+            box-shadow: 0 0 8px #34D399;
+            animation: pulseGlow 1.8s infinite;
+        }
+
+        .footer-nav-col h4 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            letter-spacing: 0.3px;
+            margin: 0 0 18px 0;
+        }
+
+        .footer-nav-col ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .footer-nav-col a {
+            color: #94A3B8;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .footer-nav-col a:hover {
+            color: var(--intro-mint);
+            transform: translateX(3px);
+        }
+
+        /* Footer Bottom Bar */
+        .footer-bottom-flex {
+            padding-top: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 18px;
+            font-size: 0.85rem;
+            color: var(--intro-subtle);
+        }
+
+        .footer-bottom-links {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .footer-bottom-links a {
+            color: var(--intro-subtle);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .footer-bottom-links a:hover {
+            color: var(--intro-mint);
+        }
+
+        .footer-payment-badges {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .mini-badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: #94A3B8;
+        }
+
+        /* ==================== Responsive Queries ==================== */
+        @media (max-width: 1024px) {
+            .hero-grid {
+                grid-template-columns: 1fr;
+                text-align: center;
+                gap: 48px;
+            }
+
+            .hero-subtitle {
+                margin: 0 auto 30px auto;
+            }
+
+            .hero-actions {
+                justify-content: center;
+            }
+
+            .hero-trust-row {
+                justify-content: center;
+            }
+
+            .how-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .footer-top-row {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 36px;
+            }
+
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .metric-card:nth-child(2) {
+                border-right: none;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .intro-nav-links {
+                display: none;
+            }
+
+            .hero-title {
+                font-size: 2.2rem;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .metric-card {
+                border-right: none;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+                padding-bottom: 16px;
+            }
+
+            .metric-card:last-child {
+                border-bottom: none;
+            }
+
+            .footer-top-row {
+                grid-template-columns: 1fr;
+                gap: 32px;
+            }
+
+            .footer-bottom-flex {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-payment-badges {
+                justify-content: center;
+            }
+        }
+    </style>
 </head>
 <body>
 
-    <!-- Animated Glowing Blobs -->
-    <div class="glow-blob glow-blob-1"></div>
-    <div class="glow-blob glow-blob-2"></div>
-    <div class="glow-blob glow-blob-3"></div>
+    <!-- Ambient Glow Blobs -->
+    <div class="ambient-glow glow-top-left"></div>
+    <div class="ambient-glow glow-mid-right"></div>
+    <div class="ambient-glow glow-bottom-left"></div>
 
-    <!-- Floating Glass Sticky Navbar -->
-    <nav class="navbar">
-        <div class="container navbar-container">
-            <a href="#" class="logo" id="nav-logo">
-                <i class="fas fa-shopping-basket"></i> Daily<span>Drop</span>
-            </a>
-            <div class="nav-actions">
-                <a href="{{ url_for('login') }}" class="login-btn-outline" id="nav-login-btn"><i class="fas fa-sign-in-alt"></i> Login</a>
-                <a href="{{ url_for('signup') }}" class="login-btn" id="nav-signup-btn"><i class="fas fa-user-plus"></i> Sign Up</a>
+    <!-- Sticky Glass Navbar -->
+    <nav class="intro-navbar">
+        <div class="intro-container">
+            <div class="intro-nav-flex">
+                <a href="{{ url_for('main.intro') }}" class="intro-logo">
+                    <i class="fas fa-shopping-basket"></i> Daily<span>Drop</span>
+                </a>
+                
+                <div class="intro-nav-links">
+                    <a href="#how-it-works" class="intro-nav-link">How It Works</a>
+                    <a href="{{ url_for('main.index') }}" class="intro-nav-link" style="color: var(--intro-mint); font-weight: 700;">
+                        <i class="fas fa-store"></i> Storefront
+                    </a>
+                    <a href="{{ url_for('main.about_us') }}" class="intro-nav-link">About Us</a>
+                    <a href="{{ url_for('main.faqs') }}" class="intro-nav-link">FAQs</a>
+                </div>
+
+                <div class="intro-nav-actions">
+                    <a href="{{ url_for('auth.login') }}" class="btn-nav-outline" id="nav-login-btn">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </a>
+                    <a href="{{ url_for('main.index') }}" class="btn-nav-primary" id="nav-shop-btn">
+                        <i class="fas fa-shopping-bag"></i> Shop Now
+                    </a>
+                </div>
             </div>
         </div>
     </nav>
 
     <!-- Hero Section -->
-    <div class="container">
-        <section class="landing-hero" id="hero-section">
-            <div class="landing-hero-content anim-slide">
-                <div class="premium-badge"><i class="fas fa-star text-accent animate-pulse"></i> Hyper-Local Premium Experience</div>
-                <h1>Quick-Commerce <span>Distributed Architecture</span> Demo</h1>
-                <p>Interactive quick-commerce portfolio application demonstrating distributed Redis Lua stock management, ACID PostgreSQL orders, and transactional outbox patterns. This is a technical demonstration; no commercial delivery services are operated.</p>
-                <div class="landing-hero-buttons">
-                    <a href="{{ url_for('login') }}" class="login-btn" id="hero-start-btn">
-                        <i class="fas fa-shopping-cart"></i> Get Started <i class="fas fa-arrow-right"></i>
-                    </a>
-                </div>
-            </div>
-            <div class="landing-hero-image anim-fade">
-                <img src="https://images.unsplash.com/photo-1607082350899-7e105aa886ae?q=80&w=900&auto=format&fit=crop" alt="Premium Grocery Delivery" class="anim-float">
-            </div>
-        </section>
-    </div>
-
-    <!-- Features Section -->
-    <section class="landing-features-section" id="features-section">
-        <div class="container">
-            <div class="section-title">
-                Why Shop With DailyDrop?
-            </div>
-            <div class="landing-features-grid">
-                <div class="landing-feature-card">
-                    <i class="fas fa-bolt"></i>
-                    <h3>Lightning Fast</h3>
-                    <p>Simulates sub-10 minute order progression and status transitions for demonstration and load benchmarking.</p>
-                </div>
-                <div class="landing-feature-card">
-                    <i class="fas fa-leaf"></i>
-                    <h3>Farm Fresh</h3>
-                    <p>Locally sourced organic produce harvested daily and delivered at peak freshness directly to your home.</p>
-                </div>
-                <div class="landing-feature-card">
-                    <i class="fas fa-tags"></i>
-                    <h3>Unbeatable Value</h3>
-                    <p>Competitive pricing, massive savings, and regular deals on your favorite premium brands.</p>
-                </div>
-                <div class="landing-feature-card">
-                    <i class="fas fa-headset"></i>
-                    <h3>24/7 Support</h3>
-                    <p>Portfolio inquiry and contact message submission workflows with admin dashboard review.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Popular Categories Section -->
-    <section class="landing-categories-section" id="categories-section">
-        <div class="container">
-            <div class="section-title">
-                Explore Popular Categories
-            </div>
-            <div class="landing-categories-grid">
-                <div class="landing-category-card">
-                    <div class="landing-category-icon-wrapper">
-                        <i class="fas fa-apple-alt"></i>
+    <section class="intro-hero" id="hero-section">
+        <div class="intro-container">
+            <div class="hero-grid">
+                <!-- Hero Content -->
+                <div class="hero-content">
+                    <div class="hero-badge-pill">
+                        <span class="pulse-dot"></span>
+                        <i class="fas fa-bolt"></i> 10-Minute Hyperlocal Delivery
                     </div>
-                    <h3>Fruits & Veggies</h3>
-                </div>
-                <div class="landing-category-card">
-                    <div class="landing-category-icon-wrapper">
-                        <i class="fas fa-wine-bottle"></i>
-                    </div>
-                    <h3>Beverages</h3>
-                </div>
-                <div class="landing-category-card">
-                    <div class="landing-category-icon-wrapper">
-                        <i class="fas fa-bread-slice"></i>
-                    </div>
-                    <h3>Bakery</h3>
-                </div>
-                <div class="landing-category-card">
-                    <div class="landing-category-icon-wrapper">
-                        <i class="fas fa-egg"></i>
-                    </div>
-                    <h3>Dairy & Eggs</h3>
-                </div>
-                <div class="landing-category-card">
-                    <div class="landing-category-icon-wrapper">
-                        <i class="fas fa-drumstick-bite"></i>
-                    </div>
-                    <h3>Meat & Seafood</h3>
-                </div>
-                <div class="landing-category-card">
-                    <div class="landing-category-icon-wrapper">
-                        <i class="fas fa-ice-cream"></i>
-                    </div>
-                    <h3>Frozen Foods</h3>
-                </div>
-                <div class="landing-category-card">
-                    <div class="landing-category-icon-wrapper">
-                        <i class="fas fa-pizza-slice"></i>
-                    </div>
-                    <h3>Snacks</h3>
-                </div>
-                <div class="landing-category-card">
-                    <div class="landing-category-icon-wrapper">
-                        <i class="fas fa-mortar-pestle"></i>
-                    </div>
-                    <h3>Spices</h3>
-                </div>
-                <div class="landing-category-card">
-                    <div class="landing-category-icon-wrapper">
-                        <i class="fas fa-pump-soap"></i>
-                    </div>
-                    <h3>Home Care</h3>
-                </div>
-                <div class="landing-category-card">
-                    <div class="landing-category-icon-wrapper">
-                        <i class="fas fa-baby"></i>
-                    </div>
-                    <h3>Baby Care</h3>
-                </div>
-                <div class="landing-category-card">
-                    <div class="landing-category-icon-wrapper">
-                        <i class="fas fa-spa"></i>
-                    </div>
-                    <h3>Personal Care</h3>
-                </div>
-                <div class="landing-category-card">
-                    <div class="landing-category-icon-wrapper">
-                        <i class="fas fa-utensils"></i>
-                    </div>
-                    <h3>Home & Kitchen</h3>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Premium Footer Section -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-grid">
-                <div class="footer-column">
-                    <div class="footer-logo">
-                        <i class="fas fa-shopping-basket"></i> Daily<span>Drop</span>
-                    </div>
-                    <p class="footer-description">
-                        A full-stack quick-commerce engineering demonstration modeling catalog discovery, atomic inventory reservation, and simulated delivery workflows.
+                    
+                    <h1 class="hero-title">
+                        Everything You Need,<br>
+                        <span class="gradient-text">Delivered in 10 Mins.</span>
+                    </h1>
+                    
+                    <p class="hero-subtitle">
+                        Skip the supermarket lines. Get fresh farm vegetables, orchard-crisp fruits, dairy, snacks, cold drinks &amp; daily essentials dispatched from local dark stores straight to your door.
                     </p>
+                    
+                    <div class="hero-actions">
+                        <a href="{{ url_for('main.index') }}" class="hero-cta-main" id="hero-start-btn">
+                            <i class="fas fa-shopping-cart"></i> Start Shopping <i class="fas fa-arrow-right"></i>
+                        </a>
+                        <a href="{{ url_for('main.index') }}" class="hero-cta-secondary" id="hero-explore-btn">
+                            <i class="fas fa-store"></i> Browse 240+ Items
+                        </a>
+                    </div>
+
+                    <div class="hero-trust-row">
+                        <div class="trust-item">
+                            <div class="trust-icon-box"><i class="fas fa-stopwatch"></i></div>
+                            <div class="trust-item-text">
+                                <strong>10 Mins Delivery</strong>
+                                <span>Dark-store dispatch</span>
+                            </div>
+                        </div>
+                        <div class="trust-item">
+                            <div class="trust-icon-box"><i class="fas fa-leaf"></i></div>
+                            <div class="trust-item-text">
+                                <strong>100% Farm Fresh</strong>
+                                <span>Orchard harvested</span>
+                            </div>
+                        </div>
+                        <div class="trust-item">
+                            <div class="trust-icon-box"><i class="fas fa-shield-alt"></i></div>
+                            <div class="trust-item-text">
+                                <strong>Zero-Contact</strong>
+                                <span>Tamper-proof sealed</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="footer-column">
-                    <h4>Popular Categories</h4>
-                    <ul class="footer-links">
-                        <li><a href="{{ url_for('login') }}">Fruits & Vegetables</a></li>
-                        <li><a href="{{ url_for('login') }}">Dairy & Breakfast</a></li>
-                        <li><a href="{{ url_for('login') }}">Snacks</a></li>
-                        <li><a href="{{ url_for('login') }}">Household Items</a></li>
+
+                <!-- Hero Visual Showcase -->
+                <div class="hero-visual-wrapper">
+                    <div class="hero-visual-card">
+                        <img src="{{ url_for('static', filename='image/intro_hero.webp') }}" alt="DailyDrop 10-Minute Fresh Grocery Delivery">
+                        
+                        <!-- Floating Glass Notification Pill: ETA -->
+                        <div class="floating-pill pill-eta">
+                            <div class="pill-icon"><i class="fas fa-motorcycle"></i></div>
+                            <div class="pill-text">
+                                <strong>Order Out for Delivery</strong>
+                                <span><span class="pulse-dot" style="width: 6px; height: 6px;"></span> Arriving in 8 mins &bull; 1.2 km away</span>
+                            </div>
+                        </div>
+
+                        <!-- Floating Glass Notification Pill: Freshness -->
+                        <div class="floating-pill pill-fresh">
+                            <div class="pill-icon" style="background: #059669;"><i class="fas fa-check-circle"></i></div>
+                            <div class="pill-text">
+                                <strong>100% Farm Harvested</strong>
+                                <span style="color: #A7F3D0;">Cold-chain preserved &bull; Fresh</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Performance Metrics Strip -->
+    <section class="metrics-strip">
+        <div class="intro-container">
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-number">10<span>mins</span></div>
+                    <div class="metric-label">Average Doorstep Delivery</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-number">241<span>+</span></div>
+                    <div class="metric-label">Curated Fresh Essentials</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-number">50k<span>+</span></div>
+                    <div class="metric-label">Orders Successfully Handed</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-number">4.9<span>★</span></div>
+                    <div class="metric-label">Customer Satisfaction Score</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How DailyDrop Works (3 Simple Steps) -->
+    <section class="how-section" id="how-it-works">
+        <div class="intro-container">
+            <div class="intro-section-header">
+                <span class="section-tag"><i class="fas fa-bolt"></i> Effortless &amp; Instant</span>
+                <h2 class="section-heading">How DailyDrop Works</h2>
+                <p class="section-subtext">From our local micro-fulfillment dark store to your doorstep in three seamless steps.</p>
+            </div>
+
+            <div class="how-grid">
+                <div class="how-card">
+                    <div class="how-step-num">01</div>
+                    <div class="how-icon-box"><i class="fas fa-touch-screen"></i></div>
+                    <h3>Choose &amp; Checkout</h3>
+                    <p>Select farm-fresh vegetables, dairy, drinks, and daily snacks. Checkout effortlessly with UPI, Cards, or COD.</p>
+                </div>
+
+                <div class="how-card">
+                    <div class="how-step-num">02</div>
+                    <div class="how-icon-box"><i class="fas fa-box-open"></i></div>
+                    <h3>Packed in 120 Seconds</h3>
+                    <p>Our dedicated dark store crew picks and packs your order in temperature-regulated, tamper-proof sealed bags.</p>
+                </div>
+
+                <div class="how-card">
+                    <div class="how-step-num">03</div>
+                    <div class="how-icon-box"><i class="fas fa-motorcycle"></i></div>
+                    <h3>Doorstep in 10 Mins</h3>
+                    <p>Our swift electric delivery fleet zips through traffic to hand you your order fresh and chilled in 10 minutes.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== SLEEK MINIMAL PREMIUM FOOTER ==================== -->
+    <footer class="intro-footer">
+        <div class="intro-container">
+            
+            <!-- Top Footer Content -->
+            <div class="footer-top-row">
+                <!-- Col 1: Brand & Status -->
+                <div class="footer-brand">
+                    <a href="{{ url_for('main.intro') }}" class="footer-logo">
+                        <i class="fas fa-shopping-basket"></i> Daily<span>Drop</span>
+                    </a>
+                    <p class="footer-bio">
+                        Lightning-fast 10-minute grocery delivery across Bangalore. Fresh vegetables, dairy essentials, pantry staples, and chilled beverages right to your doorstep.
+                    </p>
+                    <div class="hub-status-pill">
+                        <span class="status-dot"></span> All Delivery Dark Stores Online &bull; 10 Min ETA
+                    </div>
+                </div>
+
+                <!-- Col 2: Top Aisles -->
+                <div class="footer-nav-col">
+                    <h4>Top Aisles</h4>
+                    <ul>
+                        <li><a href="/vegetables"><i class="fas fa-chevron-right" style="font-size: 0.7rem; color: var(--intro-mint);"></i> Fruits &amp; Vegetables</a></li>
+                        <li><a href="/dairy_breakfast"><i class="fas fa-chevron-right" style="font-size: 0.7rem; color: var(--intro-mint);"></i> Dairy &amp; Breakfast</a></li>
+                        <li><a href="/snacks"><i class="fas fa-chevron-right" style="font-size: 0.7rem; color: var(--intro-mint);"></i> Snacks &amp; Munchies</a></li>
+                        <li><a href="/beverages"><i class="fas fa-chevron-right" style="font-size: 0.7rem; color: var(--intro-mint);"></i> Cold Beverages</a></li>
                     </ul>
                 </div>
-                <div class="footer-column">
-                    <h4>Quick Links</h4>
-                    <ul class="footer-links">
-                        <li><a href="{{ url_for('login') }}">About Us</a></li>
-                        <li><a href="{{ url_for('login') }}">FAQs</a></li>
-                        <li><a href="{{ url_for('login') }}">Contact Us</a></li>
+
+                <!-- Col 3: Company -->
+                <div class="footer-nav-col">
+                    <h4>Explore</h4>
+                    <ul>
+                        <li><a href="{{ url_for('main.index') }}"><i class="fas fa-store" style="font-size: 0.8rem; color: var(--intro-mint);"></i> Storefront</a></li>
+                        <li><a href="{{ url_for('main.about_us') }}"><i class="fas fa-info-circle" style="font-size: 0.8rem; color: var(--intro-mint);"></i> About DailyDrop</a></li>
+                        <li><a href="{{ url_for('main.faqs') }}"><i class="fas fa-question-circle" style="font-size: 0.8rem; color: var(--intro-mint);"></i> FAQs &amp; Help</a></li>
+                        <li><a href="{{ url_for('main.contact_us') }}"><i class="fas fa-envelope" style="font-size: 0.8rem; color: var(--intro-mint);"></i> Contact Support</a></li>
                     </ul>
                 </div>
-                <div class="footer-column">
-                    <h4>Get In Touch</h4>
-                    <ul class="footer-contact">
-                        <li>
-                            <i class="fas fa-map-marker-alt"></i>
-                            <span>Portfolio Engineering Demo (Virtual Sandbox)</span>
-                        </li>
-                        <li>
-                            <i class="fas fa-envelope"></i>
-                            <span>support@dailydrop.com</span>
-                        </li>
-                        <li>
-                            <i class="fas fa-phone-alt"></i>
-                            <span>Portfolio Project Showcase</span>
-                        </li>
+
+                <!-- Col 4: Account & Admin -->
+                <div class="footer-nav-col">
+                    <h4>Quick Access</h4>
+                    <ul>
+                        <li><a href="{{ url_for('cart.orders') }}"><i class="fas fa-truck" style="font-size: 0.8rem; color: var(--intro-mint);"></i> Track Orders</a></li>
+                        <li><a href="{{ url_for('cart.wishlist') }}"><i class="fas fa-heart" style="font-size: 0.8rem; color: var(--intro-mint);"></i> Saved Wishlist</a></li>
+                        <li><a href="{{ url_for('auth.login') }}"><i class="fas fa-user-circle" style="font-size: 0.8rem; color: var(--intro-mint);"></i> Account Login</a></li>
+                        <li><a href="{{ url_for('admin.admin_dashboard') }}"><i class="fas fa-shield-alt" style="font-size: 0.8rem; color: var(--intro-mint);"></i> Admin Portal</a></li>
                     </ul>
                 </div>
             </div>
-            <div class="footer-bottom">
-                <p>&copy; 2026 DailyDrop. All rights reserved. | Handcrafted with <i class="fas fa-heart" style="color: #EC4899;"></i> for visual excellence.</p>
+
+            <!-- Bottom Copyright & Legal Flex -->
+            <div class="footer-bottom-flex">
+                <div>
+                    &copy; 2026 DailyDrop Technologies Pvt. Ltd. All rights reserved.
+                </div>
+                
+                <div class="footer-bottom-links">
+                    <a href="{{ url_for('main.privacy_policy') }}">Privacy Policy</a>
+                    <span style="opacity: 0.4;">&bull;</span>
+                    <a href="{{ url_for('main.terms') }}">Terms of Service</a>
+                    <span style="opacity: 0.4;">&bull;</span>
+                    <a href="{{ url_for('main.contact_us') }}">Customer Support</a>
+                </div>
+
+                <div class="footer-payment-badges">
+                    <span class="mini-badge"><i class="fa-solid fa-bolt" style="color: #F59E0B;"></i> Instant UPI</span>
+                    <span class="mini-badge"><i class="fa-brands fa-google-pay" style="color: #38BDF8;"></i> GPay</span>
+                    <span class="mini-badge"><i class="fa-solid fa-credit-card" style="color: #A855F7;"></i> Cards</span>
+                    <span class="mini-badge"><i class="fa-solid fa-money-bill-wave" style="color: #10B981;"></i> COD</span>
+                </div>
             </div>
+
         </div>
     </footer>
+
 </body>
 </html>
