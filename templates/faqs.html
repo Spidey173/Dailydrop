@@ -123,6 +123,24 @@
       padding: 20px 28px;
       border-top: 1px solid rgba(12, 131, 31, 0.06);
     }
+
+    @media (max-width: 768px) {
+      .faqs-page {
+        margin: 16px auto 40px;
+        padding: 0 12px;
+      }
+      .faqs-header h1 {
+        font-size: 1.8rem;
+      }
+      .faq-trigger {
+        padding: 16px 18px;
+        font-size: 1rem;
+      }
+      .faq-item.active .faq-content {
+        padding: 14px 18px;
+        max-height: 350px;
+      }
+    }
   </style>
   <script src="{{ url_for('static', filename='js/wishlist.js') }}"></script>
   <script src="{{ url_for('static', filename='js/live-search.js') }}"></script>
@@ -133,7 +151,7 @@
   <nav class="navbar">
       <div class="container navbar-container">
           <a href="{{ url_for('index') }}" class="logo">
-              <i class="fas fa-shopping-basket"></i> Daily<span>Drop</span>
+              <i class="fas fa-shopping-basket"></i> Daily<span>Drop</span> <span class="delivery-badge-pill"><i class="fas fa-bolt"></i> 10m</span>
           </a>
           <div class="nav-actions">
               {% if 'user_id' in session %}

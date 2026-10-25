@@ -34,6 +34,11 @@ function updateWishlistNavbarBadge(count) {
     void badge.offsetWidth; // Trigger reflow
     badge.classList.add('badge-pop');
   }
+  const mobileBadge = document.getElementById('mobile-nav-wishlist-badge');
+  if (mobileBadge) {
+    mobileBadge.textContent = count;
+    mobileBadge.style.display = count > 0 ? 'flex' : 'none';
+  }
 }
 
 // Update all heart buttons on the page

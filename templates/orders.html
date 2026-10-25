@@ -494,6 +494,19 @@
     }
     
     @media (max-width: 768px) {
+      .orders-page {
+        margin: 16px auto 40px;
+        padding: 0 12px;
+      }
+      .orders-header {
+        font-size: 1.6rem;
+        margin-bottom: 16px;
+      }
+      .order-card {
+        padding: 16px 14px;
+        margin-bottom: 20px;
+        border-radius: 14px;
+      }
       .order-card-header {
         flex-direction: column;
         align-items: flex-start;
@@ -507,7 +520,7 @@
         max-width: 100%;
       }
       .order-tracker-container {
-        padding: 16px 14px;
+        padding: 14px 10px;
       }
       .tracker-header {
         flex-direction: column;
@@ -515,18 +528,39 @@
         gap: 10px;
       }
       .step-node {
-        width: 36px;
-        height: 36px;
-        font-size: 0.9rem;
+        width: 32px;
+        height: 32px;
+        font-size: 0.82rem;
       }
       .progress-bar-line {
-        top: 30px;
+        top: 26px;
       }
       .step-title {
-        font-size: 0.74rem;
+        font-size: 0.7rem;
+        word-break: break-word;
+        text-align: center;
+        line-height: 1.15;
       }
       .step-time {
-        font-size: 0.65rem;
+        font-size: 0.62rem;
+      }
+      .product-row {
+        padding: 10px 12px;
+        gap: 12px;
+      }
+      .product-row img {
+        width: 44px;
+        height: 44px;
+      }
+      .empty-orders-card {
+        padding: 30px 16px;
+        margin: 20px auto;
+      }
+      .empty-orders-card h3 {
+        font-size: 1.5rem;
+      }
+      .empty-orders-card p {
+        font-size: 0.92rem;
       }
     }
   </style>
@@ -539,7 +573,7 @@
   <nav class="navbar">
       <div class="container navbar-container">
           <a href="{{ url_for('index') }}" class="logo">
-              <i class="fas fa-shopping-basket"></i> Daily<span>Drop</span>
+              <i class="fas fa-shopping-basket"></i> Daily<span>Drop</span> <span class="delivery-badge-pill"><i class="fas fa-bolt"></i> 10m</span>
           </a>
           <div class="nav-actions">
               {% if 'user_id' in session %}
