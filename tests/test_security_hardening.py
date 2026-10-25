@@ -122,7 +122,7 @@ def test_authoritative_price_resolution_overrides_client_tampering():
         with conn.cursor() as cur:
             cur.execute("""
                 INSERT OR REPLACE INTO products (product_id, name, price, stock, category, image_path, description)
-                VALUES (8888, 'Tamper Proof Oil', 400.0, 50, 'Grocery', '/static/logo1.webp', 'Test Product')
+                VALUES (8888, 'Tamper Proof Oil', 400.0, 50, 'Grocery', '/static/grocery/fortune-sunlite-oil.jpeg', 'Test Product')
             """)
 
     # Attacker attempts to checkout with price = 0.50 instead of 400.00

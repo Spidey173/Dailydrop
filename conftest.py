@@ -341,25 +341,25 @@ def _seed_test_database():
         except Exception as e:
             print(f"Warning: could not seed catalog products in SQLite: {e}")
 
-    # Seed specific catalog products referenced in integration tests
+    # Seed specific catalog products referenced in integration tests with valid images
     test_products = [
-        ('Organic Tomatoes', 3.99, 'Vegetables', 'Fresh', 50),
-        ('Whole Milk', 4.50, 'Dairy', 'Milk', 50),
-        ('Apple', 1.50, 'Fruits', 'Fresh', 50),
-        ('Organic Almonds 500g', 12.50, 'Grocery', 'Dry Fruits', 50),
-        ('Fresh Avocados 2pk', 6.00, 'Fruits', 'Fresh', 50),
-        ('Basmati Rice 5kg', 450.00, 'Grocery', 'Rice', 50),
-        ('Olive Oil 1L', 600.00, 'Grocery', 'Oils', 50),
-        ('Organic Apples 1kg', 120.00, 'Fruits', 'Apples', 50),
-        ('Tea', 50.00, 'Beverages', 'Tea', 50),
-        ('Brown Bread', 40.00, 'Bakery', 'Bread', 50),
-        ('Tamper Proof Oil', 400.00, 'Grocery', 'Oils', 50),
+        ('Organic Tomatoes', 3.99, 'Vegetables', 'Fresh', 50, '/static/fruits-vegetables/tomato.jpg'),
+        ('Whole Milk', 4.50, 'Dairy', 'Milk', 50, '/static/dairy-breakfast/milk.jpg'),
+        ('Apple', 1.50, 'Fruits', 'Fresh', 50, '/static/fruits-vegetables/apples.jpeg'),
+        ('Organic Almonds 500g', 12.50, 'Grocery', 'Dry Fruits', 50, '/static/dairy-breakfast/nut-butter.jpeg'),
+        ('Fresh Avocados 2pk', 6.00, 'Fruits', 'Fresh', 50, '/static/fruits-vegetables/cucumber.jpeg'),
+        ('Basmati Rice 5kg', 450.00, 'Grocery', 'Rice', 50, '/static/grocery/jasmine-rice.jpg'),
+        ('Olive Oil 1L', 600.00, 'Grocery', 'Oils', 50, '/static/grocery/fortune-sunlite-oil.jpeg'),
+        ('Organic Apples 1kg', 120.00, 'Fruits', 'Apples', 50, '/static/fruits-vegetables/green-apple.jpeg'),
+        ('Tea', 50.00, 'Beverages', 'Tea', 50, '/static/dairy-breakfast/red-label.jpg'),
+        ('Brown Bread', 40.00, 'Bakery', 'Bread', 50, '/static/dairy-breakfast/bread.jpg'),
+        ('Tamper Proof Oil', 400.00, 'Grocery', 'Oils', 50, '/static/grocery/fortune-sunlite-oil.jpeg'),
     ]
-    for p_name, p_price, p_cat, p_sub, p_stk in test_products:
+    for p_name, p_price, p_cat, p_sub, p_stk, p_img in test_products:
         cur.execute('''
             INSERT OR IGNORE INTO products (name, price, category, subcategory, image_path, description, stock)
             VALUES (?, ?, ?, ?, ?, ?, ?)
-        ''', (p_name, p_price, p_cat, p_sub, '/static/logo1.webp', 'Test catalog product', p_stk))
+        ''', (p_name, p_price, p_cat, p_sub, p_img, 'Test catalog product', p_stk))
 
     _SHARED_SQLITE_CONN.commit()
 

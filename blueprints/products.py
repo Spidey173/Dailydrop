@@ -22,11 +22,8 @@ CATEGORY_DEFINITIONS = {
             {'slug': 'vegetables', 'name': 'Fresh Vegetables', 'icon': '🥕'},
             {'slug': 'fruits', 'name': 'Fresh Fruits', 'icon': '🍎'},
             {'slug': 'exotics', 'name': 'Exotics', 'icon': '🫐'},
-            {'slug': 'coriander', 'name': 'Coriander & Others', 'icon': '🌿'},
-            {'slug': 'sprouts', 'name': 'Freshly Cut & Sprouts', 'icon': '🥗'},
-            {'slug': 'flowers', 'name': 'Flowers & Leaves', 'icon': '🌸'},
-            {'slug': 'seasonal', 'name': 'Seasonal', 'icon': '🥭'},
-            {'slug': 'frozen', 'name': 'Frozen Veg', 'icon': '🧊'},
+            {'slug': 'leafy', 'name': 'Leafy & Herbs', 'icon': '🌿'},
+            {'slug': 'melons', 'name': 'Melons & Seasonal', 'icon': '🍉'},
         ]
     },
     'grocery': {
@@ -42,7 +39,8 @@ CATEGORY_DEFINITIONS = {
             {'slug': 'rice', 'name': 'Rice & Grains', 'icon': '🍚'},
             {'slug': 'spices', 'name': 'Spices & Masalas', 'icon': '🌶️'},
             {'slug': 'salt', 'name': 'Salt & Sugar', 'icon': '🧂'},
-            {'slug': 'besan maida powder', 'name': 'Besan & Maida', 'icon': '🥞'},
+            {'slug': 'ready', 'name': 'Ready to Eat', 'icon': '🍲'},
+            {'slug': 'besan', 'name': 'Besan & Others', 'icon': '🥞'},
         ]
     },
     'baby_care': {
@@ -53,9 +51,9 @@ CATEGORY_DEFINITIONS = {
         'placeholder': 'Search baby care...',
         'subcategories': [
             {'slug': 'all', 'name': 'All', 'icon': '👶'},
+            {'slug': 'hygiene', 'name': 'Baby Hygiene', 'icon': '🧴'},
             {'slug': 'daipers', 'name': 'Diapers & Wipes', 'icon': '🧷'},
             {'slug': 'baby food', 'name': 'Baby Food', 'icon': '🍼'},
-            {'slug': 'hygiene', 'name': 'Baby Hygiene', 'icon': '🧴'},
         ]
     },
     'beverages': {
@@ -80,8 +78,7 @@ CATEGORY_DEFINITIONS = {
         'placeholder': 'Search dairy & breakfast...',
         'subcategories': [
             {'slug': 'all', 'name': 'All', 'icon': '🥛'},
-            {'slug': 'milk', 'name': 'Milk', 'icon': '🍶'},
-            {'slug': 'dairy', 'name': 'Dairy & Butter', 'icon': '🧈'},
+            {'slug': 'milk', 'name': 'Milk & Dairy', 'icon': '🧈'},
             {'slug': 'breakfast', 'name': 'Bread & Breakfast', 'icon': '🍞'},
             {'slug': 'chocos', 'name': 'Cereals & Chocos', 'icon': '🥣'},
         ]
@@ -118,8 +115,8 @@ CATEGORY_DEFINITIONS = {
         'placeholder': 'Search household items...',
         'subcategories': [
             {'slug': 'all', 'name': 'All', 'icon': '🏠'},
-            {'slug': 'freshners', 'name': 'Fresheners & Air Care', 'icon': '💐'},
             {'slug': 'cleaning tools', 'name': 'Cleaning & Detergents', 'icon': '🧹'},
+            {'slug': 'freshners', 'name': 'Fresheners & Air Care', 'icon': '💐'},
         ]
     },
     'personal_care': {
@@ -130,12 +127,12 @@ CATEGORY_DEFINITIONS = {
         'placeholder': 'Search personal care...',
         'subcategories': [
             {'slug': 'all', 'name': 'All', 'icon': '🧼'},
+            {'slug': 'personal care', 'name': 'Daily Grooming', 'icon': '🪒'},
             {'slug': 'facewash', 'name': 'Facewash', 'icon': '🫧'},
             {'slug': 'hair care', 'name': 'Hair Care', 'icon': '🧴'},
-            {'slug': 'sunscreen', 'name': 'Sunscreen', 'icon': '☀️'},
-            {'slug': 'deodrant', 'name': 'Deodorant', 'icon': '🌸'},
+            {'slug': 'deodrant', 'name': 'Deodorants', 'icon': '🌸'},
             {'slug': 'femine care', 'name': 'Feminine Care', 'icon': '💖'},
-            {'slug': 'personal care', 'name': 'Daily Grooming', 'icon': '🪒'},
+            {'slug': 'sunscreen', 'name': 'Sunscreen', 'icon': '☀️'},
         ]
     },
     'snacks': {
