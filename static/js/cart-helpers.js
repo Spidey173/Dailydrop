@@ -412,7 +412,7 @@ function updateCartCount() {
       }
   }
 
-  // Blinkit Floating Mini-Cart Bar
+  // Modern Quick-Commerce Floating Mini-Cart Bar
   updateMobileFloatingCart(count, subtotal);
 }
 
