@@ -129,24 +129,6 @@
             color: var(--intro-mint);
         }
 
-        .intro-nav-links {
-            display: flex;
-            align-items: center;
-            gap: 32px;
-        }
-
-        .intro-nav-link {
-            color: #94A3B8;
-            text-decoration: none;
-            font-size: 0.95rem;
-            font-weight: 500;
-            transition: color 0.2s ease;
-        }
-
-        .intro-nav-link:hover {
-            color: #FFFFFF;
-        }
-
         .intro-nav-actions {
             display: flex;
             align-items: center;
@@ -490,10 +472,6 @@
         }
 
         @media (max-width: 640px) {
-            .intro-nav-links {
-                display: none;
-            }
-
             .hero-title {
                 font-size: 2.2rem;
             }
@@ -513,15 +491,6 @@
                 <a href="{{ url_for('main.intro') }}" class="intro-logo">
                     <i class="fas fa-shopping-basket"></i> Daily<span>Drop</span>
                 </a>
-                
-                <div class="intro-nav-links">
-                    <a href="#how-it-works" class="intro-nav-link">How It Works</a>
-                    <a href="{{ url_for('main.index') }}" class="intro-nav-link" style="color: var(--intro-mint); font-weight: 700;">
-                        <i class="fas fa-store"></i> Storefront
-                    </a>
-                    <a href="{{ url_for('main.about_us') }}" class="intro-nav-link">About Us</a>
-                    <a href="{{ url_for('main.faqs') }}" class="intro-nav-link">FAQs</a>
-                </div>
 
                 <div class="intro-nav-actions">
                     <a href="{{ url_for('auth.login') }}" class="btn-nav-outline" id="nav-login-btn">
@@ -608,7 +577,7 @@
             <div class="how-grid">
                 <div class="how-card">
                     <div class="how-step-num">01</div>
-                    <div class="how-icon-box"><i class="fas fa-touch-screen"></i></div>
+                    <div class="how-icon-box"><i class="fas fa-shopping-basket"></i></div>
                     <h3>Choose &amp; Checkout</h3>
                     <p>Select farm-fresh vegetables, dairy, drinks, and daily snacks. Checkout effortlessly with UPI, Cards, or COD.</p>
                 </div>
