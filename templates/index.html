@@ -153,7 +153,7 @@
   <div class="container">
     <div class="hero-slider">
       <div class="slide active">
-        <img src="/static/slider/Vegetables.webp" onerror="this.onerror=null; this.src='/static/slider/Vegetables.png'" alt="Vegetables">
+        <img src="/static/slider/Vegetables.webp" onerror="this.onerror=null; this.src='/static/slider/Vegetables.png'" alt="Vegetables" loading="eager" fetchpriority="high" decoding="async">
         <div class="slide-content">
           <span class="slide-badge"><i class="fas fa-bolt"></i> 10-Min Farm Fresh</span>
           <h2>Fresh veggies, great deals!</h2>
@@ -162,7 +162,7 @@
         </div>
       </div>
       <div class="slide">
-        <img src="/static/slider/dairy_and_breakfast.webp" onerror="this.onerror=null; this.src='/static/slider/dairy_and_breakfast.png'" alt="Dairy and Breakfast">
+        <img src="/static/slider/dairy_and_breakfast.webp" onerror="this.onerror=null; this.src='/static/slider/dairy_and_breakfast.png'" alt="Dairy and Breakfast" loading="lazy" decoding="async">
         <div class="slide-content">
           <span class="slide-badge"><i class="fas fa-sun"></i> Fresh Breakfast</span>
           <h2>Fresh dairy, perfect breakfasts!</h2>
@@ -171,7 +171,7 @@
         </div>
       </div>
       <div class="slide">
-        <img src="/static/slider/snacks.webp" onerror="this.onerror=null; this.src='/static/slider/snacks.png'" alt="Snacks">
+        <img src="/static/slider/snacks.webp" onerror="this.onerror=null; this.src='/static/slider/snacks.png'" alt="Snacks" loading="lazy" decoding="async">
         <div class="slide-content">
           <span class="slide-badge"><i class="fas fa-fire"></i> Cravings & Munchies</span>
           <h2>Delicious snacks & munchies!</h2>
@@ -180,7 +180,7 @@
         </div>
       </div>
       <div class="slide">
-        <img src="/static/slider/babycare.webp" onerror="this.onerror=null; this.src='/static/slider/babycare.png'" alt="Babycare">
+        <img src="/static/slider/babycare.webp" onerror="this.onerror=null; this.src='/static/slider/babycare.png'" alt="Babycare" loading="lazy" decoding="async">
         <div class="slide-content">
           <span class="slide-badge"><i class="fas fa-heart"></i> Gentle Baby Care</span>
           <h2>Gentle care for your little one!</h2>
@@ -189,7 +189,7 @@
         </div>
       </div>
       <div class="slide">
-        <img src="/static/slider/grocery.webp" onerror="this.onerror=null; this.src='/static/slider/grocery.png'" alt="Grocery">
+        <img src="/static/slider/grocery.webp" onerror="this.onerror=null; this.src='/static/slider/grocery.png'" alt="Grocery" loading="lazy" decoding="async">
         <div class="slide-content">
           <span class="slide-badge"><i class="fas fa-mortar-pestle"></i> Artisanal Pantry</span>
           <h2>Gourmet Groceries & Pantry Essentials</h2>
@@ -198,7 +198,7 @@
         </div>
       </div>
       <div class="slide">
-        <img src="/static/slider/beverages.webp" onerror="this.onerror=null; this.src='/static/slider/beverages.png'" alt="Beverages">
+        <img src="/static/slider/beverages.webp" onerror="this.onerror=null; this.src='/static/slider/beverages.png'" alt="Beverages" loading="lazy" decoding="async">
         <div class="slide-content">
           <span class="slide-badge"><i class="fas fa-glass-whiskey"></i> Chilled Refreshments</span>
           <h2>Refreshing Beverages & Craft Sodas</h2>
@@ -207,7 +207,7 @@
         </div>
       </div>
       <div class="slide">
-        <img src="/static/slider/frozen_foods.webp" onerror="this.onerror=null; this.src='/static/slider/frozen_foods.png'" alt="Frozen Foods">
+        <img src="/static/slider/frozen_foods.webp" onerror="this.onerror=null; this.src='/static/slider/frozen_foods.png'" alt="Frozen Foods" loading="lazy" decoding="async">
         <div class="slide-content">
           <span class="slide-badge"><i class="fas fa-ice-cream"></i> Gourmet Desserts</span>
           <h2>Premium Gelatos & Frozen Treats</h2>
@@ -237,7 +237,7 @@
       <!-- Fruits & Vegetables -->
       <a href="{{ url_for('vegetables') }}" class="category-card">
         <div class="image-container">
-          <img src="/static/image/vegetables.jpg" alt="Fruits & Vegetables">
+          <img src="/static/image/vegetables.jpg" alt="Fruits & Vegetables" loading="lazy" decoding="async">
         </div>
         <h3>Fruits & Vegetables</h3>
       </a>
@@ -245,7 +245,7 @@
       <!-- Dairy & Breakfast -->
       <a href="{{ url_for('dairy_breakfast') }}" class="category-card">
         <div class="image-container">
-          <img src="/static/image/dairy.jpg" alt="Dairy & Breakfast">
+          <img src="/static/image/dairy.jpg" alt="Dairy & Breakfast" loading="lazy" decoding="async">
         </div>
         <h3>Dairy & Breakfast</h3>
       </a>
@@ -253,7 +253,7 @@
             <!-- Snacks -->
       <a href="{{ url_for('snacks') }}" class="category-card">
         <div class="image-container">
-          <img src="/static/image/snaks.jpeg" alt="Snacks">
+          <img src="/static/image/snaks.jpeg" alt="Snacks" loading="lazy" decoding="async">
         </div>
         <h3>Snacks</h3>
       </a>
@@ -262,7 +262,7 @@
       <!-- Baby Care -->
       <a href="{{ url_for('baby_care') }}" class="category-card">
         <div class="image-container">
-          <img src="/static/image/baby.png" alt="Baby Care">
+          <img src="/static/image/baby.png" alt="Baby Care" loading="lazy" decoding="async">
         </div>
         <h3>Baby Care</h3>
       </a>
@@ -273,7 +273,7 @@
       <!-- Personal Care -->
       <a href="{{ url_for('personal_care') }}" class="category-card">
         <div class="image-container">
-          <img src="/static/image/personalcare.jpg" alt="Personal Care">
+          <img src="/static/image/personalcare.jpg" alt="Personal Care" loading="lazy" decoding="async">
         </div>
         <h3>Personal Care</h3>
       </a>
@@ -281,7 +281,7 @@
       <!-- Household Items -->
       <a href="{{ url_for('household_items') }}" class="category-card">
         <div class="image-container">
-          <img src="/static/image/household.jpeg" alt="Household Items">
+          <img src="/static/image/household.jpeg" alt="Household Items" loading="lazy" decoding="async">
         </div>
         <h3>Household Items</h3>
       </a>
@@ -291,7 +291,7 @@
       <!-- Home & Kitchen -->
       <a href="{{ url_for('home_kitchen') }}" class="category-card">
         <div class="image-container">
-          <img src="/static/image/kitchen.jpeg" alt="Home & Kitchen">
+          <img src="/static/image/kitchen.jpeg" alt="Home & Kitchen" loading="lazy" decoding="async">
         </div>
         <h3>Home & Kitchen</h3>
       </a>
@@ -299,7 +299,7 @@
             <!-- Electronics -->
       <a href="{{ url_for('grocery') }}" class="category-card">
         <div class="image-container">
-          <img src="/static/image/grocery.jpeg" alt="Grocery">
+          <img src="/static/image/grocery.jpeg" alt="Grocery" loading="lazy" decoding="async">
         </div>
         <h3>Grocery</h3>
       </a>
@@ -307,7 +307,7 @@
       <!-- Beverages -->
       <a href="{{ url_for('beverages') }}" class="category-card">
         <div class="image-container">
-          <img src="/static/image/beverages.jpg" alt="Beverages">
+          <img src="/static/image/beverages.jpg" alt="Beverages" loading="lazy" decoding="async">
         </div>
         <h3>Beverages</h3>
       </a>
@@ -315,7 +315,7 @@
       <!-- Frozen Foods -->
       <a href="{{ url_for('frozen_foods') }}" class="category-card">
         <div class="image-container">
-          <img src="/static/image/frozen_foods.jpg" alt="Frozen Foods">
+          <img src="/static/image/frozen_foods.jpg" alt="Frozen Foods" loading="lazy" decoding="async">
         </div>
         <h3>Frozen Foods</h3>
       </a>

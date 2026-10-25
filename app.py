@@ -106,6 +106,14 @@ def create_app(config_name: Optional[str] = None) -> Flask:
     @app.after_request
     def set_security_headers_and_auth_cookie(response):
         """Synchronize client-side cookie with session state and apply defensive security headers."""
+        if request.path.startswith('/static/'):
+            # Ultra-fast Edge CDN & Browser caching for static assets (images, css, js, fonts)
+            response.headers['Cache-Control'] = 'public, max-age=31536000, s-maxage=31536000, immutable'
+            # Remove any cookie or session variation on static assets so Vercel CDN caches at the edge
+            response.headers.pop('Set-Cookie', None)
+            response.headers.pop('Vary', None)
+            return response
+
         if 'user_id' in session:
             response.set_cookie('is_logged_in', 'true', samesite='Lax', path='/')
         else:

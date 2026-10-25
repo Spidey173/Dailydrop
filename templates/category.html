@@ -947,7 +947,7 @@
             <button class="quick-wish-btn ${isWishlisted ? 'active' : ''}" data-product-id="${pid}" onclick="toggleWishlist(${pid}, event, '${safeTitle}')" title="Save to Wishlist">
               <i class="${isWishlisted ? 'fas' : 'far'} fa-heart"></i>
             </button>
-            <img src="${product.image}" alt="${title}" loading="lazy" onerror="this.onerror=null; this.src='${svgFallback}'" onclick="showDetails('${safeTitle}', ${price}, '${product.image}', '${product.category}')" />
+            <img src="${product.image}" alt="${title}" loading="lazy" decoding="async" onerror="this.onerror=null; this.src='${svgFallback}'" onclick="showDetails('${safeTitle}', ${price}, '${product.image}', '${product.category}')" />
           </div>
 
           <div class="quick-timer-badge">

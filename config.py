@@ -151,6 +151,7 @@ class TestingConfig(Config):
     DEBUG = True
     TESTING = True
     WTF_CSRF_ENABLED = False
+    RATELIMIT_ENABLED = False
     SECRET_KEY = os.getenv('SECRET_KEY', 'test-mock-secret-key-32bytes-secure-pytest')
     DATABASE_URL = os.getenv('DATABASE_URL') or 'sqlite:///:memory:'
 
