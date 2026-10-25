@@ -493,8 +493,18 @@ def clear_product_cache(product_id: Optional[int] = None) -> None:
 
 
 def get_all_products(category: Optional[str] = None) -> List[Dict[str, Any]]:
-    """Retrieve all products, optionally filtered by category, with Redis read-through and memory caching."""
-    # 1. Distributed Read-Through Redis Cache (< 2ms)
+    """Retrieve all products, optionally filtered by category, with tiered L1 (memory) and L2 (Redis) caching."""
+    now = time.time()
+
+    # 1. Local in-memory cache (L1: instant < 0.01ms)
+    if '__ALL__' in _PRODUCT_CACHE:
+        cached_time, all_products = _PRODUCT_CACHE['__ALL__']
+        if now - cached_time < _CACHE_TTL_SECONDS:
+            if category:
+                return [p for p in all_products if is_matching_category(p.get('category', ''), category)]
+            return all_products
+
+    # 2. Distributed Read-Through Redis Cache (L2: distributed shared cache)
     try:
         from services.redis_service import RedisService
         cached_catalog = RedisService.get_json('catalog:all_products')
@@ -505,27 +515,13 @@ def get_all_products(category: Optional[str] = None) -> List[Dict[str, Any]]:
                         p['price'] = float(p['price'])
                     except (ValueError, TypeError):
                         pass
+            # Hydrate local L1 cache
+            _PRODUCT_CACHE['__ALL__'] = (now, cached_catalog)
             if category:
                 return [p for p in cached_catalog if is_matching_category(p.get('category', ''), category)]
             return cached_catalog
     except Exception as re:
         logger.debug(f"Redis get_all_products miss/error: {re}")
-
-    now = time.time()
-
-    # 2. Local in-memory cache fallback (0ms)
-    if '__ALL__' in _PRODUCT_CACHE:
-        cached_time, all_products = _PRODUCT_CACHE['__ALL__']
-        if now - cached_time < _CACHE_TTL_SECONDS:
-            # Re-hydrate Redis if evicted or restarted
-            try:
-                from services.redis_service import RedisService
-                RedisService.set_json('catalog:all_products', all_products)
-            except Exception:
-                pass
-            if category:
-                return [p for p in all_products if is_matching_category(p.get('category', ''), category)]
-            return all_products
 
     # 3. Relational PostgreSQL Database query
     try:
@@ -570,8 +566,14 @@ def get_all_products(category: Optional[str] = None) -> List[Dict[str, Any]]:
 
 
 def get_product_by_id(product_id: int) -> Optional[Dict[str, Any]]:
-    """Retrieve a product by ID, checking Redis and in-memory cache first."""
-    # 1. Distributed Redis Cache
+    """Retrieve a product by ID, checking local memory first, then Redis, and finally DB."""
+    # 1. Local memory cache (L1: instant < 0.01ms)
+    for _, (_, products) in _PRODUCT_CACHE.items():
+        for p in products:
+            if p.get('product_id') == product_id or p.get('id') == product_id:
+                return p
+
+    # 2. Distributed Redis Cache (L2)
     try:
         from services.redis_service import RedisService
         cached_p = RedisService.get_json(f"catalog:product:{product_id}")
@@ -579,12 +581,6 @@ def get_product_by_id(product_id: int) -> Optional[Dict[str, Any]]:
             return cached_p
     except Exception:
         pass
-
-    # 2. Local memory cache
-    for _, (_, products) in _PRODUCT_CACHE.items():
-        for p in products:
-            if p.get('product_id') == product_id:
-                return p
 
     # 3. Database query
     try:
