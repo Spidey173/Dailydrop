@@ -162,10 +162,79 @@ def api_update_product_stock(product_id: int):
     return jsonify({'success': False, 'error': message}), 400
 
 
+import io
+import base64
+from PIL import Image, ImageOps
+
+def process_and_persist_image(file_storage) -> str:
+    """
+    Process an uploaded image file, optimize and downsample it for web delivery,
+    and convert to a compact Base64 Data URL (WebP) for 100% permanent storage
+    in PostgreSQL that persists across all environments, deployments, and restarts.
+    Also saves a local backup copy in static/uploads if running locally.
+    """
+    if not file_storage or not getattr(file_storage, 'filename', None):
+        return ""
+
+    raw_filename = file_storage.filename
+    ext = os.path.splitext(raw_filename)[1].lower()
+    allowed_exts = current_app.config.get('ALLOWED_IMAGE_EXTENSIONS', {'.png', '.jpg', '.jpeg', '.webp'})
+    if ext not in allowed_exts:
+        raise ValueError(f"Invalid image format '{ext}'. Allowed formats: {', '.join(sorted(allowed_exts))}")
+
+    try:
+        file_bytes = file_storage.read()
+        if not file_bytes:
+            return ""
+
+        # Open with PIL for optimization & compression
+        img = Image.open(io.BytesIO(file_bytes))
+        img = ImageOps.exif_transpose(img)
+
+        # Downsample to max 600x600 for optimal product display
+        img.thumbnail((600, 600), Image.Resampling.LANCZOS)
+
+        buffer = io.BytesIO()
+        if img.mode in ('RGBA', 'LA') or (img.mode == 'P' and 'transparency' in img.info):
+            img.save(buffer, format='WEBP', quality=82, method=6)
+        else:
+            img = img.convert('RGB')
+            img.save(buffer, format='WEBP', quality=82, method=6)
+
+        compressed_bytes = buffer.getvalue()
+        b64_str = base64.b64encode(compressed_bytes).decode('utf-8')
+        data_url = f"data:image/webp;base64,{b64_str}"
+
+        # If on local disk and uploads permitted, also save a local backup copy
+        if not current_app.config.get('DISABLE_FILE_UPLOADS', False) and os.getenv('VERCEL') != '1':
+            try:
+                clean_base = secure_filename(os.path.splitext(raw_filename)[0]) or 'uploaded_image'
+                timestamp = int(datetime.now().timestamp())
+                filename = f"{timestamp}_{clean_base}.webp"
+                uploads_dir = os.path.join(current_app.static_folder or 'static', 'uploads')
+                os.makedirs(uploads_dir, exist_ok=True)
+                with open(os.path.join(uploads_dir, filename), 'wb') as f:
+                    f.write(compressed_bytes)
+            except Exception as backup_err:
+                logger.warning(f"Could not save local disk backup: {backup_err}")
+
+        return data_url
+    except Exception as e:
+        logger.error(f"Image processing error: {e}. Falling back to raw base64 encode.")
+        try:
+            file_storage.seek(0)
+            raw_b64 = base64.b64encode(file_storage.read()).decode('utf-8')
+            mime = 'image/jpeg' if ext in ('.jpg', '.jpeg') else f'image/{ext.lstrip(".")}'
+            return f"data:{mime};base64,{raw_b64}"
+        except Exception as fallback_err:
+            logger.error(f"Fallback base64 encode error: {fallback_err}")
+            raise
+
+
 @admin_bp.route('/api/v1/admin/products/add', methods=['POST'], endpoint='api_add_product')
 @admin_required
 def api_add_product():
-    """API to create a new product in the catalog with image upload support."""
+    """API to create a new product in the catalog with permanent cloud database persistence."""
     data = request.form if request.form else (request.get_json(silent=True) or {})
     try:
         name = sanitize_string(data.get('name', ''))
@@ -187,41 +256,7 @@ def api_add_product():
         if 'image_file' in request.files:
             file = request.files['image_file']
             if file and file.filename:
-                raw_filename = file.filename
-                ext = os.path.splitext(raw_filename)[1].lower()
-                allowed_exts = current_app.config.get('ALLOWED_IMAGE_EXTENSIONS', {'.png', '.jpg', '.jpeg', '.webp'})
-
-                if ext not in allowed_exts:
-                    return jsonify({
-                        'success': False,
-                        'error': f"Invalid image format '{ext}'. Allowed formats: {', '.join(sorted(allowed_exts))}"
-                    }), 400
-
-                # In serverless environments (e.g. Vercel) or when local disk uploads are disabled,
-                # encode the image as a Base64 Data URL so it permanently persists in PostgreSQL!
-                if current_app.config.get('DISABLE_FILE_UPLOADS', False) or os.getenv('VERCEL') == '1':
-                    import base64
-                    file_bytes = file.read()
-                    mime = 'image/jpeg' if ext in ('.jpg', '.jpeg') else f'image/{ext.lstrip(".")}'
-                    image_path = f"data:{mime};base64,{base64.b64encode(file_bytes).decode('utf-8')}"
-                else:
-                    clean_base = secure_filename(os.path.splitext(raw_filename)[0]) or 'uploaded_image'
-                    timestamp = int(datetime.now().timestamp())
-                    filename = f"{timestamp}_{clean_base}{ext}"
-
-                    uploads_dir = os.path.join(current_app.static_folder or 'static', 'uploads')
-                    try:
-                        os.makedirs(uploads_dir, exist_ok=True)
-                        save_path = os.path.join(uploads_dir, filename)
-                        file.save(save_path)
-                        image_path = f'/static/uploads/{filename}'
-                    except (OSError, IOError) as upload_err:
-                        logger.warning(f"Could not persist upload locally: {upload_err}. Encoding as data URL.")
-                        import base64
-                        file.seek(0)
-                        file_bytes = file.read()
-                        mime = 'image/jpeg' if ext in ('.jpg', '.jpeg') else f'image/{ext.lstrip(".")}'
-                        image_path = f"data:{mime};base64,{base64.b64encode(file_bytes).decode('utf-8')}"
+                image_path = process_and_persist_image(file)
 
         if not image_path:
             cat_lower = category.lower()
@@ -247,8 +282,55 @@ def api_add_product():
                 'image_path': image_path
             }), 201
         return jsonify({'success': False, 'error': message}), 400
+    except ValueError as ve:
+        return jsonify({'success': False, 'error': str(ve)}), 400
     except Exception as e:
         logger.error(f"Error adding product: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@admin_bp.route('/api/v1/admin/products/<int:product_id>/edit', methods=['POST', 'PUT'], endpoint='api_edit_product')
+@admin_required
+def api_edit_product(product_id: int):
+    """API to update an existing product with permanent cloud database persistence."""
+    data = request.form if request.form else (request.get_json(silent=True) or {})
+    try:
+        kwargs = {}
+        if 'name' in data and data.get('name'):
+            kwargs['name'] = sanitize_string(data.get('name'))
+        if 'price' in data and data.get('price') != '':
+            kwargs['price'] = float(data.get('price'))
+        if 'category' in data and data.get('category'):
+            kwargs['category'] = normalize_category(sanitize_string(data.get('category')))
+        if 'subcategory' in data:
+            kwargs['subcategory'] = sanitize_string(data.get('subcategory'))
+        if 'stock' in data and data.get('stock') != '':
+            kwargs['stock'] = int(data.get('stock'))
+        if 'description' in data:
+            kwargs['description'] = sanitize_string(data.get('description'))
+
+        # Check if a new image was uploaded
+        if 'image_file' in request.files:
+            file = request.files['image_file']
+            if file and file.filename:
+                kwargs['image_path'] = process_and_persist_image(file)
+        elif 'image_path' in data and data.get('image_path'):
+            kwargs['image_path'] = sanitize_string(data.get('image_path'))
+
+        success, message = ProductService.update_product(product_id, **kwargs)
+        if success:
+            clear_product_cache(product_id)
+            return jsonify({
+                'success': True,
+                'message': f'Product #{product_id} updated permanently in database',
+                'product_id': product_id,
+                'updated_fields': list(kwargs.keys())
+            }), 200
+        return jsonify({'success': False, 'error': message}), 400
+    except ValueError as ve:
+        return jsonify({'success': False, 'error': str(ve)}), 400
+    except Exception as e:
+        logger.error(f"Error editing product #{product_id}: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
 

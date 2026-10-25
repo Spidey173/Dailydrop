@@ -934,6 +934,61 @@ def update_product_stock(product_id: int, stock: int) -> bool:
         raise DatabaseError(f"Failed to update product stock: {e}") from e
 
 
+def update_product(product_id: int, name: Optional[str] = None, price: Optional[float] = None,
+                   category: Optional[str] = None, subcategory: Optional[str] = None,
+                   image_path: Optional[str] = None, description: Optional[str] = None,
+                   stock: Optional[int] = None) -> bool:
+    """Update all or selected fields of an existing product in the catalog."""
+    updates = []
+    params = []
+    if name is not None and name.strip():
+        updates.append("name = %s")
+        params.append(name.strip())
+    if price is not None:
+        updates.append("price = %s")
+        params.append(float(price))
+    if category is not None and category.strip():
+        updates.append("category = %s")
+        params.append(normalize_category(category))
+    if subcategory is not None:
+        updates.append("subcategory = %s")
+        params.append(subcategory.strip())
+    if image_path is not None and image_path.strip():
+        updates.append("image_path = %s")
+        params.append(image_path.strip())
+    if description is not None:
+        updates.append("description = %s")
+        params.append(description.strip())
+    if stock is not None:
+        updates.append("stock = %s")
+        params.append(int(stock))
+
+    if not updates:
+        return True
+
+    params.append(product_id)
+    query = f"UPDATE products SET {', '.join(updates)} WHERE product_id = %s"
+    updated = False
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(query, tuple(params))
+                updated = cursor.rowcount > 0
+
+        if updated:
+            clear_product_cache(product_id)
+            if stock is not None:
+                try:
+                    from services.redis_service import RedisService
+                    RedisService.set_stock(product_id, int(stock))
+                except Exception:
+                    pass
+        return updated
+    except Exception as e:
+        logger.error(f"Error updating product #{product_id}: {e}")
+        raise DatabaseError(f"Failed to update product: {e}") from e
+
+
 def add_product(name: str, price: float, category: str, subcategory: str = '',
                 image_path: str = '/static/product-placeholder.svg', description: str = '', stock: int = 50) -> int:
     """Add a new product to the database catalog."""

@@ -5,7 +5,7 @@ from typing import Optional, List, Dict, Any, Tuple
 import logging
 from database import (
     get_all_products, get_product_by_id, get_product_by_name, update_product_price,
-    update_product_stock, add_product, delete_product, get_low_stock_products,
+    update_product_stock, update_product, add_product, delete_product, get_low_stock_products,
     DatabaseError
 )
 
@@ -72,6 +72,18 @@ class ProductService:
         except DatabaseError as e:
             logger.error(f"Error updating stock for product {product_id}: {e}")
             return False, 'Failed to update stock'
+
+    @staticmethod
+    def update_product(product_id: int, **kwargs) -> Tuple[bool, str]:
+        """Update any fields of a product in the catalog."""
+        try:
+            success = update_product(product_id, **kwargs)
+            if success:
+                return True, 'Product updated successfully'
+            return False, 'Product not found or not modified'
+        except DatabaseError as e:
+            logger.error(f"Error updating product {product_id}: {e}")
+            return False, f'Failed to update product: {e}'
 
     @staticmethod
     def create_product(name: str, price: float, category: str, subcategory: str = '',
