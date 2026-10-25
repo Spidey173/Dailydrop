@@ -35,12 +35,6 @@
 </head>
 <body>
 
-  <!-- Global Portfolio Demo Notice Banner -->
-  <div class="portfolio-demo-banner">
-      <span class="portfolio-demo-pill">Portfolio Demo</span>
-      <span>DailyDrop is a simulated full-stack engineering demonstration. <strong>No actual grocery orders, transactions, or live deliveries take place.</strong></span>
-  </div>
-
   {% block navbar %}
   <!-- Premium Sticky Floating Navbar -->
   <nav class="navbar">
@@ -183,6 +177,9 @@
                   <li><a href="{{ url_for('main.privacy') }}">Privacy Policy</a></li>
               </ul>
           </div>
+      </div>
+      <div style="border-top: 1px solid rgba(255,255,255,0.06); margin-top: 24px; padding-top: 16px; text-align: center; color: var(--text-muted); font-size: 0.78rem;">
+          <p style="margin: 0;">&copy; 2026 DailyDrop. All rights reserved. • Simulated grocery delivery platform demonstration.</p>
       </div>
   </footer>
   {% endblock %}
