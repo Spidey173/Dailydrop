@@ -88,6 +88,16 @@
             <i class="fas fa-times"></i>
         </button>
     </div>
+    <div class="drawer-search-container">
+        <div class="drawer-search-bar search-bar">
+            <i class="fas fa-search drawer-search-icon"></i>
+            <input type="text" id="drawerSearchInput" class="drawer-search-input" placeholder="Search milk, veggies, snacks..." autocomplete="off">
+            <button type="button" class="drawer-voice-btn" id="drawerVoiceBtn" aria-label="Voice search">
+                <i class="fas fa-microphone"></i>
+            </button>
+            <div class="search-autocomplete-dropdown"></div>
+        </div>
+    </div>
     <div class="drawer-user-info">
         <div class="drawer-avatar">
             <i class="fas {% if 'user_id' in session %}fa-user-check{% else %}fa-user{% endif %}"></i>
@@ -168,57 +178,64 @@
       <div class="slide active">
         <img src="/static/slider/Vegetables.webp" onerror="this.onerror=null; this.src='/static/slider/Vegetables.png'" alt="Vegetables">
         <div class="slide-content">
+          <span class="slide-badge"><i class="fas fa-bolt"></i> 10-Min Farm Fresh</span>
           <h2>Fresh veggies, great deals!</h2>
           <p>Experience the finest, farm-fresh vegetables, rich in flavor and nutrition every day!</p>
-          <a href="{{ url_for('vegetables') }}" class="slide-btn">Explore Now</a>
+          <a href="{{ url_for('vegetables') }}" class="slide-btn">Explore Now <i class="fas fa-arrow-right"></i></a>
         </div>
       </div>
       <div class="slide">
         <img src="/static/slider/dairy_and_breakfast.webp" onerror="this.onerror=null; this.src='/static/slider/dairy_and_breakfast.png'" alt="Dairy and Breakfast">
         <div class="slide-content">
+          <span class="slide-badge"><i class="fas fa-sun"></i> Fresh Breakfast</span>
           <h2>Fresh dairy, perfect breakfasts!</h2>
           <p>Discover rich, creamy dairy products and wholesome breakfast essentials to start your day right!</p>
-          <a href="{{ url_for('dairy_breakfast') }}" class="slide-btn">See What's Fresh</a>
+          <a href="{{ url_for('dairy_breakfast') }}" class="slide-btn">See What's Fresh <i class="fas fa-arrow-right"></i></a>
         </div>
       </div>
       <div class="slide">
         <img src="/static/slider/snacks.webp" onerror="this.onerror=null; this.src='/static/slider/snacks.png'" alt="Snacks">
         <div class="slide-content">
+          <span class="slide-badge"><i class="fas fa-fire"></i> Cravings & Munchies</span>
           <h2>Delicious snacks & munchies!</h2>
           <p>Indulge in crispy chips, sweet chocolates, gourmet cookies, and delightful treats any time!</p>
-          <a href="{{ url_for('snacks') }}" class="slide-btn">Find Your Favorites</a>
+          <a href="{{ url_for('snacks') }}" class="slide-btn">Find Your Favorites <i class="fas fa-arrow-right"></i></a>
         </div>
       </div>
       <div class="slide">
         <img src="/static/slider/babycare.webp" onerror="this.onerror=null; this.src='/static/slider/babycare.png'" alt="Babycare">
         <div class="slide-content">
+          <span class="slide-badge"><i class="fas fa-heart"></i> Gentle Baby Care</span>
           <h2>Gentle care for your little one!</h2>
           <p>Discover premium baby care products that nurture and protect your baby's delicate skin and health.</p>
-          <a href="{{ url_for('baby_care') }}" class="slide-btn">Shop Now</a>
+          <a href="{{ url_for('baby_care') }}" class="slide-btn">Shop Now <i class="fas fa-arrow-right"></i></a>
         </div>
       </div>
       <div class="slide">
         <img src="/static/slider/grocery.webp" onerror="this.onerror=null; this.src='/static/slider/grocery.png'" alt="Grocery">
         <div class="slide-content">
+          <span class="slide-badge"><i class="fas fa-mortar-pestle"></i> Artisanal Pantry</span>
           <h2>Gourmet Groceries & Pantry Essentials</h2>
           <p>Stock your kitchen with premium, handpicked artisanal spices, pantry classics, and organic staples.</p>
-          <a href="{{ url_for('grocery') }}" class="slide-btn">Stock Your Pantry</a>
+          <a href="{{ url_for('grocery') }}" class="slide-btn">Stock Your Pantry <i class="fas fa-arrow-right"></i></a>
         </div>
       </div>
       <div class="slide">
         <img src="/static/slider/beverages.webp" onerror="this.onerror=null; this.src='/static/slider/beverages.png'" alt="Beverages">
         <div class="slide-content">
+          <span class="slide-badge"><i class="fas fa-glass-whiskey"></i> Chilled Refreshments</span>
           <h2>Refreshing Beverages & Craft Sodas</h2>
           <p>Thirst-quenching juices, sparkling waters, gourmet lassis, and artisanal tea blends.</p>
-          <a href="{{ url_for('beverages') }}" class="slide-btn">Explore Refreshments</a>
+          <a href="{{ url_for('beverages') }}" class="slide-btn">Explore Refreshments <i class="fas fa-arrow-right"></i></a>
         </div>
       </div>
       <div class="slide">
         <img src="/static/slider/frozen_foods.webp" onerror="this.onerror=null; this.src='/static/slider/frozen_foods.png'" alt="Frozen Foods">
         <div class="slide-content">
+          <span class="slide-badge"><i class="fas fa-ice-cream"></i> Gourmet Desserts</span>
           <h2>Premium Gelatos & Frozen Treats</h2>
           <p>Indulge in pure bliss with gourmet ice cream cones, creamy pints, and delightful frozen desserts.</p>
-          <a href="{{ url_for('frozen_foods') }}" class="slide-btn">Shop Frozen Foods</a>
+          <a href="{{ url_for('frozen_foods') }}" class="slide-btn">Shop Frozen Foods <i class="fas fa-arrow-right"></i></a>
         </div>
       </div>
       <div class="slider-nav">
@@ -233,7 +250,13 @@
   <!-- Categories Section -->
 <section class="categories-section">
   <div class="container">
-    <h2 class="section-title">Shop by Category</h2>
+    <div class="section-header-row">
+      <div>
+        <span class="section-eyebrow"><i class="fas fa-layer-group"></i> Explore Aisles</span>
+        <h2 class="section-title">Shop by Category</h2>
+      </div>
+      <a href="{{ url_for('vegetables') }}" class="view-all-link">All Aisles <i class="fas fa-arrow-right"></i></a>
+    </div>
     <div class="categories-grid">
       <!-- Fruits & Vegetables -->
       <a href="{{ url_for('vegetables') }}" class="category-card">
@@ -325,8 +348,14 @@
     </div>
   </div>
 </section>
-<br><section class="container products-container active" id="all">
-  <h2 class="products-title">Popular Products</h2>
+<section class="container products-container active" id="all">
+  <div class="section-header-row">
+    <div>
+      <span class="section-eyebrow"><i class="fas fa-fire"></i> Daily Essentials</span>
+      <h2 class="products-title" style="margin: 0; text-align: left; font-size: 2.2rem;">Popular Products</h2>
+    </div>
+    <span class="speed-pill"><i class="fas fa-bolt"></i> 10-Min Delivery</span>
+  </div>
   <div class="products-grid" id="popular-products-grid">
     <!-- Products load dynamically from database -->
   </div>
@@ -489,14 +518,15 @@ function renderSearchResultsList(filteredProducts, searchTerm) {
 
     productCard.innerHTML = `
       <div class="product-image-container">
+        <span class="product-badge-speed"><i class="fas fa-bolt"></i> 10 MINS</span>
         <button class="wishlist-heart-btn ${isWishlisted ? 'active' : ''}" data-product-id="${pId}" onclick="toggleWishlist(${pId}, event)" title="Save to Wishlist">
           <i class="${isWishlisted ? 'fas' : 'far'} fa-heart"></i>
         </button>
         <img src="${pImg}" alt="${pTitle}" class="product-image" loading="lazy" decoding="async" onclick="showDetails('${safeTitle}', ${product.price}, '${pImg}', '${pCat}')" style="cursor: pointer;" onerror="this.onerror=null; this.src='/static/logo1.webp'" />
       </div>
       <div class="product-details">
-        <div class="product-title" onclick="showDetails('${safeTitle}', ${product.price}, '${pImg}', '${pCat}')" style="cursor: pointer;">${pTitle}</div>
         <div class="product-category">${pCat}</div>
+        <div class="product-title" onclick="showDetails('${safeTitle}', ${product.price}, '${pImg}', '${pCat}')" style="cursor: pointer;">${pTitle}</div>
         <div class="product-pricing">
           <span class="current-price">Rs.${pPrice}</span>
           ${product.discount ? `
@@ -504,7 +534,7 @@ function renderSearchResultsList(filteredProducts, searchTerm) {
             <span class="discount">${product.discount}% OFF</span>
           ` : ''}
         </div>
-        <button class="add-to-cart-btn" onclick="addToCart('${safeTitle}', ${product.price}, '${pImg}', this)">ADD</button>
+        <button class="add-to-cart-btn" onclick="addToCart('${safeTitle}', ${product.price}, '${pImg}', this)"><i class="fas fa-plus"></i> ADD</button>
       </div>
     `;
 
@@ -644,18 +674,19 @@ function renderPopularProducts() {
         
         productCard.innerHTML = `
             <div class="product-image-container">
+                <span class="product-badge-speed"><i class="fas fa-bolt"></i> 10 MINS</span>
                 <button class="wishlist-heart-btn ${isWishlisted ? 'active' : ''}" data-product-id="${pId}" onclick="toggleWishlist(${pId}, event)" title="Save to Wishlist">
                     <i class="${isWishlisted ? 'fas' : 'far'} fa-heart"></i>
                 </button>
                 <img src="${pImg}" alt="${pTitle}" class="product-image" loading="lazy" decoding="async" onclick="showDetails('${safeTitle}', ${product.price}, '${pImg}', '${pCat}')" style="cursor: pointer;" onerror="this.onerror=null; this.src='/static/logo1.webp'" />
             </div>
             <div class="product-details">
-                <div class="product-title" onclick="showDetails('${safeTitle}', ${product.price}, '${pImg}', '${pCat}')" style="cursor: pointer;">${pTitle}</div>
                 <div class="product-category">${pCat}</div>
+                <div class="product-title" onclick="showDetails('${safeTitle}', ${product.price}, '${pImg}', '${pCat}')" style="cursor: pointer;">${pTitle}</div>
                 <div class="product-pricing">
                     <span class="current-price">Rs.${pPrice}</span>
                 </div>
-                <button class="add-to-cart-btn" onclick="addToCart('${safeTitle}', ${product.price}, '${pImg}')">ADD</button>
+                <button class="add-to-cart-btn" onclick="addToCart('${safeTitle}', ${product.price}, '${pImg}')"><i class="fas fa-plus"></i> ADD</button>
             </div>
         `;
         grid.appendChild(productCard);

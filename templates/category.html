@@ -222,6 +222,7 @@
 
         productCard.innerHTML = `
           <div class="product-image-container">
+            <span class="product-badge-speed"><i class="fas fa-bolt"></i> 10 MINS</span>
             <button class="wishlist-heart-btn ${typeof isInWishlist === 'function' && isInWishlist(product.id) ? 'active' : ''}" data-product-id="${product.id}" onclick="toggleWishlist(${product.id}, event)" title="Save to Wishlist">
               <i class="${typeof isInWishlist === 'function' && isInWishlist(product.id) ? 'fas' : 'far'} fa-heart"></i>
             </button>
@@ -230,10 +231,12 @@
           <div class="product-details">
             <div class="product-category">${product.category}</div>
             <div class="product-title">${product.name}</div>
-            <div class="product-price">Rs. ${product.price}</div>
-            <div class="product-actions">
-              <button class="view-detail" data-bs-toggle="modal" data-bs-target="#productModal" onclick="showDetails('${product.name.replace(/'/g, "\\'")}', 'Rs.${product.price}', '${product.image || product.image_path || "/static/logo1.webp"}')">Details</button>
-              <button class="add-to-cart-btn" onclick="addToCart('${product.name.replace(/'/g, "\\'")}', ${product.price}, '${product.image || product.image_path || "/static/logo1.webp"}')"><i class="fas fa-shopping-basket"></i> Add</button>
+            <div class="product-pricing">
+              <span class="current-price">Rs. ${product.price}</span>
+            </div>
+            <div class="product-actions" style="margin-top: auto; display: flex; gap: 8px;">
+              <button class="view-detail" data-bs-toggle="modal" data-bs-target="#productModal" onclick="showDetails('${product.name.replace(/'/g, "\\'")}', 'Rs.${product.price}', '${product.image || product.image_path || "/static/logo1.webp"}')" style="flex: 1; padding: 0; height: 38px; border-radius: 999px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: #e2e8f0; font-size: 0.8rem; font-weight: 700;">Details</button>
+              <button class="add-to-cart-btn" onclick="addToCart('${product.name.replace(/'/g, "\\'")}', ${product.price}, '${product.image || product.image_path || "/static/logo1.webp"}')" style="flex: 1;"><i class="fas fa-plus"></i> ADD</button>
             </div>
           </div>
         `;
