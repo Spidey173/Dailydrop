@@ -544,16 +544,6 @@ function initMobileExperience() {
                   <i class="fas fa-times"></i>
               </button>
           </div>
-          <div class="drawer-search-container">
-              <div class="drawer-search-bar search-bar">
-                  <i class="fas fa-search drawer-search-icon"></i>
-                  <input type="text" id="drawerSearchInput" class="drawer-search-input" placeholder="Search milk, veggies, snacks..." autocomplete="off">
-                  <button type="button" class="drawer-voice-btn" id="drawerVoiceBtn" aria-label="Voice search">
-                      <i class="fas fa-microphone"></i>
-                  </button>
-                  <div class="search-autocomplete-dropdown"></div>
-              </div>
-          </div>
           <div class="drawer-user-info">
               <div class="drawer-avatar">
                   <i class="fas ${loggedIn ? 'fa-user-check' : 'fa-user'}"></i>
@@ -633,34 +623,10 @@ function initMobileExperience() {
   const hamburgerBtn = document.getElementById('mobileHamburgerBtn');
   const drawerCloseBtn = document.getElementById('drawerCloseBtn');
 
-  // Idempotently ensure search bar exists inside SSR-rendered drawer if not present
-  if (drawer && !drawer.querySelector('.drawer-search-container')) {
-      const drawerHeader = drawer.querySelector('.drawer-header');
-      if (drawerHeader) {
-          const searchContainer = document.createElement('div');
-          searchContainer.className = 'drawer-search-container';
-          searchContainer.innerHTML = `
-              <div class="drawer-search-bar search-bar">
-                  <i class="fas fa-search drawer-search-icon"></i>
-                  <input type="text" id="drawerSearchInput" class="drawer-search-input" placeholder="Search milk, veggies, snacks..." autocomplete="off">
-                  <button type="button" class="drawer-voice-btn" id="drawerVoiceBtn" aria-label="Voice search">
-                      <i class="fas fa-microphone"></i>
-                  </button>
-                  <div class="search-autocomplete-dropdown"></div>
-              </div>
-          `;
-          drawerHeader.parentNode.insertBefore(searchContainer, drawerHeader.nextSibling);
-      }
-  }
-
   const openDrawer = () => {
       drawer?.classList.add('show');
       backdrop?.classList.add('show');
       document.body.style.overflow = 'hidden';
-      // Auto-focus search input for rapid grocery discovery
-      setTimeout(() => {
-          drawer?.querySelector('#drawerSearchInput')?.focus();
-      }, 250);
   };
 
   const closeDrawer = () => {
@@ -709,84 +675,6 @@ function initMobileExperience() {
           });
       }
   });
-
-  // Bind Drawer Search Input and Voice Search Button
-  const drawerSearchInput = drawer?.querySelector('#drawerSearchInput');
-  const drawerVoiceBtn = drawer?.querySelector('#drawerVoiceBtn');
-  const pageSearchInput = document.getElementById('searchInput');
-
-  if (drawerSearchInput && !drawerSearchInput.dataset.bound) {
-      drawerSearchInput.dataset.bound = 'true';
-
-      drawerSearchInput.addEventListener('input', function() {
-          const val = this.value;
-          if (pageSearchInput && pageSearchInput !== this) {
-              pageSearchInput.value = val;
-              pageSearchInput.dispatchEvent(new Event('input', { bubbles: true }));
-          }
-      });
-
-      drawerSearchInput.addEventListener('keydown', function(e) {
-          if (e.key === 'Enter') {
-              const query = this.value.trim();
-              if (!query) return;
-              if (pageSearchInput) {
-                  closeDrawer();
-                  pageSearchInput.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              } else {
-                  window.location.href = `/vegetables?q=${encodeURIComponent(query)}`;
-              }
-          }
-      });
-  }
-
-  if (drawerVoiceBtn && !drawerVoiceBtn.dataset.bound) {
-      drawerVoiceBtn.dataset.bound = 'true';
-      drawerVoiceBtn.addEventListener('click', function(e) {
-          e.preventDefault();
-          const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-          if (!SpeechRecognition) {
-              alert('Voice search is supported on Google Chrome, Safari, and Microsoft Edge.');
-              return;
-          }
-          try {
-              const recognition = new SpeechRecognition();
-              recognition.continuous = false;
-              recognition.interimResults = false;
-              recognition.lang = 'en-US';
-
-              drawerVoiceBtn.classList.add('listening');
-
-              recognition.onresult = function(event) {
-                  if (event.results && event.results[0] && event.results[0][0]) {
-                      const transcript = event.results[0][0].transcript;
-                      if (drawerSearchInput) {
-                          drawerSearchInput.value = transcript;
-                          drawerSearchInput.dispatchEvent(new Event('input', { bubbles: true }));
-                          if (pageSearchInput) {
-                              pageSearchInput.value = transcript;
-                              pageSearchInput.dispatchEvent(new Event('input', { bubbles: true }));
-                              closeDrawer();
-                          }
-                      }
-                  }
-              };
-
-              recognition.onend = function() {
-                  drawerVoiceBtn.classList.remove('listening');
-              };
-
-              recognition.onerror = function() {
-                  drawerVoiceBtn.classList.remove('listening');
-              };
-
-              recognition.start();
-          } catch (err) {
-              console.warn('Voice search start error:', err);
-              drawerVoiceBtn.classList.remove('listening');
-          }
-      });
-  }
 
   if (typeof window.initLiveSearch === 'function') {
       window.initLiveSearch();
