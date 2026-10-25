@@ -410,13 +410,17 @@
       if (parent && !parent.querySelector('.nav-search-tools')) {
         parent.style.position = 'relative';
 
-        // Append KBD badge & Voice button inside navbar search box (hide ⌘K on phones)
+        // On mobile/phones, keep navbar search box uncluttered (Voice is available in Command Palette)
         const isMobileOrPhone = window.innerWidth <= 768 || ('ontouchstart' in window && window.innerWidth < 1024);
+        if (isMobileOrPhone) {
+          return;
+        }
+
         const btnContainer = document.createElement('div');
         btnContainer.className = 'nav-search-tools';
         btnContainer.innerHTML = `
           <button type="button" class="nav-voice-btn" title="Voice Search"><i class="fas fa-microphone"></i></button>
-          ${!isMobileOrPhone ? '<span class="nav-kbd-badge" title="Press Cmd+K to open Spotlight Search"><kbd>⌘K</kbd></span>' : ''}
+          <span class="nav-kbd-badge" title="Press Cmd+K to open Spotlight Search"><kbd>⌘K</kbd></span>
         `;
         parent.appendChild(btnContainer);
 

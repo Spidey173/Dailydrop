@@ -1556,7 +1556,7 @@ textarea.form-input {
   /* Full Search Bar in Middle of Top Nav */
   .navbar .search-bar {
     order: 2 !important;
-    flex: 1 1 auto !important;
+    flex: 1 1 0% !important;
     min-width: 0 !important;
     max-width: none !important;
     margin: 0 !important;
@@ -1567,20 +1567,23 @@ textarea.form-input {
   .navbar .search-bar input {
     width: 100% !important;
     height: 38px !important;
-    padding: 0 28px 0 34px !important;
+    padding: 0 32px 0 34px !important;
     font-size: 0.82rem !important;
     border-radius: 10px !important;
-    background: rgba(255, 255, 255, 0.05) !important;
-    border: 1px solid rgba(16, 185, 129, 0.28) !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid rgba(16, 185, 129, 0.3) !important;
     color: #ffffff !important;
     box-shadow: none !important;
     transition: all 0.2s ease !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
   }
 
   .navbar .search-bar input:focus {
-    background: rgba(16, 185, 129, 0.09) !important;
+    background: rgba(16, 185, 129, 0.1) !important;
     border-color: #34d399 !important;
-    box-shadow: 0 0 10px rgba(16, 185, 129, 0.22) !important;
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.25) !important;
   }
 
   .navbar .search-bar::before {
@@ -1589,11 +1592,30 @@ textarea.form-input {
     color: #34d399 !important;
   }
 
+  /* Keep mobile search bar completely uncluttered */
+  .nav-search-tools {
+    display: none !important;
+  }
+
   .search-clear-btn {
-    right: 7px !important;
+    right: 8px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
     width: 20px !important;
     height: 20px !important;
     font-size: 0.65rem !important;
+    background: rgba(255, 255, 255, 0.15) !important;
+    color: #ffffff !important;
+    border-radius: 50% !important;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+  }
+
+  .search-clear-btn.visible {
+    display: flex !important;
   }
 
   .navbar .search-autocomplete-dropdown {
@@ -1611,9 +1633,11 @@ textarea.form-input {
     order: 3 !important;
     display: flex !important;
     align-items: center !important;
+    justify-content: center !important;
     gap: 0 !important;
     flex-shrink: 0 !important;
     margin: 0 !important;
+    z-index: 10 !important;
   }
 
   /* Cart completely removed from top navbar as requested */
@@ -1622,10 +1646,46 @@ textarea.form-input {
   }
 
   .mobile-hamburger-btn {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 4.5px !important;
     width: 38px !important;
     height: 38px !important;
+    min-width: 38px !important;
     border-radius: 10px !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(52, 211, 153, 0.35) !important;
+    padding: 0 !important;
+    cursor: pointer !important;
     flex-shrink: 0 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+    transition: all 0.2s ease !important;
+    -webkit-tap-highlight-color: transparent !important;
+  }
+
+  .mobile-hamburger-btn:hover,
+  .mobile-hamburger-btn:active {
+    background: rgba(16, 185, 129, 0.2) !important;
+    border-color: #34d399 !important;
+    transform: scale(1.05);
+  }
+
+  /* The Three - Distinct Horizontal Bars */
+  .mobile-hamburger-btn .bar {
+    display: block !important;
+    width: 18px !important;
+    height: 2.2px !important;
+    background-color: #ffffff !important;
+    border-radius: 2px !important;
+    transition: all 0.25s ease !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+  }
+
+  .mobile-hamburger-btn:hover .bar,
+  .mobile-hamburger-btn:active .bar {
+    background-color: #34d399 !important;
   }
 
   /* Category layout: horizontal scroll chip rail */
