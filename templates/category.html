@@ -25,270 +25,1003 @@
   <script src="{{ url_for('static', filename='js/wishlist.js') }}" defer></script>
   <script src="{{ url_for('static', filename='js/live-search.js') }}" defer></script>
   <script src="{{ url_for('static', filename='js/command-palette.js') }}" defer></script>
+
+  <style>
+    /* ==========================================================================
+       DAILYDROP SIGNATURE COSMIC EMERALD PALETTE (ADAPTED TO SCREENSHOT LAYOUT)
+       ========================================================================== */
+    body.quick-category-body {
+      background-color: #020805 !important;
+      color: #F8FAFC !important;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Animated Cosmic Glow Blobs */
+    .cosmic-blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(90px);
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.22;
+      animation: cosmicPulse 9s ease-in-out infinite alternate;
+    }
+    .cosmic-blob-1 {
+      top: -100px;
+      left: 10%;
+      width: 450px;
+      height: 450px;
+      background: #10B981;
+    }
+    .cosmic-blob-2 {
+      bottom: 10%;
+      right: 5%;
+      width: 500px;
+      height: 500px;
+      background: #047857;
+      animation-delay: -4s;
+    }
+    @keyframes cosmicPulse {
+      0% { transform: scale(1) translate(0, 0); opacity: 0.18; }
+      100% { transform: scale(1.15) translate(30px, 40px); opacity: 0.28; }
+    }
+
+    /* Fixed Dark Emerald Navbar */
+    .quick-cat-navbar {
+      background: rgba(5, 20, 13, 0.88) !important;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-bottom: 1px solid rgba(52, 211, 153, 0.18);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+    .quick-cat-navbar .navbar-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 68px;
+      padding: 0 24px;
+      max-width: 1520px;
+      margin: 0 auto;
+    }
+    .quick-cat-navbar .logo {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #F8FAFC;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      white-space: nowrap;
+    }
+    .quick-cat-navbar .logo i {
+      color: #10B981;
+      filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.45));
+    }
+    .quick-cat-navbar .logo span {
+      color: #34D399;
+    }
+
+    .quick-cat-search {
+      flex: 1;
+      max-width: 520px;
+      margin: 0 28px;
+      position: relative;
+    }
+    .quick-cat-search input {
+      width: 100%;
+      height: 42px;
+      padding: 0 16px 0 42px;
+      border-radius: 999px;
+      border: 1px solid rgba(52, 211, 153, 0.25);
+      background: rgba(8, 30, 20, 0.7);
+      color: #F8FAFC;
+      font-size: 0.88rem;
+      outline: none;
+      transition: all 0.2s;
+    }
+    .quick-cat-search input:focus {
+      background: rgba(12, 40, 28, 0.95);
+      border-color: #10B981;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25), 0 0 16px rgba(16, 185, 129, 0.2);
+    }
+    .quick-cat-search input::placeholder {
+      color: #64748b;
+    }
+    .quick-cat-search i {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #34D399;
+      font-size: 14px;
+    }
+
+    .quick-cat-nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .quick-cat-nav-actions a {
+      text-decoration: none;
+      font-size: 0.86rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .quick-cat-nav-link {
+      color: #94A3B8;
+      padding: 8px 12px;
+      border-radius: 8px;
+      transition: all 0.15s;
+    }
+    .quick-cat-nav-link:hover {
+      color: #F8FAFC;
+      background: rgba(52, 211, 153, 0.1);
+    }
+    .quick-cat-cart-btn {
+      background: var(--gradient-primary);
+      color: #ffffff !important;
+      padding: 9px 18px;
+      border-radius: 999px;
+      font-weight: 800;
+      transition: all 0.15s;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+      border: 1px solid rgba(52, 211, 153, 0.3);
+    }
+    .quick-cat-cart-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(16, 185, 129, 0.45);
+    }
+    .quick-cat-cart-badge {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      margin-left: 4px;
+    }
+
+    /* Page Layout Container */
+    .quick-category-container {
+      max-width: 1520px;
+      margin: 0 auto;
+      display: flex;
+      background: transparent;
+      min-height: calc(100vh - 68px);
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Left Sidebar Rail (Dark Emerald Glass) */
+    .quick-subcat-sidebar {
+      width: 98px;
+      min-width: 98px;
+      background: rgba(5, 20, 13, 0.85);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-right: 1px solid rgba(52, 211, 153, 0.16);
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      padding: 14px 0 60px;
+      position: sticky;
+      top: 68px;
+      height: calc(100vh - 68px);
+      overflow-y: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      user-select: none;
+      z-index: 10;
+    }
+    .quick-subcat-sidebar::-webkit-scrollbar {
+      display: none;
+    }
+    .quick-subcat-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 9px 4px 10px;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.15s ease;
+    }
+    .quick-subcat-item:hover {
+      background: rgba(52, 211, 153, 0.08);
+    }
+    .quick-subcat-item .subcat-icon-box {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: rgba(12, 36, 24, 0.85);
+      border: 1px solid rgba(52, 211, 153, 0.22);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin-bottom: 5px;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .quick-subcat-item .subcat-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #94A3B8;
+      line-height: 1.25;
+      max-width: 82px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      transition: color 0.15s;
+    }
+    .quick-subcat-item .subcat-indicator {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 10px;
+      bottom: 10px;
+      width: 3.5px;
+      background: #10B981;
+      box-shadow: 0 0 10px #10B981;
+      border-radius: 4px 0 0 4px;
+    }
+
+    /* Active Subcategory */
+    .quick-subcat-item.active {
+      background: rgba(16, 185, 129, 0.12);
+    }
+    .quick-subcat-item.active .subcat-icon-box {
+      border-color: #34D399;
+      background: rgba(16, 185, 129, 0.25);
+      box-shadow: 0 0 16px rgba(16, 185, 129, 0.35);
+      transform: scale(1.05);
+    }
+    .quick-subcat-item.active .subcat-label {
+      color: #34D399;
+      font-weight: 800;
+    }
+    .quick-subcat-item.active .subcat-indicator {
+      display: block;
+    }
+
+    /* Right Main Product Listing Area */
+    .quick-category-main {
+      flex: 1;
+      background: transparent;
+      padding: 24px 30px 80px;
+      min-width: 0;
+    }
+    .quick-category-header {
+      margin-bottom: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(52, 211, 153, 0.15);
+      padding-bottom: 14px;
+      gap: 12px;
+    }
+    .quick-cat-heading {
+      font-size: 24px;
+      font-weight: 800;
+      color: #F8FAFC;
+      letter-spacing: -0.4px;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .quick-cat-count-badge {
+      font-size: 12px;
+      color: #34D399;
+      font-weight: 700;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(52, 211, 153, 0.28);
+      padding: 3px 11px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+    .quick-aisles-back-btn {
+      color: #34D399;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(52, 211, 153, 0.25);
+      transition: all 0.15s;
+    }
+    .quick-aisles-back-btn:hover {
+      background: #10B981;
+      color: #ffffff;
+      box-shadow: 0 0 14px rgba(16, 185, 129, 0.3);
+    }
+
+    /* Product Cards Grid */
+    .quick-products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+      gap: 16px;
+    }
+    @media (min-width: 1440px) {
+      .quick-products-grid {
+        grid-template-columns: repeat(6, 1fr);
+      }
+    }
+    @media (min-width: 1200px) and (max-width: 1439px) {
+      .quick-products-grid {
+        grid-template-columns: repeat(5, 1fr);
+      }
+    }
+    @media (min-width: 992px) and (max-width: 1199px) {
+      .quick-products-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+    @media (max-width: 991px) {
+      .quick-products-grid {
+        grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+        gap: 12px;
+      }
+      .quick-category-main {
+        padding: 16px 14px 60px;
+      }
+    }
+    @media (max-width: 576px) {
+      .quick-products-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+      .quick-subcat-sidebar {
+        width: 78px;
+        min-width: 78px;
+        padding-top: 8px;
+      }
+      .quick-subcat-item .subcat-icon-box {
+        width: 44px;
+        height: 44px;
+        font-size: 20px;
+        border-radius: 12px;
+      }
+      .quick-subcat-item .subcat-label {
+        font-size: 10px;
+        max-width: 70px;
+      }
+      .quick-cat-search {
+        margin: 0 10px;
+      }
+    }
+
+    /* Product Card (Cosmic Emerald Styling Matching Screenshot Layout) */
+    .quick-card {
+      background: rgba(8, 24, 16, 0.78);
+      border: 1px solid rgba(52, 211, 153, 0.2);
+      border-radius: 16px;
+      padding: 10px 10px 12px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      transition: all 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .quick-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.7), 0 0 20px rgba(16, 185, 129, 0.25);
+      border-color: rgba(52, 211, 153, 0.55);
+    }
+    .quick-img-wrapper {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border-radius: 12px;
+      overflow: hidden;
+      background: rgba(2, 12, 8, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 8px;
+    }
+    .quick-img-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.25s ease;
+      cursor: pointer;
+    }
+    .quick-card:hover .quick-img-wrapper img {
+      transform: scale(1.05);
+    }
+
+    /* Blue Discount Tag (Top-Left of Image) */
+    .quick-discount-tag {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      background: #2563EB;
+      color: #FFFFFF;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2.5px 6px;
+      border-radius: 4px;
+      line-height: 1.1;
+      letter-spacing: 0.2px;
+      text-transform: uppercase;
+      z-index: 2;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
+    }
+
+    /* Wishlist Heart Icon (Top-Right) */
+    .quick-wish-btn {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(5, 20, 13, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #94A3B8;
+      font-size: 12px;
+      z-index: 2;
+      transition: all 0.15s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    }
+    .quick-wish-btn:hover {
+      color: #EC4899;
+      background: rgba(12, 36, 24, 0.95);
+      transform: scale(1.1);
+    }
+    .quick-wish-btn.active {
+      color: #EC4899;
+    }
+
+    /* ⏱ 20 MINS Delivery Badge */
+    .quick-timer-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 3.5px;
+      font-size: 11px;
+      font-weight: 800;
+      color: #F59E0B;
+      margin-bottom: 3px;
+    }
+    .quick-timer-badge i {
+      font-size: 10px;
+      color: #F59E0B;
+    }
+
+    /* Product Title */
+    .quick-item-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #F8FAFC;
+      line-height: 1.35;
+      min-height: 36px;
+      margin: 0 0 2px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      cursor: pointer;
+      transition: color 0.15s;
+    }
+    .quick-item-title:hover {
+      color: #34D399;
+    }
+
+    /* Unit / Weight Subtitle */
+    .quick-item-unit {
+      font-size: 12px;
+      color: #94A3B8;
+      font-weight: 500;
+      margin-bottom: 10px;
+    }
+
+    /* Bottom Row: Price & ADD Button */
+    .quick-bottom-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-top: auto;
+      padding-top: 4px;
+    }
+    .quick-pricing-group {
+      display: flex;
+      flex-direction: column;
+    }
+    .quick-current-price {
+      font-size: 16px;
+      font-weight: 800;
+      color: #34D399;
+      line-height: 1.1;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .quick-strikethrough-price {
+      font-size: 11.5px;
+      color: #64748B;
+      text-decoration: line-through;
+      line-height: 1.2;
+      margin-top: 2px;
+    }
+
+    /* ADD Button: Crisp White Outline / Glass with Emerald Border */
+    .quick-add-btn {
+      background: rgba(16, 185, 129, 0.12);
+      border: 1.5px solid #10B981;
+      color: #34D399;
+      font-weight: 800;
+      font-size: 12.5px;
+      border-radius: 8px;
+      min-width: 68px;
+      height: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s ease-in-out;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+      padding: 0 12px;
+    }
+    .quick-add-btn:hover {
+      background: #10B981;
+      color: #FFFFFF;
+      box-shadow: 0 0 14px rgba(16, 185, 129, 0.4);
+      transform: translateY(-1px);
+    }
+
+    /* Quantity Stepper when in Cart */
+    .quick-stepper {
+      background: var(--gradient-primary);
+      border: 1.5px solid #10B981;
+      color: #FFFFFF;
+      font-weight: 800;
+      font-size: 13px;
+      border-radius: 8px;
+      height: 32px;
+      min-width: 76px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 6px;
+      box-shadow: 0 0 14px rgba(16, 185, 129, 0.35);
+    }
+    .quick-stepper button {
+      background: none;
+      border: none;
+      color: #FFFFFF;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      padding: 0 4px;
+      line-height: 1;
+    }
+    .quick-stepper .stepper-val {
+      font-size: 13px;
+      color: #FFFFFF;
+      font-weight: 800;
+    }
+
+    /* Scroll To Top */
+    .quick-scroll-top {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 44px;
+      height: 44px;
+      background: rgba(8, 30, 20, 0.85);
+      color: #34D399;
+      border: 1px solid rgba(52, 211, 153, 0.3);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.6);
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.2s;
+    }
+    .quick-scroll-top.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .quick-scroll-top:hover {
+      background: #10B981;
+      color: #ffffff;
+      transform: translateY(-2px);
+    }
+  </style>
 </head>
 
-<body>
+<body class="quick-category-body">
 
-  <!-- Premium Sticky Floating Navbar -->
-  <nav class="navbar">
-      <div class="container navbar-container">
-          <a href="{{ url_for('index') }}" class="logo">
-              <i class="fas fa-shopping-basket"></i> Daily<span>Drop</span>
-          </a>
+  <!-- Background Animated Cosmic Blobs -->
+  <div class="cosmic-blob cosmic-blob-1"></div>
+  <div class="cosmic-blob cosmic-blob-2"></div>
 
-          <div class="search-bar">
-              <input type="text" id="searchInput" autocomplete="off" placeholder="{{ category_config.placeholder }}" />
-          </div>
-
-          <!-- Mobile Hamburger Menu ("The Three -") -->
-          <div class="mobile-header-controls" id="mobileHeaderControls">
-              <button class="mobile-hamburger-btn" id="mobileHamburgerBtn" aria-label="Open Navigation Menu" type="button">
-                  <span class="bar"></span>
-                  <span class="bar"></span>
-                  <span class="bar"></span>
-              </button>
-          </div>
-          <div class="nav-actions">
-              {% if 'user_id' in session %}
-                  <a href="{{ url_for('orders') }}" class="login-btn-outline"><i class="fas fa-box"></i> My Orders</a>
-                  <a href="{{ url_for('wishlist') }}" class="wishlist-nav-icon" title="My Wishlist">
-                      <i class="fas fa-heart"></i> <span class="nav-text">Wishlist</span> <span id="wishlist-count" class="wishlist-badge">0</span>
-                  </a>
-                  <a href="{{ url_for('logout') }}" class="login-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
-              {% else %}
-                  <a href="{{ url_for('login') }}" class="login-btn"><i class="fas fa-sign-in-alt"></i> Login</a>
-              {% endif %}
-              <a href="{{ url_for('cart') }}" class="cart-icon">
-                  <i class="fas fa-shopping-cart"></i> My Cart <span id="cart-count">0</span>
-              </a>
-          </div>
-      </div>
-  </nav>
-
-  <div class="container main-container">
-    <!-- Categories sidebar -->
-    <div class="categories-sidebar">
-      <h3 class="categories-header"><i class="fas fa-th-list me-2" style="color: var(--primary);"></i> Categories</h3>
-      <a href="{{ url_for('products.categories') }}" class="category-item aisle-hub-pill" title="View all aisles" style="text-decoration: none;">
-        <i class="fas fa-th-large me-1 text-primary"></i> <span>All Aisles</span>
+  <!-- Sticky Navbar -->
+  <header class="quick-cat-navbar">
+    <div class="navbar-container">
+      <a href="{{ url_for('index') }}" class="logo">
+        <i class="fas fa-shopping-basket"></i> Daily<span>Drop</span>
       </a>
+
+      <div class="quick-cat-search">
+        <i class="fas fa-search"></i>
+        <input type="text" id="catSearchInput" placeholder="{{ category_config.placeholder }}" autocomplete="off" />
+      </div>
+
+      <div class="quick-cat-nav-actions">
+        <a href="{{ url_for('products.categories') }}" class="quick-cat-nav-link" title="All Aisles">
+          <i class="fas fa-th-large text-success"></i> <span class="d-none d-md-inline">All Aisles</span>
+        </a>
+        {% if 'user_id' in session %}
+          <a href="{{ url_for('orders') }}" class="quick-cat-nav-link d-none d-sm-flex"><i class="fas fa-box"></i> Orders</a>
+          <a href="{{ url_for('wishlist') }}" class="quick-cat-nav-link d-none d-sm-flex" title="My Wishlist">
+            <i class="fas fa-heart text-danger"></i> <span id="wishlist-count" class="badge bg-danger ms-1">0</span>
+          </a>
+        {% else %}
+          <a href="{{ url_for('login') }}" class="quick-cat-nav-link"><i class="fas fa-sign-in-alt"></i> Login</a>
+        {% endif %}
+        <a href="{{ url_for('cart') }}" class="quick-cat-cart-btn">
+          <i class="fas fa-shopping-cart"></i> <span>Cart</span> <span id="cart-count" class="quick-cat-cart-badge">0</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Category Page Container with Left Rail + Product Grid -->
+  <div class="quick-category-container">
+    
+    <!-- Left Sidebar Rail (Matching Screenshot Layout with Cosmic Colors) -->
+    <aside class="quick-subcat-sidebar" id="quickSubcatSidebar">
       {% for subcat in category_config.subcategories %}
-      <div class="category-item {% if loop.first %}active{% endif %}" data-category="{{ subcat.slug }}">
-        <span>{{ subcat.name }}</span> <i class="fas fa-chevron-right fs-xs"></i>
+      <div class="quick-subcat-item {% if loop.first %}active{% endif %}" data-category="{{ subcat.slug }}" title="{{ subcat.name }}">
+        <div class="subcat-icon-box">
+          {{ subcat.icon }}
+        </div>
+        <span class="subcat-label">{{ subcat.name }}</span>
+        <div class="subcat-indicator"></div>
       </div>
       {% endfor %}
-    </div>
+    </aside>
 
-    <!-- Products section -->
-    <div class="products-section">
-      <h2 class="products-title">{{ category_config.heading }}</h2>
-      <h3 class="category-title" id="active-category">{{ category_config.subcategories[0].name if category_config.subcategories else 'All Products' }}</h3>
-
-      <div class="products-grid" id="productsGrid">
-        <!-- Products load dynamically -->
+    <!-- Right Product Section -->
+    <main class="quick-category-main">
+      <div class="quick-category-header">
+        <div>
+          <h1 class="quick-cat-heading" id="catHeadingTitle">
+            {{ category_config.heading }}
+          </h1>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+          <span class="quick-cat-count-badge" id="productCountBadge">{{ products|length }} items</span>
+          <a href="{{ url_for('products.categories') }}" class="quick-aisles-back-btn d-none d-md-inline-flex">
+            <i class="fas fa-arrow-left"></i> All Aisles
+          </a>
+        </div>
       </div>
-    </div>
+
+      <!-- Products Grid -->
+      <div class="quick-products-grid" id="productsGrid">
+        <!-- Rendered dynamically -->
+      </div>
+    </main>
+
   </div>
 
-  <div class="scroll-to-top" onclick="scrollToTop()">
+  <!-- Scroll to Top Button -->
+  <button class="quick-scroll-top" id="quickScrollTop" onclick="window.scrollTo({top: 0, behavior: 'smooth'});" aria-label="Scroll to top">
     <i class="fas fa-arrow-up"></i>
+  </button>
+
+  <!-- Product Details Modal (Reused from standard application modal) -->
+  <div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content" style="border-radius: 20px; overflow: hidden; border: 1px solid rgba(52, 211, 153, 0.3); background: #041209; color: #F8FAFC;">
+        <div class="modal-header" style="border-bottom: 1px solid rgba(52, 211, 153, 0.18); padding: 18px 24px;">
+          <h5 class="modal-title font-weight-bold" id="productModalLabel" style="font-weight: 800; font-size: 1.15rem; color: #34D399;">Product Details</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="productModalBody" style="padding: 24px;">
+          <!-- Dynamically populated by product-modal.js -->
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-    // Live search
-    document.getElementById('searchInput').addEventListener('input', function() {
-      const filter = this.value.toLowerCase();
-      const cards = document.querySelectorAll('.product-card');
-      cards.forEach(card => {
-        const title = card.getAttribute('data-title').toLowerCase();
-        card.style.display = title.includes(filter) ? '' : 'none';
-      });
-    });
-
-    // Scroll to Top Functionality
-    const scrollButton = document.querySelector('.scroll-to-top');
-    window.addEventListener('scroll', () => {
-      if (window.pageYOffset > 300) {
-        scrollButton.classList.add('show');
-      } else {
-        scrollButton.classList.remove('show');
-      }
-    });
-    
-    function scrollToTop() {
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-      });
-    }
-
-    // Load products from backend server catalog (with client-side fallback)
     const serverProducts = {{ (products or []) | tojson }};
     const categoryName = {{ category_config.db_name | tojson }};
-    let products = [];
+    let allProducts = [];
+    let currentCategoryProducts = [];
+    let activeSubcategory = 'all';
 
-    function isProduceFruit(title) {
-      const lower = (title || '').toLowerCase();
-      return ['apple', 'banana', 'melon', 'fruit', 'mango', 'orange', 'grape', 'berry', 'watermelon', 'pineapple', 'pomegranate', 'kiwi', 'papaya', 'guava', 'pear', 'plum'].some(f => lower.includes(f));
+    // Parse weight and clean title from raw title string
+    function parseTitleAndUnit(rawTitle) {
+      const text = (rawTitle || '').trim();
+
+      // Check for explicit weight / volume at end: e.g. "(500 g)", "(1 kg)", "(250 ml)", "(1 pc)"
+      const unitMatch = text.match(/\s*\(([\d\.]+\s*(?:g|gm|kg|ml|l|ltr|pc|pcs|pack|units?|bunch))\)$/i) ||
+                        text.match(/\s*[-–]\s*([\d\.]+\s*(?:g|gm|kg|ml|l|ltr|pc|pcs|pack|units?))\s*$/i);
+
+      if (unitMatch) {
+        const titleWithoutUnit = text.slice(0, unitMatch.index).trim();
+        return {
+          title: titleWithoutUnit || text,
+          unit: unitMatch[1].trim()
+        };
+      }
+
+      // If parentheses contain a weight with digits e.g. "Royal Gala (500g)"
+      const parenMatch = text.match(/^(.*?)\s*\(([\d\.]+\s*[a-zA-Z]+)\)$/);
+      if (parenMatch) {
+        return {
+          title: parenMatch[1].trim(),
+          unit: parenMatch[2].trim()
+        };
+      }
+
+      // Fallback: preserve full regional name e.g. "Lemon (Nimbe)", and derive authentic unit
+      const lower = text.toLowerCase();
+      let defaultUnit = '1 unit';
+      if (lower.includes('flour') || lower.includes('atta') || lower.includes('rice') || lower.includes('dal') || lower.includes('onion') || lower.includes('potato') || lower.includes('1 kg')) {
+        defaultUnit = '1 kg';
+      } else if (lower.includes('bunch') || lower.includes('coriander') || lower.includes('curry') || lower.includes('mint') || lower.includes('chilli') || lower.includes('pudina')) {
+        defaultUnit = '100 g';
+      } else if (lower.includes('coconut') || lower.includes('corn') || lower.includes('cob') || lower.includes('pc') || lower.includes('cabbage') || lower.includes('cauliflower') || lower.includes('melon') || lower.includes('watermelon')) {
+        defaultUnit = '1 pc';
+      } else if (lower.includes('lemon') || lower.includes('garlic') || lower.includes('ginger') || lower.includes('mushroom')) {
+        defaultUnit = '200 g';
+      } else if (lower.includes('banana') || lower.includes('cucumber') || lower.includes('carrot') || lower.includes('tomato') || lower.includes('apple') || lower.includes('beans') || lower.includes('capsicum')) {
+        defaultUnit = '500 g';
+      }
+
+      return {
+        title: text,
+        unit: defaultUnit
+      };
     }
 
-    function isCategoryMatch(prodCat, targetCat) {
-      if (!targetCat) return true;
-      if (!prodCat) return false;
-      const p = prodCat.toLowerCase();
-      const t = targetCat.toLowerCase();
-      if (p === t) return true;
-      if ((t.includes('veg') || t.includes('fruit')) && (p.includes('veg') || p.includes('fruit'))) return true;
-      if (t.includes('dairy') && p.includes('dairy')) return true;
-      if (t.includes('house') && p.includes('house')) return true;
-      if (t.includes('kitchen') && p.includes('kitchen')) return true;
-      return false;
+    // Keyword taxonomy for vegetables & fruits subcategories matching the design
+    function isMatchingSubcategory(product, slug) {
+      if (!slug || slug === 'all') return true;
+      const title = (product.name || product.title || '').toLowerCase();
+      const sub = (product.subcategory || '').toLowerCase();
+
+      switch (slug) {
+        case 'vegetables':
+          return sub.includes('veg') || ['tomato', 'brinjal', 'broccoli', 'cabbage', 'capsicum', 'cauliflower', 'cucumber', 'corn', 'ladies', 'bhindi', 'onion', 'potato', 'carrot', 'chilli'].some(k => title.includes(k));
+        
+        case 'fruits':
+          return sub.includes('fruit') || ['apple', 'banana', 'grape', 'mango', 'pineapple', 'pomegranate', 'papaya', 'coconut', 'lemon'].some(k => title.includes(k));
+        
+        case 'exotics':
+          return sub.includes('exotic') || ['dragon', 'kiwi', 'passion', 'carambola', 'avocado', 'berry', 'exotic'].some(k => title.includes(k));
+        
+        case 'coriander':
+          return sub.includes('leaf') || ['coriander', 'methi', 'fenugreek', 'lettuce', 'spinach', 'mint', 'pudina', 'curry', 'greens', 'leaves'].some(k => title.includes(k));
+        
+        case 'sprouts':
+          return sub.includes('cut') || ['grated', 'coconut', 'lettuce', 'sprout', 'salad', 'corn on the cob', 'cabbage'].some(k => title.includes(k));
+        
+        case 'flowers':
+          return sub.includes('pooja') || ['fenugreek', 'lettuce', 'flower', 'pooja', 'leaves'].some(k => title.includes(k));
+        
+        case 'seasonal':
+          return sub.includes('melon') || ['watermelon', 'musk melon', 'melon', 'mango', 'grapes', 'pineapple'].some(k => title.includes(k));
+        
+        case 'frozen':
+          return sub.includes('frozen') || ['frozen', 'peas', 'corn'].some(k => title.includes(k));
+        
+        default:
+          return sub.includes(slug) || title.includes(slug);
+      }
     }
 
-    function getCategoryProducts() {
+    // Populate catalog
+    function initializeCatalog() {
       if (Array.isArray(serverProducts) && serverProducts.length > 0) {
-        return serverProducts.map(p => ({
+        allProducts = serverProducts.map(p => ({
           id: p.product_id || p.id,
           name: p.name || p.title,
           price: parseFloat(p.price || 0),
           image: p.image_path || p.image || '/static/logo1.webp',
-          category: p.subcategory || '',
-          mainCategory: p.category || categoryName,
-          description: p.description || ''
+          category: p.category || categoryName,
+          subcategory: p.subcategory || '',
+          description: p.description || '',
+          discount: p.discount || null
         }));
+      } else if (Array.isArray(window.productsDB)) {
+        allProducts = window.productsDB
+          .filter(p => (p.category || '').toLowerCase() === categoryName.toLowerCase())
+          .map(p => ({
+            id: p.id,
+            name: p.title,
+            price: parseFloat(p.price || 0),
+            image: p.image || '/static/logo1.webp',
+            category: p.category || categoryName,
+            subcategory: p.subcategory || '',
+            description: p.description || '',
+            discount: p.discount || null
+          }));
       }
-
-      return (window.productsDB || [])
-        .filter(p => isCategoryMatch(p.category, categoryName))
-        .map(p => ({
-          id: p.id,
-          name: p.title,
-          price: parseFloat(p.price || 0),
-          image: p.image || '/static/logo1.webp',
-          category: p.subcategory || '',
-          mainCategory: p.category || categoryName,
-          description: p.description || ''
-        }));
     }
 
-    // Infinite Scroll / Batch Rendering Variables
-    let currentCategoryProducts = [];
-    let renderedCount = 0;
-    const batchSize = 12;
+    // Render cards matching the screenshot with our Emerald theme
+    function renderCategoryView(subcategorySlug = 'all', searchQuery = '') {
+      const grid = document.getElementById('productsGrid');
+      grid.innerHTML = '';
+      activeSubcategory = subcategorySlug;
 
-    // Function to render products with pagination / batching
-    function renderProducts(category = 'all') {
-      products = getCategoryProducts();
-      const productsGrid = document.getElementById('productsGrid');
-      productsGrid.innerHTML = '';
-      renderedCount = 0;
+      let filtered = allProducts.filter(p => isMatchingSubcategory(p, subcategorySlug));
 
-      const catTarget = (category || 'all').toLowerCase();
-      if (catTarget === 'all') {
-        currentCategoryProducts = products;
-      } else if (catTarget === 'fruits') {
-        currentCategoryProducts = products.filter(p => 
-          (p.category || '').toLowerCase() === 'fruits' || isProduceFruit(p.name)
-        );
-      } else if (catTarget === 'vegetables') {
-        currentCategoryProducts = products.filter(p => 
-          (p.category || '').toLowerCase() === 'vegetables' || (!isProduceFruit(p.name) && (p.category === '' || (p.category || '').toLowerCase() === 'vegetables'))
-        );
-      } else {
-        currentCategoryProducts = products.filter(p => {
-          const sub = (p.category || '').toLowerCase();
-          const name = (p.name || '').toLowerCase();
-          return sub === catTarget || sub.includes(catTarget) || catTarget.includes(sub) || name.includes(catTarget);
-        });
+      if (searchQuery.trim()) {
+        const q = searchQuery.trim().toLowerCase();
+        filtered = filtered.filter(p => (p.name || '').toLowerCase().includes(q));
       }
 
-      if (currentCategoryProducts.length === 0) {
-        productsGrid.innerHTML = `
-          <div style="grid-column: 1 / -1; text-align: center; padding: 48px 16px; color: var(--text-muted);">
-            <i class="fas fa-box-open" style="font-size: 2.4rem; margin-bottom: 12px; opacity: 0.4;"></i>
-            <h4 style="color: #ffffff; font-size: 1.1rem; margin-bottom: 6px;">No products found in this subcategory</h4>
-            <p style="font-size: 0.85rem; margin-bottom: 16px;">Try selecting another subcategory or browse all products in this aisle.</p>
-            <button onclick="renderProducts('all'); document.querySelectorAll('.category-item').forEach(i => i.classList.toggle('active', i.dataset.category==='all'));" style="background: var(--gradient-primary); border: none; padding: 8px 20px; border-radius: 999px; color: #fff; font-weight: 700; font-size: 0.82rem; cursor: pointer;">View All Products</button>
+      currentCategoryProducts = filtered;
+
+      // Update badge count
+      const badge = document.getElementById('productCountBadge');
+      if (badge) badge.textContent = `${filtered.length} items`;
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 60px 16px; color: #94A3B8;">
+            <i class="fas fa-box-open" style="font-size: 2.8rem; margin-bottom: 14px; opacity: 0.4; color: #34D399;"></i>
+            <h4 style="color: #F8FAFC; font-size: 1.15rem; font-weight: 800; margin-bottom: 6px;">No products found in this aisle</h4>
+            <p style="font-size: 0.88rem; margin-bottom: 18px; color: #64748B;">Try switching to another subcategory or browsing all items.</p>
+            <button onclick="selectSubcategory('all')" class="quick-add-btn" style="height: 38px; border-radius: 999px; padding: 0 22px;">View All Items</button>
           </div>
         `;
         return;
       }
 
-      loadMoreProducts();
-    }
+      const discountRatios = [19, 17, 15, 22, 14, 16];
+      let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
-    document.addEventListener('productsSynced', function() {
-      const activeCat = document.querySelector('.category-item.active')?.dataset?.category || 'all';
-      renderProducts(activeCat);
-    });
+      filtered.forEach((product, idx) => {
+        const { title, unit } = parseTitleAndUnit(product.name);
+        const safeTitle = (product.name || '').replace(/'/g, "\\'");
+        const pid = product.id;
+        const price = product.price;
 
-    function loadMoreProducts() {
-      const productsGrid = document.getElementById('productsGrid');
-      const nextBatch = currentCategoryProducts.slice(renderedCount, renderedCount + batchSize);
-      
-      if (nextBatch.length === 0) return;
+        // Compute authentic discount & strikethrough price
+        const discountPct = product.discount || discountRatios[pid % discountRatios.length];
+        const origPrice = Math.round(price / (1 - (discountPct / 100)));
 
-      nextBatch.forEach(product => {
-        const productCard = document.createElement('div');
-        productCard.className = 'product-card';
-        productCard.setAttribute('data-title', product.name);
+        const isWishlisted = typeof isInWishlist === 'function' && isInWishlist(pid);
+        const cartItem = cart.find(c => c.name === product.name);
+        const qty = cartItem ? cartItem.quantity : 0;
 
-        productCard.innerHTML = `
-          <div class="product-image-container">
-            <button class="wishlist-heart-btn ${typeof isInWishlist === 'function' && isInWishlist(product.id) ? 'active' : ''}" data-product-id="${product.id}" onclick="toggleWishlist(${product.id}, event)" title="Save to Wishlist">
-              <i class="${typeof isInWishlist === 'function' && isInWishlist(product.id) ? 'fas' : 'far'} fa-heart"></i>
+        const card = document.createElement('div');
+        card.className = 'quick-card';
+        card.setAttribute('data-product-id', pid);
+        card.setAttribute('data-title', product.name);
+
+        card.innerHTML = `
+          <div class="quick-img-wrapper">
+            <span class="quick-discount-tag">${discountPct}% OFF</span>
+            <button class="quick-wish-btn ${isWishlisted ? 'active' : ''}" onclick="toggleWishlist(${pid}, event)" title="Save to Wishlist">
+              <i class="${isWishlisted ? 'fas' : 'far'} fa-heart"></i>
             </button>
-            <img src="${product.image || product.image_path || "/static/logo1.webp"}" alt="${product.name}" class="product-image" loading="lazy" onerror="this.onerror=null; this.src='/static/logo1.webp'" />
+            <img src="${product.image}" alt="${title}" loading="lazy" onerror="this.onerror=null; this.src='/static/logo1.webp'" onclick="showDetails('${safeTitle}', ${price}, '${product.image}', '${product.category}')" />
           </div>
-          <div class="product-details">
-            <div class="product-category">${product.category}</div>
-            <div class="product-title">${product.name}</div>
-            <div class="product-pricing">
-              <span class="current-price">Rs. ${product.price}</span>
+
+          <div class="quick-timer-badge">
+            <i class="fas fa-stopwatch"></i> 20 MINS
+          </div>
+
+          <div class="quick-item-title" onclick="showDetails('${safeTitle}', ${price}, '${product.image}', '${product.category}')" title="${product.name}">
+            ${title}
+          </div>
+
+          <div class="quick-item-unit">
+            ${unit}
+          </div>
+
+          <div class="quick-bottom-bar">
+            <div class="quick-pricing-group">
+              <span class="quick-current-price">₹${price}</span>
+              <span class="quick-strikethrough-price">₹${origPrice}</span>
             </div>
-            <div class="product-actions" style="margin-top: auto; display: flex; gap: 8px;">
-              <button class="view-detail" data-bs-toggle="modal" data-bs-target="#productModal" onclick="showDetails('${product.name.replace(/'/g, "\\'")}', 'Rs.${product.price}', '${product.image || product.image_path || "/static/logo1.webp"}')" style="flex: 1; padding: 0; height: 38px; border-radius: 999px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: #e2e8f0; font-size: 0.8rem; font-weight: 700;">Details</button>
-              <button class="add-to-cart-btn" onclick="addToCart('${product.name.replace(/'/g, "\\'")}', ${product.price}, '${product.image || product.image_path || "/static/logo1.webp"}')" style="flex: 1;"><i class="fas fa-plus"></i> ADD</button>
+
+            <div class="quick-action-slot" id="slot-${pid}">
+              ${qty > 0 ? `
+                <div class="quick-stepper">
+                  <button onclick="changeQuantity('${safeTitle}', -1, ${price}, '${product.image}', event)">−</button>
+                  <span class="stepper-val">${qty}</span>
+                  <button onclick="changeQuantity('${safeTitle}', 1, ${price}, '${product.image}', event)">+</button>
+                </div>
+              ` : `
+                <button class="quick-add-btn" onclick="addToCart('${safeTitle}', ${price}, '${product.image}', event)">ADD</button>
+              `}
             </div>
           </div>
         `;
 
-        productsGrid.appendChild(productCard);
+        grid.appendChild(card);
       });
-
-      renderedCount += nextBatch.length;
-      updateProductButtons();
-      if (typeof updateWishlistHeartButtons === "function") updateWishlistHeartButtons();
     }
 
-    // Listen for scroll events to trigger infinite scroll
+    function selectSubcategory(slug) {
+      document.querySelectorAll('.quick-subcat-item').forEach(item => {
+        item.classList.toggle('active', item.dataset.category === slug);
+      });
+      renderCategoryView(slug, document.getElementById('catSearchInput').value);
+    }
+
+    // Sidebar Click Listeners
+    document.querySelectorAll('.quick-subcat-item').forEach(item => {
+      item.addEventListener('click', function() {
+        const slug = this.dataset.category;
+        selectSubcategory(slug);
+      });
+    });
+
+    // Real-Time Search Input
+    const searchInput = document.getElementById('catSearchInput');
+    if (searchInput) {
+      searchInput.addEventListener('input', function() {
+        renderCategoryView(activeSubcategory, this.value);
+      });
+    }
+
+    // Scroll to Top visibility
+    const scrollTopBtn = document.getElementById('quickScrollTop');
     window.addEventListener('scroll', () => {
-      if ((window.innerHeight + window.scrollY) >= document.documentElement.scrollHeight - 600) {
-        loadMoreProducts();
+      if (window.pageYOffset > 250) {
+        scrollTopBtn.classList.add('visible');
+      } else {
+        scrollTopBtn.classList.remove('visible');
       }
     });
 
-    // Initialize with all products
-    renderProducts();
-
-    // Category selection
-    const categoryItems = document.querySelectorAll('.category-item');
-    const activeCategoryTitle = document.getElementById('active-category');
-
-    categoryItems.forEach(item => {
-      item.addEventListener('click', function() {
-        categoryItems.forEach(i => i.classList.remove('active'));
-        this.classList.add('active');
-
-        const category = this.dataset.category;
-        activeCategoryTitle.textContent = this.querySelector('span').textContent.trim();
-        renderProducts(category);
-      });
+    // Cart changes synchronize buttons
+    document.addEventListener('cartUpdated', () => {
+      renderCategoryView(activeSubcategory, searchInput ? searchInput.value : '');
     });
 
+    // Initialize on load
+    document.addEventListener('DOMContentLoaded', () => {
+      initializeCatalog();
+      renderCategoryView('all');
+      if (typeof updateCartCount === 'function') updateCartCount();
+      if (typeof updateWishlistCount === 'function') updateWishlistCount();
+    });
+
+    document.addEventListener('productsSynced', () => {
+      initializeCatalog();
+      renderCategoryView(activeSubcategory, searchInput ? searchInput.value : '');
+    });
   </script>
 </body>
 </html>

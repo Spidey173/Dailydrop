@@ -13,33 +13,36 @@ products_bp = Blueprint('products', __name__)
 CATEGORY_DEFINITIONS = {
     'vegetables': {
         'slug': 'vegetables',
-        'title': 'Vegetables and Fruits',
+        'title': 'Vegetables & Fruits',
         'heading': 'Vegetables & Fruits',
         'db_name': 'Fruits & Vegetables',
-        'placeholder': 'Search vegetables & fruits...',
+        'placeholder': 'Search in Vegetables & Fruits...',
         'subcategories': [
-            {'slug': 'all', 'name': 'All Products'},
-            {'slug': 'vegetables', 'name': 'Vegetables'},
-            {'slug': 'fruits', 'name': 'Fruits'},
-            {'slug': 'exotics', 'name': 'Exotics'},
-            {'slug': 'leafy', 'name': 'Leafy Greens'},
-            {'slug': 'melons', 'name': 'Melons'},
+            {'slug': 'all', 'name': 'All', 'icon': '🧺'},
+            {'slug': 'vegetables', 'name': 'Fresh Vegetables', 'icon': '🥕'},
+            {'slug': 'fruits', 'name': 'Fresh Fruits', 'icon': '🍎'},
+            {'slug': 'exotics', 'name': 'Exotics', 'icon': '🫐'},
+            {'slug': 'coriander', 'name': 'Coriander & Others', 'icon': '🌿'},
+            {'slug': 'sprouts', 'name': 'Freshly Cut & Sprouts', 'icon': '🥗'},
+            {'slug': 'flowers', 'name': 'Flowers & Leaves', 'icon': '🌸'},
+            {'slug': 'seasonal', 'name': 'Seasonal', 'icon': '🥭'},
+            {'slug': 'frozen', 'name': 'Frozen Veg', 'icon': '🧊'},
         ]
     },
     'grocery': {
         'slug': 'grocery',
-        'title': 'Premium Grocery Shop',
-        'heading': 'Premium Grocery Shop',
+        'title': 'Premium Grocery',
+        'heading': 'Premium Grocery',
         'db_name': 'Grocery',
         'placeholder': 'Search groceries...',
         'subcategories': [
-            {'slug': 'all', 'name': 'All Products'},
-            {'slug': 'atta', 'name': 'Atta & Flours'},
-            {'slug': 'dals', 'name': 'Dals & Pulses'},
-            {'slug': 'rice', 'name': 'Rice & Grains'},
-            {'slug': 'spices', 'name': 'Spices & Masalas'},
-            {'slug': 'salt', 'name': 'Salt & Sugar'},
-            {'slug': 'besan maida powder', 'name': 'Besan & Maida'},
+            {'slug': 'all', 'name': 'All', 'icon': '🛒'},
+            {'slug': 'atta', 'name': 'Atta & Flours', 'icon': '🌾'},
+            {'slug': 'dals', 'name': 'Dals & Pulses', 'icon': '🫘'},
+            {'slug': 'rice', 'name': 'Rice & Grains', 'icon': '🍚'},
+            {'slug': 'spices', 'name': 'Spices & Masalas', 'icon': '🌶️'},
+            {'slug': 'salt', 'name': 'Salt & Sugar', 'icon': '🧂'},
+            {'slug': 'besan maida powder', 'name': 'Besan & Maida', 'icon': '🥞'},
         ]
     },
     'baby_care': {
@@ -49,38 +52,38 @@ CATEGORY_DEFINITIONS = {
         'db_name': 'Baby Care',
         'placeholder': 'Search baby care...',
         'subcategories': [
-            {'slug': 'all', 'name': 'All Products'},
-            {'slug': 'daipers', 'name': 'Diapers & Wipes'},
-            {'slug': 'baby food', 'name': 'Baby Food'},
-            {'slug': 'hygiene', 'name': 'Baby Hygiene'},
+            {'slug': 'all', 'name': 'All', 'icon': '👶'},
+            {'slug': 'daipers', 'name': 'Diapers & Wipes', 'icon': '🧷'},
+            {'slug': 'baby food', 'name': 'Baby Food', 'icon': '🍼'},
+            {'slug': 'hygiene', 'name': 'Baby Hygiene', 'icon': '🧴'},
         ]
     },
     'beverages': {
         'slug': 'beverages',
-        'title': 'Beverages',
-        'heading': 'Beverages',
+        'title': 'Beverages & Drinks',
+        'heading': 'Beverages & Drinks',
         'db_name': 'Beverages',
         'placeholder': 'Search beverages...',
         'subcategories': [
-            {'slug': 'all', 'name': 'All Beverages'},
-            {'slug': 'soft drinks', 'name': 'Soft Drinks'},
-            {'slug': 'lassi', 'name': 'Lassi & Yogurt'},
-            {'slug': 'dairy', 'name': 'Dairy Drinks'},
-            {'slug': 'energy bars', 'name': 'Energy & Juices'},
+            {'slug': 'all', 'name': 'All', 'icon': '🥤'},
+            {'slug': 'soft drinks', 'name': 'Soft Drinks', 'icon': '🥫'},
+            {'slug': 'lassi', 'name': 'Lassi & Yogurt', 'icon': '🥛'},
+            {'slug': 'dairy', 'name': 'Dairy Drinks', 'icon': '🧋'},
+            {'slug': 'energy bars', 'name': 'Juices & Energy', 'icon': '🧃'},
         ]
     },
     'dairy_breakfast': {
         'slug': 'dairy_breakfast',
-        'title': 'Dairy and Breakfast',
+        'title': 'Dairy & Breakfast',
         'heading': 'Dairy & Breakfast',
         'db_name': 'Dairy & Breakfast',
         'placeholder': 'Search dairy & breakfast...',
         'subcategories': [
-            {'slug': 'all', 'name': 'All Products'},
-            {'slug': 'dairy', 'name': 'Dairy & Butter'},
-            {'slug': 'milk', 'name': 'Milk'},
-            {'slug': 'breakfast', 'name': 'Bread & Breakfast'},
-            {'slug': 'chocos', 'name': 'Cereals & Chocos'},
+            {'slug': 'all', 'name': 'All', 'icon': '🥛'},
+            {'slug': 'milk', 'name': 'Milk', 'icon': '🍶'},
+            {'slug': 'dairy', 'name': 'Dairy & Butter', 'icon': '🧈'},
+            {'slug': 'breakfast', 'name': 'Bread & Breakfast', 'icon': '🍞'},
+            {'slug': 'chocos', 'name': 'Cereals & Chocos', 'icon': '🥣'},
         ]
     },
     'frozen_foods': {
@@ -90,21 +93,21 @@ CATEGORY_DEFINITIONS = {
         'db_name': 'Frozen Foods',
         'placeholder': 'Search frozen foods...',
         'subcategories': [
-            {'slug': 'all', 'name': 'All Frozen Foods'},
-            {'slug': 'ice cream', 'name': 'Ice Cream & Desserts'},
+            {'slug': 'all', 'name': 'All', 'icon': '❄️'},
+            {'slug': 'ice cream', 'name': 'Ice Cream & Desserts', 'icon': '🍨'},
         ]
     },
     'home_kitchen': {
         'slug': 'home_kitchen',
-        'title': 'Home and Kitchen',
+        'title': 'Home & Kitchen',
         'heading': 'Home & Kitchen',
         'db_name': 'Home & Kitchen',
         'placeholder': 'Search home & kitchen...',
         'subcategories': [
-            {'slug': 'all', 'name': 'All Products'},
-            {'slug': 'kitchen', 'name': 'Kitchen Tools'},
-            {'slug': 'dainning needs', 'name': 'Dining Essentials'},
-            {'slug': 'pooja needs', 'name': 'Pooja Needs'},
+            {'slug': 'all', 'name': 'All', 'icon': '🍳'},
+            {'slug': 'kitchen', 'name': 'Kitchen Tools', 'icon': '🔪'},
+            {'slug': 'dainning needs', 'name': 'Dining Essentials', 'icon': '🍽️'},
+            {'slug': 'pooja needs', 'name': 'Pooja Needs', 'icon': '🪔'},
         ]
     },
     'household_items': {
@@ -114,9 +117,9 @@ CATEGORY_DEFINITIONS = {
         'db_name': 'Household',
         'placeholder': 'Search household items...',
         'subcategories': [
-            {'slug': 'all', 'name': 'All Products'},
-            {'slug': 'freshners', 'name': 'Fresheners & Air Care'},
-            {'slug': 'cleaning tools', 'name': 'Cleaning & Detergents'},
+            {'slug': 'all', 'name': 'All', 'icon': '🏠'},
+            {'slug': 'freshners', 'name': 'Fresheners & Air Care', 'icon': '💐'},
+            {'slug': 'cleaning tools', 'name': 'Cleaning & Detergents', 'icon': '🧹'},
         ]
     },
     'personal_care': {
@@ -126,25 +129,25 @@ CATEGORY_DEFINITIONS = {
         'db_name': 'Personal Care',
         'placeholder': 'Search personal care...',
         'subcategories': [
-            {'slug': 'all', 'name': 'All Products'},
-            {'slug': 'facewash', 'name': 'Facewash'},
-            {'slug': 'hair care', 'name': 'Hair Care'},
-            {'slug': 'sunscreen', 'name': 'Sunscreen'},
-            {'slug': 'deodrant', 'name': 'Deodorant'},
-            {'slug': 'femine care', 'name': 'Feminine Care'},
-            {'slug': 'personal care', 'name': 'Daily Grooming'},
+            {'slug': 'all', 'name': 'All', 'icon': '🧼'},
+            {'slug': 'facewash', 'name': 'Facewash', 'icon': '🫧'},
+            {'slug': 'hair care', 'name': 'Hair Care', 'icon': '🧴'},
+            {'slug': 'sunscreen', 'name': 'Sunscreen', 'icon': '☀️'},
+            {'slug': 'deodrant', 'name': 'Deodorant', 'icon': '🌸'},
+            {'slug': 'femine care', 'name': 'Feminine Care', 'icon': '💖'},
+            {'slug': 'personal care', 'name': 'Daily Grooming', 'icon': '🪒'},
         ]
     },
     'snacks': {
         'slug': 'snacks',
-        'title': 'Snacks',
-        'heading': 'Snacks',
+        'title': 'Snacks & Munchies',
+        'heading': 'Snacks & Munchies',
         'db_name': 'Snacks',
         'placeholder': 'Search snacks...',
         'subcategories': [
-            {'slug': 'all', 'name': 'All Products'},
-            {'slug': 'chips', 'name': 'Chips & Crisps'},
-            {'slug': 'cookie', 'name': 'Biscuits & Cookies'},
+            {'slug': 'all', 'name': 'All', 'icon': '🍿'},
+            {'slug': 'chips', 'name': 'Chips & Crisps', 'icon': '🥔'},
+            {'slug': 'cookie', 'name': 'Biscuits & Cookies', 'icon': '🍪'},
         ]
     }
 }
