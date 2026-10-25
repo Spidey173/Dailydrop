@@ -2,7 +2,7 @@
 Products blueprint handling catalog listings, categories, and product query APIs.
 """
 import logging
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request, jsonify, redirect, url_for
 from services.product_service import ProductService
 
 logger = logging.getLogger(__name__)
@@ -184,9 +184,9 @@ ALL_AISLES_META = [
 
 
 @products_bp.route('/categories', endpoint='categories')
-def categories_directory() -> str:
-    """Display comprehensive visual directory of all shopping aisles."""
-    return render_template('categories.html', aisles=ALL_AISLES_META)
+def categories_directory():
+    """Redirect to home page since separate all-aisles page has been removed."""
+    return redirect(url_for('main.index'))
 
 
 @products_bp.route('/category/<string:category_slug>', endpoint='category_view')

@@ -331,26 +331,8 @@
       border-radius: 999px;
       white-space: nowrap;
     }
-    .quick-aisles-back-btn {
-      color: #34D399;
-      text-decoration: none;
-      font-size: 13px;
-      font-weight: 700;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 14px;
-      border-radius: 999px;
-      background: rgba(16, 185, 129, 0.12);
-      border: 1px solid rgba(52, 211, 153, 0.25);
-      transition: all 0.15s;
-    }
-    .quick-aisles-back-btn:hover {
-      background: #10B981;
-      color: #ffffff;
-      box-shadow: 0 0 14px rgba(16, 185, 129, 0.3);
-    }
 
+    /* Product Cards Grid */
     /* Product Cards Grid */
     .quick-products-grid {
       display: grid;
@@ -675,9 +657,6 @@
       </div>
 
       <div class="quick-cat-nav-actions">
-        <a href="{{ url_for('products.categories') }}" class="quick-cat-nav-link" title="All Aisles">
-          <i class="fas fa-th-large text-success"></i> <span class="d-none d-md-inline">All Aisles</span>
-        </a>
         {% if 'user_id' in session %}
           <a href="{{ url_for('orders') }}" class="quick-cat-nav-link d-none d-sm-flex"><i class="fas fa-box"></i> Orders</a>
           <a href="{{ url_for('wishlist') }}" class="quick-cat-nav-link d-none d-sm-flex" title="My Wishlist">
@@ -719,9 +698,6 @@
         </div>
         <div class="d-flex align-items-center gap-3">
           <span class="quick-cat-count-badge" id="productCountBadge">{{ products|length }} items</span>
-          <a href="{{ url_for('products.categories') }}" class="quick-aisles-back-btn d-none d-md-inline-flex">
-            <i class="fas fa-arrow-left"></i> All Aisles
-          </a>
         </div>
       </div>
 
@@ -930,7 +906,7 @@
         card.innerHTML = `
           <div class="quick-img-wrapper">
             <span class="quick-discount-tag">${discountPct}% OFF</span>
-            <button class="quick-wish-btn ${isWishlisted ? 'active' : ''}" onclick="toggleWishlist(${pid}, event)" title="Save to Wishlist">
+            <button class="quick-wish-btn ${isWishlisted ? 'active' : ''}" data-product-id="${pid}" onclick="toggleWishlist(${pid}, event)" title="Save to Wishlist">
               <i class="${isWishlisted ? 'fas' : 'far'} fa-heart"></i>
             </button>
             <img src="${product.image}" alt="${title}" loading="lazy" onerror="this.onerror=null; this.src='/static/logo1.webp'" onclick="showDetails('${safeTitle}', ${price}, '${product.image}', '${product.category}')" />
@@ -995,6 +971,37 @@
       });
     }
 
+    // Sync quick-card action slots without full re-rendering
+    function syncQuickCardSlots() {
+      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+      document.querySelectorAll('.quick-card').forEach(card => {
+        const pid = card.getAttribute('data-product-id');
+        const title = card.getAttribute('data-title');
+        const slot = document.getElementById(`slot-${pid}`);
+        if (!slot) return;
+        const cartItem = cart.find(c => c.name === title);
+        const qty = cartItem ? cartItem.quantity : 0;
+        const product = allProducts.find(p => String(p.id) === String(pid));
+        const price = product ? product.price : 0;
+        const img = product ? product.image : '';
+        const safeTitle = (title || '').replace(/'/g, "\\'");
+
+        if (qty > 0) {
+          slot.innerHTML = `
+            <div class="quick-stepper">
+              <button onclick="changeQuantity('${safeTitle}', -1, ${price}, '${img}', event)">−</button>
+              <span class="stepper-val">${qty}</span>
+              <button onclick="changeQuantity('${safeTitle}', 1, ${price}, '${img}', event)">+</button>
+            </div>
+          `;
+        } else {
+          slot.innerHTML = `
+            <button class="quick-add-btn" onclick="addToCart('${safeTitle}', ${price}, '${img}', event)">ADD</button>
+          `;
+        }
+      });
+    }
+
     // Scroll to Top visibility
     const scrollTopBtn = document.getElementById('quickScrollTop');
     window.addEventListener('scroll', () => {
@@ -1005,9 +1012,14 @@
       }
     });
 
-    // Cart changes synchronize buttons
+    // Cart changes synchronize buttons & stepper slots immediately
     document.addEventListener('cartUpdated', () => {
-      renderCategoryView(activeSubcategory, searchInput ? searchInput.value : '');
+      syncQuickCardSlots();
+      if (typeof updateCartCount === 'function') updateCartCount();
+    });
+    window.addEventListener('storage', () => {
+      syncQuickCardSlots();
+      if (typeof updateCartCount === 'function') updateCartCount();
     });
 
     // Initialize on load
@@ -1015,12 +1027,13 @@
       initializeCatalog();
       renderCategoryView('all');
       if (typeof updateCartCount === 'function') updateCartCount();
-      if (typeof updateWishlistCount === 'function') updateWishlistCount();
+      if (typeof updateWishlistHeartButtons === 'function') updateWishlistHeartButtons();
     });
 
     document.addEventListener('productsSynced', () => {
       initializeCatalog();
       renderCategoryView(activeSubcategory, searchInput ? searchInput.value : '');
+      if (typeof updateWishlistHeartButtons === 'function') updateWishlistHeartButtons();
     });
   </script>
 </body>

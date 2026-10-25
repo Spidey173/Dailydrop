@@ -187,6 +187,10 @@ function addToCart(productName, productPrice, productImage, evt) {
     updateCartCount();
     updateProductButtons();
     showAddedToCartAlert(productName);
+
+    // Broadcast cart change event across all active pages and components
+    document.dispatchEvent(new CustomEvent('cartUpdated', { detail: { cart, productName } }));
+    window.dispatchEvent(new Event('storage'));
 }
 
 function changeQuantity(productName, delta, price, img, event) {
@@ -221,7 +225,8 @@ function changeQuantity(productName, delta, price, img, event) {
     updateCartCount();
     updateProductButtons();
     
-    // Dispatch event to sync other tabs or templates
+    // Broadcast cart change event across all active pages and components
+    document.dispatchEvent(new CustomEvent('cartUpdated', { detail: { cart, productName } }));
     window.dispatchEvent(new Event('storage'));
 }
 

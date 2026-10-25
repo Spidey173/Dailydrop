@@ -48,8 +48,8 @@ function updateWishlistNavbarBadge(count) {
 
 // Update all heart buttons on the page
 function updateWishlistHeartButtons() {
-  document.querySelectorAll('.wishlist-heart-btn').forEach(btn => {
-    const pid = Number(btn.getAttribute('data-product-id'));
+  document.querySelectorAll('.wishlist-heart-btn, .quick-wish-btn').forEach(btn => {
+    const pid = Number(btn.getAttribute('data-product-id')) || Number(btn.closest('[data-product-id]')?.getAttribute('data-product-id'));
     if (!pid) return;
     const isSaved = window.wishlistProductIds.has(pid);
     btn.classList.toggle('active', isSaved);
@@ -187,7 +187,21 @@ async function removeFromWishlistPage(productId, buttonEl) {
 function moveToCartFromWishlist(name, price, image, pid, btnEl) {
   if (typeof addToCart === 'function') {
     addToCart(name, price, image, btnEl);
-    showWishlistToast(`Added "${name}" to cart!`, true);
+  }
+  if (btnEl) {
+    const originalText = btnEl.innerHTML;
+    btnEl.innerHTML = '<i class="fas fa-check"></i> Added to Cart';
+    btnEl.style.background = '#10B981';
+    btnEl.style.borderColor = '#10B981';
+    btnEl.style.color = '#ffffff';
+    btnEl.disabled = true;
+    setTimeout(() => {
+      btnEl.innerHTML = '<i class="fas fa-plus"></i> Add More';
+      btnEl.style.background = '';
+      btnEl.style.borderColor = '';
+      btnEl.style.color = '';
+      btnEl.disabled = false;
+    }, 1800);
   }
 }
 

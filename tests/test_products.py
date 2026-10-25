@@ -30,8 +30,12 @@ def test_product_catalog_queries():
 
 
 def test_product_routes(client):
+    # /categories redirects cleanly to home
+    cat_res = client.get('/categories')
+    assert cat_res.status_code in [200, 302]
+
     category_routes = [
-        '/categories', '/grocery', '/vegetables', '/dairy_breakfast', '/snacks',
+        '/grocery', '/vegetables', '/dairy_breakfast', '/snacks',
         '/beverages', '/frozen_foods', '/household_items',
         '/home_kitchen', '/personal_care', '/baby_care'
     ]
