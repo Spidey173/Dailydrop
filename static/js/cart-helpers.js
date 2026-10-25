@@ -346,14 +346,129 @@ function updateCartCount() {
       localStorage.removeItem('cart');
       const cartCountEl = document.getElementById('cart-count');
       if (cartCountEl) cartCountEl.textContent = '0';
+      const mobileNavBadge = document.getElementById('mobile-nav-cart-badge');
+      if (mobileNavBadge) {
+          mobileNavBadge.textContent = '0';
+          mobileNavBadge.style.display = 'none';
+      }
+      const floatingBar = document.getElementById('mobileFloatingCartBar');
+      if (floatingBar) floatingBar.remove();
       return;
   }
   const cart = JSON.parse(localStorage.getItem('cart')) || [];
   const count = cart.reduce((total, item) => total + (item.quantity || 1), 0);
+  const subtotal = cart.reduce((total, item) => total + ((Number(item.price) || 0) * (item.quantity || 1)), 0);
+
+  // Desktop badge
   const cartCountEl = document.getElementById('cart-count');
   if (cartCountEl) {
       cartCountEl.textContent = count;
   }
+
+  // Mobile Bottom Nav badge
+  const mobileNavBadge = document.getElementById('mobile-nav-cart-badge');
+  if (mobileNavBadge) {
+      mobileNavBadge.textContent = count;
+      mobileNavBadge.style.display = count > 0 ? 'flex' : 'none';
+  }
+
+  // Sync mobile wishlist badge if available
+  const desktopWishlist = document.getElementById('wishlist-count');
+  const mobileWishlist = document.getElementById('mobile-nav-wishlist-badge');
+  if (desktopWishlist && mobileWishlist) {
+      const wCount = parseInt(desktopWishlist.textContent) || 0;
+      mobileWishlist.textContent = wCount;
+      mobileWishlist.style.display = wCount > 0 ? 'flex' : 'none';
+  }
+
+  // Blinkit Floating Mini-Cart Bar
+  updateMobileFloatingCart(count, subtotal);
+}
+
+function updateMobileFloatingCart(count, subtotal) {
+  const currentPath = window.location.pathname;
+  // Don't show floating cart on cart, payment, or admin pages
+  if (currentPath.includes('/cart') || currentPath.includes('/payment') || currentPath.includes('/admin')) {
+      const existing = document.getElementById('mobileFloatingCartBar');
+      if (existing) existing.remove();
+      return;
+  }
+
+  let floatingBar = document.getElementById('mobileFloatingCartBar');
+  if (count <= 0) {
+      if (floatingBar) floatingBar.remove();
+      return;
+  }
+
+  if (!floatingBar) {
+      floatingBar = document.createElement('a');
+      floatingBar.id = 'mobileFloatingCartBar';
+      floatingBar.className = 'mobile-floating-cart-bar';
+      floatingBar.href = '/cart';
+      document.body.appendChild(floatingBar);
+  }
+
+  floatingBar.innerHTML = `
+      <div class="floating-cart-info">
+          <div class="floating-cart-icon-wrap">
+              <i class="fas fa-shopping-basket"></i>
+          </div>
+          <div class="floating-cart-text">
+              <span class="floating-cart-count">${count} Item${count > 1 ? 's' : ''} Added</span>
+              <span class="floating-cart-subtotal">Rs. ${subtotal.toFixed(2)}</span>
+          </div>
+      </div>
+      <div class="floating-cart-action">
+          View Cart <i class="fas fa-arrow-right"></i>
+      </div>
+  `;
+}
+
+function initMobileExperience() {
+  const currentPath = window.location.pathname;
+  if (currentPath.includes('/admin')) return;
+
+  // Render Mobile Bottom Navigation Bar if not already present
+  if (!document.getElementById('mobileBottomNav')) {
+      const isHome = currentPath === '/' || currentPath.includes('/intro');
+      const isCategory = ['/vegetables', '/dairy_breakfast', '/snacks', '/baby_care', '/personal_care', '/household_items', '/home_kitchen', '/grocery', '/beverages', '/frozen_foods'].some(p => currentPath.includes(p));
+      const isWishlist = currentPath.includes('/wishlist');
+      const isOrders = currentPath.includes('/orders');
+      const isCart = currentPath.includes('/cart');
+
+      const bottomNav = document.createElement('nav');
+      bottomNav.id = 'mobileBottomNav';
+      bottomNav.className = 'mobile-bottom-nav';
+      bottomNav.setAttribute('aria-label', 'Mobile Bottom Navigation');
+
+      bottomNav.innerHTML = `
+          <a href="/" class="mobile-nav-item ${isHome ? 'active' : ''}" title="Home">
+              <i class="fas fa-house"></i>
+              <span>Home</span>
+          </a>
+          <a href="/vegetables" class="mobile-nav-item ${isCategory ? 'active' : ''}" title="Categories">
+              <i class="fas fa-border-all"></i>
+              <span>Categories</span>
+          </a>
+          <a href="/wishlist" class="mobile-nav-item ${isWishlist ? 'active' : ''}" title="Wishlist">
+              <i class="fas fa-heart"></i>
+              <span>Wishlist</span>
+              <span class="mobile-nav-badge" id="mobile-nav-wishlist-badge" style="display:none;">0</span>
+          </a>
+          <a href="/orders" class="mobile-nav-item ${isOrders ? 'active' : ''}" title="My Orders">
+              <i class="fas fa-box"></i>
+              <span>Orders</span>
+          </a>
+          <a href="/cart" class="mobile-nav-item ${isCart ? 'active' : ''}" title="My Cart">
+              <i class="fas fa-shopping-cart"></i>
+              <span>Cart</span>
+              <span class="mobile-nav-badge" id="mobile-nav-cart-badge" style="display:none;">0</span>
+          </a>
+      `;
+      document.body.appendChild(bottomNav);
+  }
+
+  updateCartCount();
 }
 
 function showAddedToCartAlert(productName) {
@@ -366,6 +481,9 @@ function showAddedToCartAlert(productName) {
   }
   notification.innerHTML = `<i class="fas fa-check-circle me-1" style="color:#34D399;"></i> <span><strong>${productName}</strong> added to cart!</span>`;
   notification.classList.add('show');
+  if (navigator.vibrate) {
+    try { navigator.vibrate(30); } catch(e) {}
+  }
   setTimeout(() => {
     notification.classList.remove('show');
   }, 2200);
@@ -373,8 +491,14 @@ function showAddedToCartAlert(productName) {
 
 // Automatically bind to DOM load
 document.addEventListener('DOMContentLoaded', () => {
+    initMobileExperience();
     updateCartCount();
     updateProductButtons();
+});
+
+// Re-evaluate on resize/orientation change
+window.addEventListener('resize', () => {
+    updateCartCount();
 });
 
 // Global modal backdrop lockup prevention:

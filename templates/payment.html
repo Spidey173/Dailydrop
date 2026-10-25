@@ -356,6 +356,57 @@
         order: -1;
       }
     }
+
+    @media (max-width: 768px) {
+      .checkout-page {
+        margin: 16px auto 40px;
+        padding: 0 12px;
+      }
+      .checkout-header {
+        font-size: 1.6rem;
+        margin-bottom: 16px;
+      }
+      .checkout-form-card,
+      .order-summary-card {
+        padding: 16px;
+        border-radius: 14px;
+      }
+      .checkout-section-title {
+        font-size: 1.15rem;
+        margin-bottom: 16px;
+      }
+      .form-input {
+        font-size: 16px !important;
+        padding: 12px 14px;
+        border-radius: 10px;
+      }
+      .cod-card {
+        padding: 14px 16px;
+        gap: 12px;
+        margin: 18px 0;
+      }
+      .cod-icon-wrapper {
+        width: 42px;
+        height: 42px;
+        font-size: 1.2rem;
+      }
+      .payment-methods-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+      .payment-method-card {
+        padding: 14px;
+      }
+      .confirm-btn {
+        padding: 14px;
+        font-size: 1rem;
+      }
+      .order-item img {
+        width: 48px;
+        height: 48px;
+        margin-right: 12px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -364,7 +415,7 @@
   <nav class="navbar">
       <div class="container navbar-container">
           <a href="{{ url_for('index') }}" class="logo">
-              <i class="fas fa-shopping-basket"></i> Daily<span>Drop</span>
+              <i class="fas fa-shopping-basket"></i> Daily<span>Drop</span> <span class="delivery-badge-pill"><i class="fas fa-bolt"></i> 10m</span>
           </a>
           <div class="nav-actions">
               {% if 'user_id' in session %}

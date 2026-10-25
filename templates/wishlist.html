@@ -74,6 +74,20 @@
       color: #ffffff;
       box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
     }
+
+    @media (max-width: 576px) {
+      .wishlist-hero {
+        padding: 16px 0 10px;
+      }
+      .wishlist-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 10px !important;
+      }
+      .wishlist-empty-state {
+        padding: 30px 16px;
+        margin: 20px auto;
+      }
+    }
   </style>
 </head>
 
@@ -82,7 +96,7 @@
   <nav class="navbar">
     <div class="container navbar-container">
       <a href="{{ url_for('index') }}" class="logo">
-        <i class="fas fa-shopping-basket"></i> Daily<span>Drop</span>
+        <i class="fas fa-shopping-basket"></i> Daily<span>Drop</span> <span class="delivery-badge-pill"><i class="fas fa-bolt"></i> 10m</span>
       </a>
       <div class="search-bar">
         <input type="text" id="searchInput" placeholder="Search for products..." autocomplete="off" />

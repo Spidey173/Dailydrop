@@ -187,8 +187,26 @@
     }
 
     @media (max-width: 768px) {
+      .contact-page {
+        margin: 16px auto 40px;
+        padding: 0 12px;
+      }
+      .contact-header {
+        margin-bottom: 24px;
+      }
+      .contact-header h1 {
+        font-size: 1.8rem;
+      }
       .contact-layout {
         grid-template-columns: 1fr;
+        gap: 20px;
+      }
+      .contact-form-card,
+      .contact-info-card {
+        padding: 20px 16px;
+      }
+      .form-input {
+        font-size: 16px !important;
       }
     }
   </style>
@@ -201,7 +219,7 @@
   <nav class="navbar">
       <div class="container navbar-container">
           <a href="{{ url_for('index') }}" class="logo">
-              <i class="fas fa-shopping-basket"></i> Daily<span>Drop</span>
+              <i class="fas fa-shopping-basket"></i> Daily<span>Drop</span> <span class="delivery-badge-pill"><i class="fas fa-bolt"></i> 10m</span>
           </a>
           <div class="nav-actions">
               {% if 'user_id' in session %}
