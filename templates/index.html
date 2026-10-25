@@ -4,6 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DailyDrop — Portfolio Engineering Demo (Simulated E-Commerce)</title>
+  <!-- Google Fonts Preconnect & Optimized Loading -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
   <!-- Bootstrap, FontAwesome & Google Fonts -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -13,13 +18,12 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
   <script>window.IS_USER_LOGGED_IN = {{ 'true' if is_logged_in else 'false' }};</script>
-  <script src="{{ url_for('static', filename='js/products.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/cart-helpers.js') }}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="{{ url_for('static', filename='js/product-modal.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/command-palette.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/wishlist.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/live-search.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/products.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='js/cart-helpers.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='js/product-modal.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='js/command-palette.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='js/wishlist.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='js/live-search.js') }}" defer></script>
 </head>
 
 <body>
@@ -255,7 +259,6 @@
         <span class="section-eyebrow"><i class="fas fa-layer-group"></i> Explore Aisles</span>
         <h2 class="section-title">Shop by Category</h2>
       </div>
-      <a href="{{ url_for('vegetables') }}" class="view-all-link">All Aisles <i class="fas fa-arrow-right"></i></a>
     </div>
     <div class="categories-grid">
       <!-- Fruits & Vegetables -->
@@ -461,14 +464,24 @@
     nextButton.addEventListener('click', nextSlide);
 
     function startAutoSlide() {
-      autoSlideInterval = setInterval(nextSlide, 2500);
+      if (autoSlideInterval) clearInterval(autoSlideInterval);
+      autoSlideInterval = setInterval(nextSlide, 5500);
     }
 
     function stopAutoSlide() {
-      clearInterval(autoSlideInterval);
+      if (autoSlideInterval) {
+        clearInterval(autoSlideInterval);
+        autoSlideInterval = null;
+      }
     }
 
     const heroSlider = document.querySelector('.hero-slider');
+    if (heroSlider) {
+      heroSlider.addEventListener('mouseenter', stopAutoSlide);
+      heroSlider.addEventListener('mouseleave', startAutoSlide);
+      heroSlider.addEventListener('touchstart', stopAutoSlide, { passive: true });
+      heroSlider.addEventListener('touchend', startAutoSlide, { passive: true });
+    }
     startAutoSlide();
 
     document.addEventListener('keydown', (e) => {
