@@ -202,7 +202,7 @@
         html += `
           <div class="cmd-item ${selectedClass}" data-index="${idx}" onclick="executeCommand(${idx})">
             <div class="cmd-item-img-wrap">
-              <img src="${item.image}" alt="${item.title}" onerror="this.src='/static/logo.webp'" />
+              <img src="${item.image}" alt="${item.title}" onerror="this.src='/static/product-placeholder.svg'" />
             </div>
             <div class="cmd-item-info">
               <div class="cmd-item-title">${highlightMatch(item.title, lowerQ)}</div>

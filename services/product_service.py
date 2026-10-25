@@ -75,7 +75,7 @@ class ProductService:
 
     @staticmethod
     def create_product(name: str, price: float, category: str, subcategory: str = '',
-                       image_path: str = '/static/logo.webp', description: str = '',
+                       image_path: str = '/static/product-placeholder.svg', description: str = '',
                        stock: int = 50) -> Tuple[bool, str, Optional[int]]:
         """Add a new product to catalog."""
         if not name or price <= 0 or not category:

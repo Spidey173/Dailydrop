@@ -334,7 +334,7 @@ def _seed_test_database():
                         float(p.get('price', 0)),
                         p.get('category', 'Grocery'),
                         p.get('subcategory', ''),
-                        p.get('image', '/static/logo.webp'),
+                        p.get('image', '/static/product-placeholder.svg'),
                         p.get('description', ''),
                         unique_stock
                     ))

@@ -228,7 +228,7 @@ def api_add_product():
             if 'veg' in cat_lower or 'fruit' in cat_lower:
                 image_path = '/static/fruits-vegetables/pineapple.jpeg' if 'pineapple' in name.lower() else '/static/fruits-vegetables/apples.jpeg'
             else:
-                image_path = '/static/logo.webp'
+                image_path = '/static/product-placeholder.svg'
 
         success, message, new_id = ProductService.create_product(
             name=name, price=price, category=category,

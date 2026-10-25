@@ -738,7 +738,7 @@
                 <div class="order-items-grid">
                     {% for product in order.products %}
                     <div class="product-row">
-                        <img src="{{ product.image or product.image_path or '/static/logo1.webp' }}" alt="{{ product.name }}" onerror="this.onerror=null; this.src='/static/logo1.webp';">
+                        <img src="{{ product.image or product.image_path or '/static/product-placeholder.svg' }}" alt="{{ product.name }}" onerror="this.onerror=null; this.src='/static/product-placeholder.svg';">
                         <div class="product-row-info">
                             <h4 class="product-row-name">{{ product.name }}</h4>
                             <div class="product-row-price">

@@ -276,7 +276,7 @@ def init_database() -> None:
                                         float(p.get('price', 0)),
                                         p.get('category', 'Grocery'),
                                         p.get('subcategory', ''),
-                                        p.get('image', '/static/logo.webp'),
+                                        p.get('image', '/static/product-placeholder.svg'),
                                         p.get('description', ''),
                                         unique_stock
                                     ))
@@ -935,7 +935,7 @@ def update_product_stock(product_id: int, stock: int) -> bool:
 
 
 def add_product(name: str, price: float, category: str, subcategory: str = '',
-                image_path: str = '/static/logo.webp', description: str = '', stock: int = 50) -> int:
+                image_path: str = '/static/product-placeholder.svg', description: str = '', stock: int = 50) -> int:
     """Add a new product to the database catalog."""
     category = normalize_category(category)
     pid = None

@@ -207,7 +207,7 @@
       const cleanName = escapeHtml(prodTitle);
 
       itemEl.innerHTML = `
-        <img src="${imageSrc}" alt="${cleanName}" class="suggestion-thumb" onerror="this.src='/static/logo.webp'" />
+        <img src="${imageSrc}" alt="${cleanName}" class="suggestion-thumb" onerror="this.src='/static/product-placeholder.svg'" />
         <div class="suggestion-info">
           <div class="suggestion-title">${highlightedName}</div>
           <div class="suggestion-meta">

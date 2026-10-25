@@ -103,7 +103,7 @@ function animateFlyToCart(imgUrl, originEvtOrEl) {
     // Create flying thumbnail clone
     const flyEl = document.createElement('div');
     flyEl.className = 'flying-cart-item';
-    flyEl.innerHTML = `<img src="${imgUrl}" alt="Fly product" onerror="this.src='/static/logo.webp'" />`;
+    flyEl.innerHTML = `<img src="${imgUrl}" alt="Fly product" onerror="this.src='/static/product-placeholder.svg'" />`;
     
     flyEl.style.left = `${startX - 25}px`;
     flyEl.style.top = `${startY - 25}px`;

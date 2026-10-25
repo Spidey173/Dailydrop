@@ -240,7 +240,7 @@ def test_razorpay_webhook_client_disconnect_recovery():
         full_name='Disconnected Customer',
         phone_number='9123456780',
         address='456 Disconnect Rd',
-        products=[{"name": "Brown Bread", "price": 40.0, "quantity": 2, "image": "/static/logo.webp"}],
+        products=[{"name": "Brown Bread", "price": 40.0, "quantity": 2, "image": "/static/dairy-breakfast/bread.jpg"}],
         total_amount=80.0
     )
     assert get_pending_order(rzp_order_id) is not None

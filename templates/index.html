@@ -498,7 +498,8 @@ function renderSearchResultsList(filteredProducts, searchTerm) {
     const pId = product.id || product.product_id;
     const pTitle = product.title || product.name || 'Product';
     const safeTitle = pTitle.replace(/'/g, "\\'");
-    const pImg = product.image || product.image_path || '/static/logo1.webp';
+    const defaultPlaceholder = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200' width='200' height='200'><rect width='200' height='200' fill='%23ffffff'/><circle cx='100' cy='100' r='50' fill='%23ecfdf5'/><path d='M80 90h40l-5 35H85l-5-35zm15-15a15 15 0 0 1 15 15h-30a15 15 0 0 1 15-15z' fill='none' stroke='%2310B981' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/><text x='100' y='145' font-family='sans-serif' font-size='10' fill='%23059669' text-anchor='middle' font-weight='700'>DAILYDROP</text></svg>";
+    const pImg = product.image || product.image_path || defaultPlaceholder;
     const pCat = product.category || 'Grocery';
     const pPrice = parseFloat(product.price || 0).toFixed(2);
 
@@ -513,7 +514,7 @@ function renderSearchResultsList(filteredProducts, searchTerm) {
         <button class="wishlist-heart-btn ${isWishlisted ? 'active' : ''}" data-product-id="${pId}" onclick="toggleWishlist(${pId}, event)" title="Save to Wishlist">
           <i class="${isWishlisted ? 'fas' : 'far'} fa-heart"></i>
         </button>
-        <img src="${pImg}" alt="${pTitle}" class="product-image" loading="lazy" decoding="async" onclick="showDetails('${safeTitle}', ${product.price}, '${pImg}', '${pCat}')" style="cursor: pointer;" onerror="this.onerror=null; this.src='/static/logo1.webp'" />
+        <img src="${pImg}" alt="${pTitle}" class="product-image" loading="lazy" decoding="async" onclick="showDetails('${safeTitle}', ${product.price}, '${pImg}', '${pCat}')" style="cursor: pointer;" onerror="this.onerror=null; this.src='${defaultPlaceholder}'" />
       </div>
       <div class="product-details">
         <div class="product-category">${pCat}</div>
@@ -681,7 +682,8 @@ function renderPopularProducts() {
         const pId = product.id || product.product_id;
         const pTitle = product.title || product.name || 'Product';
         const safeTitle = pTitle.replace(/'/g, "\\'");
-        const pImg = product.image || product.image_path || '/static/logo1.webp';
+        const defaultPlaceholder = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200' width='200' height='200'><rect width='200' height='200' fill='%23ffffff'/><circle cx='100' cy='100' r='50' fill='%23ecfdf5'/><path d='M80 90h40l-5 35H85l-5-35zm15-15a15 15 0 0 1 15 15h-30a15 15 0 0 1 15-15z' fill='none' stroke='%2310B981' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/><text x='100' y='145' font-family='sans-serif' font-size='10' fill='%23059669' text-anchor='middle' font-weight='700'>DAILYDROP</text></svg>";
+        const pImg = product.image || product.image_path || defaultPlaceholder;
         const pCat = product.category || '';
         const pPrice = parseFloat(product.price || 0).toFixed(2);
         
@@ -696,7 +698,7 @@ function renderPopularProducts() {
                 <button class="wishlist-heart-btn ${isWishlisted ? 'active' : ''}" data-product-id="${pId}" onclick="toggleWishlist(${pId}, event)" title="Save to Wishlist">
                     <i class="${isWishlisted ? 'fas' : 'far'} fa-heart"></i>
                 </button>
-                <img src="${pImg}" alt="${pTitle}" class="product-image" loading="lazy" decoding="async" onclick="showDetails('${safeTitle}', ${product.price}, '${pImg}', '${pCat}')" style="cursor: pointer;" onerror="this.onerror=null; this.src='/static/logo1.webp'" />
+                <img src="${pImg}" alt="${pTitle}" class="product-image" loading="lazy" decoding="async" onclick="showDetails('${safeTitle}', ${product.price}, '${pImg}', '${pCat}')" style="cursor: pointer;" onerror="this.onerror=null; this.src='${defaultPlaceholder}'" />
             </div>
             <div class="product-details">
                 <div class="product-category">${pCat}</div>
@@ -725,13 +727,14 @@ async function syncCatalogWithServer() {
         if (res.ok) {
             const data = await res.json();
             if (data.success && Array.isArray(data.products) && data.products.length > 0) {
+                const defaultPlaceholder = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200' width='200' height='200'><rect width='200' height='200' fill='%23ffffff'/><circle cx='100' cy='100' r='50' fill='%23ecfdf5'/><path d='M80 90h40l-5 35H85l-5-35zm15-15a15 15 0 0 1 15 15h-30a15 15 0 0 1 15-15z' fill='none' stroke='%2310B981' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/><text x='100' y='145' font-family='sans-serif' font-size='10' fill='%23059669' text-anchor='middle' font-weight='700'>DAILYDROP</text></svg>";
                 window.productsDB = data.products.map(p => ({
                     id: p.product_id || p.id,
                     title: p.name || p.title,
                     category: p.category,
                     subcategory: p.subcategory || '',
                     price: parseFloat(p.price || 0),
-                    image: p.image_path || p.image || '/static/logo1.webp',
+                    image: p.image_path || p.image || defaultPlaceholder,
                     description: p.description || ''
                 }));
                 document.dispatchEvent(new CustomEvent('productsSynced', { detail: window.productsDB }));

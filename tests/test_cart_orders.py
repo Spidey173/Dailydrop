@@ -95,8 +95,8 @@ def test_normalized_order_items(test_user):
     """Verify orders persist normalized relational rows into order_items table."""
     from database import get_order_items
     items = [
-        {"name": "Organic Almonds 500g", "price": 12.50, "quantity": 2, "image": "/static/logo.webp"},
-        {"name": "Fresh Avocados 2pk", "price": 6.00, "quantity": 1, "image": "/static/logo.webp"}
+        {"name": "Farm Fresh Red Hybrid Tomatoes (1 kg)", "price": 35.0, "quantity": 2, "image": "/static/fruits-vegetables/tomato.jpg"},
+        {"name": "Amul Taaza Homogenised Toned Milk (1 L)", "price": 54.0, "quantity": 1, "image": "/static/dairy-breakfast/milk.jpg"}
     ]
     success, msg, order_id = OrderService.create_order(
         user_id=test_user,
@@ -112,20 +112,20 @@ def test_normalized_order_items(test_user):
     # Verify rows in normalized order_items table
     order_items = get_order_items(order_id)
     assert len(order_items) == 2
-    assert order_items[0]['name'] == "Organic Almonds 500g"
+    assert order_items[0]['name'] == "Farm Fresh Red Hybrid Tomatoes (1 kg)"
     assert order_items[0]['quantity'] == 2
-    assert order_items[0]['price'] == 12.50
-    assert order_items[0]['subtotal'] == 25.00
-    assert order_items[1]['name'] == "Fresh Avocados 2pk"
+    assert order_items[0]['price'] == 35.00
+    assert order_items[0]['subtotal'] == 70.00
+    assert order_items[1]['name'] == "Amul Taaza Homogenised Toned Milk (1 L)"
     assert order_items[1]['quantity'] == 1
-    assert order_items[1]['price'] == 6.00
-    assert order_items[1]['subtotal'] == 6.00
+    assert order_items[1]['price'] == 72.00
+    assert order_items[1]['subtotal'] == 72.00
 
     # Verify OrderService.get_user_orders() loads directly from normalized order_items
     user_orders = OrderService.get_user_orders(test_user)
     matching = next(o for o in user_orders if o['order_id'] == order_id)
     assert len(matching['products']) == 2
-    assert matching['products'][0]['name'] == "Organic Almonds 500g"
+    assert matching['products'][0]['name'] == "Farm Fresh Red Hybrid Tomatoes (1 kg)"
 
 
 def test_atomic_inventory_decrement_and_race_prevention(test_user):

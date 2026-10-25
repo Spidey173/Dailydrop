@@ -257,7 +257,7 @@ function injectProductModalHTML() {
             <!-- Left Column: Product Image & Badges -->
             <div class="col-lg-4 col-md-5 text-center">
               <div class="product-modal-img-wrap mb-3">
-                <img id="modalImage" src="" alt="Product Image" class="img-fluid rounded-4 shadow-lg product-modal-img" onerror="this.src='/static/logo.webp'" />
+                <img id="modalImage" src="" alt="Product Image" class="img-fluid rounded-4 shadow-lg product-modal-img" onerror="this.src='/static/product-placeholder.svg'" />
               </div>
               <div class="badge-list d-flex flex-wrap justify-content-center gap-2 mb-2" id="modalBadgesContainer">
                 <!-- Badges injected dynamically -->
@@ -386,7 +386,7 @@ window.showDetails = function(name, priceStr, image, categoryHint = '') {
   if (strikeEl) strikeEl.innerText = strikePrice;
 
   const imgEl = document.getElementById('modalImage');
-  if (imgEl) imgEl.src = image || '/static/logo.webp';
+  if (imgEl) imgEl.src = image || '/static/product-placeholder.svg';
 
   const descEl = document.getElementById('modalDescription');
   if (descEl) descEl.innerText = description;
@@ -575,7 +575,7 @@ window.addModalItemToCart = function() {
   const priceEl = document.getElementById('modalPrice');
   const priceText = priceEl ? priceEl.innerText : '0';
   const imgEl = document.getElementById('modalImage');
-  const image = imgEl ? imgEl.src : '/static/logo1.webp';
+  const image = imgEl ? imgEl.src : '/static/product-placeholder.svg';
   const price = parseFloat(priceText.replace(/[^0-9.]/g, '')) || 0;
   const qtyToAdd = Math.max(1, parseInt(modalItemQty) || 1);
 

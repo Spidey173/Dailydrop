@@ -156,7 +156,7 @@
               <button class="wishlist-heart-btn active" data-product-id="{{ item.product_id }}" onclick="removeFromWishlistPage({{ item.product_id }}, this)" title="Remove from Wishlist">
                 <i class="fas fa-heart"></i>
               </button>
-              <img src="{{ item.image_path }}" alt="{{ item.name }}" class="product-image" loading="lazy" onerror="this.onerror=null; this.src='/static/logo1.webp'" />
+              <img src="{{ item.image_path }}" alt="{{ item.name }}" class="product-image" loading="lazy" onerror="this.onerror=null; this.src='/static/product-placeholder.svg'" />
             </div>
             <div class="product-details">
               <div class="product-category">{{ item.category }} {% if item.subcategory %}&bull; {{ item.subcategory }}{% endif %}</div>
@@ -204,7 +204,7 @@
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body text-center">
-          <img id="modalProductImage" src="" alt="Product" style="max-height: 200px; object-fit: contain; margin-bottom: 15px; border-radius: var(--radius-sm);" onerror="this.onerror=null; this.src='/static/logo1.webp'" />
+          <img id="modalProductImage" src="" alt="Product" style="max-height: 200px; object-fit: contain; margin-bottom: 15px; border-radius: var(--radius-sm);" onerror="this.onerror=null; this.src='/static/product-placeholder.svg'" />
           <h4 id="modalProductName" style="font-weight: 700; color: var(--text-primary);"></h4>
           <p id="modalProductPrice" style="font-size: 1.3rem; color: var(--accent); font-weight: 800;"></p>
           <p id="modalProductDescription" style="color: var(--text-secondary);"></p>
