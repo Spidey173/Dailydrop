@@ -50,6 +50,7 @@
             padding: 0;
             line-height: 1.5;
             position: relative;
+            min-height: 100vh;
         }
 
         /* Ambient Background Glows */
@@ -71,19 +72,11 @@
         }
 
         .glow-mid-right {
-            top: 450px;
+            top: 400px;
             right: -150px;
             width: 600px;
             height: 600px;
             background: radial-gradient(circle, rgba(5, 150, 105, 0.25) 0%, transparent 70%);
-        }
-
-        .glow-bottom-left {
-            bottom: 200px;
-            left: -100px;
-            width: 500px;
-            height: 500px;
-            background: radial-gradient(circle, rgba(16, 185, 129, 0.18) 0%, transparent 70%);
         }
 
         /* Container helper */
@@ -205,7 +198,7 @@
         /* ==================== Hero Section ==================== */
         .intro-hero {
             position: relative;
-            padding: 70px 0 90px 0;
+            padding: 80px 0 100px 0;
             overflow: hidden;
         }
 
@@ -276,7 +269,6 @@
             display: flex;
             align-items: center;
             gap: 18px;
-            flex-wrap: wrap;
             margin-bottom: 45px;
         }
 
@@ -284,7 +276,7 @@
             display: inline-flex;
             align-items: center;
             gap: 12px;
-            padding: 16px 36px;
+            padding: 16px 38px;
             border-radius: 9999px;
             background: linear-gradient(135deg, #10B981 0%, #059669 100%);
             color: #FFFFFF;
@@ -299,29 +291,6 @@
             transform: translateY(-2px);
             box-shadow: 0 12px 32px rgba(16, 185, 129, 0.55);
             color: #FFFFFF;
-        }
-
-        .hero-cta-secondary {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            padding: 16px 30px;
-            border-radius: 9999px;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            background: rgba(255, 255, 255, 0.04);
-            color: #F1F5F9;
-            text-decoration: none;
-            font-size: 1.02rem;
-            font-weight: 600;
-            backdrop-filter: blur(12px);
-            transition: all 0.2s ease;
-        }
-
-        .hero-cta-secondary:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(52, 211, 153, 0.4);
-            color: #FFFFFF;
-            transform: translateY(-2px);
         }
 
         /* Hero Trust Highlights */
@@ -391,114 +360,9 @@
             border-radius: 28px;
         }
 
-        /* Floating live glass cards */
-        .floating-pill {
-            position: absolute;
-            background: rgba(10, 26, 18, 0.88);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(52, 211, 153, 0.35);
-            border-radius: 16px;
-            padding: 12px 18px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
-            z-index: 5;
-            animation: floatPill 5s ease-in-out infinite;
-        }
-
-        .floating-pill.pill-eta {
-            bottom: -15px;
-            left: -15px;
-            animation-delay: 0s;
-        }
-
-        .floating-pill.pill-fresh {
-            top: 20px;
-            right: -20px;
-            animation-delay: 2.5s;
-        }
-
-        @keyframes floatPill {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
-        }
-
-        .pill-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
-            background: var(--intro-emerald);
-            color: #FFFFFF;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1rem;
-        }
-
-        .pill-text strong {
-            display: block;
-            font-size: 0.88rem;
-            color: #FFFFFF;
-            font-weight: 700;
-        }
-
-        .pill-text span {
-            font-size: 0.76rem;
-            color: var(--intro-mint);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        /* ==================== Metrics Bar ==================== */
-        .metrics-strip {
-            padding: 38px 0;
-            background: rgba(10, 24, 18, 0.55);
-            border-top: 1px solid rgba(52, 211, 153, 0.15);
-            border-bottom: 1px solid rgba(52, 211, 153, 0.15);
-            margin-bottom: 80px;
-        }
-
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 24px;
-        }
-
-        .metric-card {
-            text-align: center;
-            padding: 12px 16px;
-            border-right: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .metric-card:last-child {
-            border-right: none;
-        }
-
-        .metric-number {
-            font-family: 'Outfit', sans-serif;
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: #FFFFFF;
-            margin-bottom: 4px;
-            line-height: 1.1;
-        }
-
-        .metric-number span {
-            color: var(--intro-mint);
-        }
-
-        .metric-label {
-            font-size: 0.88rem;
-            color: #94A3B8;
-            font-weight: 500;
-        }
-
         /* ==================== How It Works (3 Steps) ==================== */
         .how-section {
-            padding: 30px 0 100px 0;
+            padding: 40px 0 100px 0;
             position: relative;
         }
 
@@ -599,162 +463,6 @@
             margin: 0;
         }
 
-        /* ==================== SLEEK MINIMAL PREMIUM FOOTER ==================== */
-        .intro-footer {
-            background: #020704;
-            border-top: 1px solid rgba(52, 211, 153, 0.18);
-            padding: 64px 0 32px 0;
-            position: relative;
-            z-index: 10;
-        }
-
-        .footer-top-row {
-            display: grid;
-            grid-template-columns: 1.5fr 1fr 1fr 1fr;
-            gap: 48px;
-            padding-bottom: 48px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .footer-brand {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .footer-logo {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            font-family: 'Outfit', sans-serif;
-            font-size: 1.7rem;
-            font-weight: 800;
-            color: #FFFFFF;
-            text-decoration: none;
-            letter-spacing: -0.5px;
-        }
-
-        .footer-logo i {
-            color: var(--intro-mint);
-            font-size: 1.6rem;
-            filter: drop-shadow(0 0 8px rgba(52, 211, 153, 0.4));
-        }
-
-        .footer-logo span {
-            color: var(--intro-mint);
-        }
-
-        .footer-bio {
-            color: #94A3B8;
-            font-size: 0.92rem;
-            line-height: 1.65;
-            max-width: 360px;
-            margin: 0;
-        }
-
-        /* Live status pill */
-        .hub-status-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 9px;
-            padding: 6px 14px;
-            border-radius: 9999px;
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(52, 211, 153, 0.25);
-            color: #A7F3D0;
-            font-size: 0.82rem;
-            font-weight: 600;
-            width: fit-content;
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background-color: #34D399;
-            box-shadow: 0 0 8px #34D399;
-            animation: pulseGlow 1.8s infinite;
-        }
-
-        .footer-nav-col h4 {
-            font-family: 'Outfit', sans-serif;
-            font-size: 1rem;
-            font-weight: 700;
-            color: #FFFFFF;
-            letter-spacing: 0.3px;
-            margin: 0 0 18px 0;
-        }
-
-        .footer-nav-col ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .footer-nav-col a {
-            color: #94A3B8;
-            text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: all 0.2s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .footer-nav-col a:hover {
-            color: var(--intro-mint);
-            transform: translateX(3px);
-        }
-
-        /* Footer Bottom Bar */
-        .footer-bottom-flex {
-            padding-top: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 18px;
-            font-size: 0.85rem;
-            color: var(--intro-subtle);
-        }
-
-        .footer-bottom-links {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .footer-bottom-links a {
-            color: var(--intro-subtle);
-            text-decoration: none;
-            transition: color 0.2s ease;
-        }
-
-        .footer-bottom-links a:hover {
-            color: var(--intro-mint);
-        }
-
-        .footer-payment-badges {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .mini-badge {
-            padding: 4px 10px;
-            border-radius: 6px;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            font-size: 0.72rem;
-            font-weight: 600;
-            color: #94A3B8;
-        }
-
         /* ==================== Responsive Queries ==================== */
         @media (max-width: 1024px) {
             .hero-grid {
@@ -779,19 +487,6 @@
                 grid-template-columns: 1fr;
                 gap: 20px;
             }
-
-            .footer-top-row {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 36px;
-            }
-
-            .metrics-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .metric-card:nth-child(2) {
-                border-right: none;
-            }
         }
 
         @media (max-width: 640px) {
@@ -802,34 +497,6 @@
             .hero-title {
                 font-size: 2.2rem;
             }
-
-            .metrics-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .metric-card {
-                border-right: none;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-                padding-bottom: 16px;
-            }
-
-            .metric-card:last-child {
-                border-bottom: none;
-            }
-
-            .footer-top-row {
-                grid-template-columns: 1fr;
-                gap: 32px;
-            }
-
-            .footer-bottom-flex {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .footer-payment-badges {
-                justify-content: center;
-            }
         }
     </style>
 </head>
@@ -838,7 +505,6 @@
     <!-- Ambient Glow Blobs -->
     <div class="ambient-glow glow-top-left"></div>
     <div class="ambient-glow glow-mid-right"></div>
-    <div class="ambient-glow glow-bottom-left"></div>
 
     <!-- Sticky Glass Navbar -->
     <nav class="intro-navbar">
@@ -893,9 +559,6 @@
                         <a href="{{ url_for('main.index') }}" class="hero-cta-main" id="hero-start-btn">
                             <i class="fas fa-shopping-cart"></i> Start Shopping <i class="fas fa-arrow-right"></i>
                         </a>
-                        <a href="{{ url_for('main.index') }}" class="hero-cta-secondary" id="hero-explore-btn">
-                            <i class="fas fa-store"></i> Browse 240+ Items
-                        </a>
                     </div>
 
                     <div class="hero-trust-row">
@@ -927,49 +590,7 @@
                 <div class="hero-visual-wrapper">
                     <div class="hero-visual-card">
                         <img src="{{ url_for('static', filename='image/intro_hero.webp') }}" alt="DailyDrop 10-Minute Fresh Grocery Delivery">
-                        
-                        <!-- Floating Glass Notification Pill: ETA -->
-                        <div class="floating-pill pill-eta">
-                            <div class="pill-icon"><i class="fas fa-motorcycle"></i></div>
-                            <div class="pill-text">
-                                <strong>Order Out for Delivery</strong>
-                                <span><span class="pulse-dot" style="width: 6px; height: 6px;"></span> Arriving in 8 mins &bull; 1.2 km away</span>
-                            </div>
-                        </div>
-
-                        <!-- Floating Glass Notification Pill: Freshness -->
-                        <div class="floating-pill pill-fresh">
-                            <div class="pill-icon" style="background: #059669;"><i class="fas fa-check-circle"></i></div>
-                            <div class="pill-text">
-                                <strong>100% Farm Harvested</strong>
-                                <span style="color: #A7F3D0;">Cold-chain preserved &bull; Fresh</span>
-                            </div>
-                        </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Performance Metrics Strip -->
-    <section class="metrics-strip">
-        <div class="intro-container">
-            <div class="metrics-grid">
-                <div class="metric-card">
-                    <div class="metric-number">10<span>mins</span></div>
-                    <div class="metric-label">Average Doorstep Delivery</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-number">241<span>+</span></div>
-                    <div class="metric-label">Curated Fresh Essentials</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-number">50k<span>+</span></div>
-                    <div class="metric-label">Orders Successfully Handed</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-number">4.9<span>★</span></div>
-                    <div class="metric-label">Customer Satisfaction Score</div>
                 </div>
             </div>
         </div>
@@ -1008,84 +629,6 @@
             </div>
         </div>
     </section>
-
-    <!-- ==================== SLEEK MINIMAL PREMIUM FOOTER ==================== -->
-    <footer class="intro-footer">
-        <div class="intro-container">
-            
-            <!-- Top Footer Content -->
-            <div class="footer-top-row">
-                <!-- Col 1: Brand & Status -->
-                <div class="footer-brand">
-                    <a href="{{ url_for('main.intro') }}" class="footer-logo">
-                        <i class="fas fa-shopping-basket"></i> Daily<span>Drop</span>
-                    </a>
-                    <p class="footer-bio">
-                        Lightning-fast 10-minute grocery delivery across Bangalore. Fresh vegetables, dairy essentials, pantry staples, and chilled beverages right to your doorstep.
-                    </p>
-                    <div class="hub-status-pill">
-                        <span class="status-dot"></span> All Delivery Dark Stores Online &bull; 10 Min ETA
-                    </div>
-                </div>
-
-                <!-- Col 2: Top Aisles -->
-                <div class="footer-nav-col">
-                    <h4>Top Aisles</h4>
-                    <ul>
-                        <li><a href="/vegetables"><i class="fas fa-chevron-right" style="font-size: 0.7rem; color: var(--intro-mint);"></i> Fruits &amp; Vegetables</a></li>
-                        <li><a href="/dairy_breakfast"><i class="fas fa-chevron-right" style="font-size: 0.7rem; color: var(--intro-mint);"></i> Dairy &amp; Breakfast</a></li>
-                        <li><a href="/snacks"><i class="fas fa-chevron-right" style="font-size: 0.7rem; color: var(--intro-mint);"></i> Snacks &amp; Munchies</a></li>
-                        <li><a href="/beverages"><i class="fas fa-chevron-right" style="font-size: 0.7rem; color: var(--intro-mint);"></i> Cold Beverages</a></li>
-                    </ul>
-                </div>
-
-                <!-- Col 3: Company -->
-                <div class="footer-nav-col">
-                    <h4>Explore</h4>
-                    <ul>
-                        <li><a href="{{ url_for('main.index') }}"><i class="fas fa-store" style="font-size: 0.8rem; color: var(--intro-mint);"></i> Storefront</a></li>
-                        <li><a href="{{ url_for('main.about_us') }}"><i class="fas fa-info-circle" style="font-size: 0.8rem; color: var(--intro-mint);"></i> About DailyDrop</a></li>
-                        <li><a href="{{ url_for('main.faqs') }}"><i class="fas fa-question-circle" style="font-size: 0.8rem; color: var(--intro-mint);"></i> FAQs &amp; Help</a></li>
-                        <li><a href="{{ url_for('main.contact_us') }}"><i class="fas fa-envelope" style="font-size: 0.8rem; color: var(--intro-mint);"></i> Contact Support</a></li>
-                    </ul>
-                </div>
-
-                <!-- Col 4: Account & Admin -->
-                <div class="footer-nav-col">
-                    <h4>Quick Access</h4>
-                    <ul>
-                        <li><a href="{{ url_for('cart.orders') }}"><i class="fas fa-truck" style="font-size: 0.8rem; color: var(--intro-mint);"></i> Track Orders</a></li>
-                        <li><a href="{{ url_for('cart.wishlist') }}"><i class="fas fa-heart" style="font-size: 0.8rem; color: var(--intro-mint);"></i> Saved Wishlist</a></li>
-                        <li><a href="{{ url_for('auth.login') }}"><i class="fas fa-user-circle" style="font-size: 0.8rem; color: var(--intro-mint);"></i> Account Login</a></li>
-                        <li><a href="{{ url_for('admin.admin_dashboard') }}"><i class="fas fa-shield-alt" style="font-size: 0.8rem; color: var(--intro-mint);"></i> Admin Portal</a></li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Bottom Copyright & Legal Flex -->
-            <div class="footer-bottom-flex">
-                <div>
-                    &copy; 2026 DailyDrop Technologies Pvt. Ltd. All rights reserved.
-                </div>
-                
-                <div class="footer-bottom-links">
-                    <a href="{{ url_for('main.privacy_policy') }}">Privacy Policy</a>
-                    <span style="opacity: 0.4;">&bull;</span>
-                    <a href="{{ url_for('main.terms') }}">Terms of Service</a>
-                    <span style="opacity: 0.4;">&bull;</span>
-                    <a href="{{ url_for('main.contact_us') }}">Customer Support</a>
-                </div>
-
-                <div class="footer-payment-badges">
-                    <span class="mini-badge"><i class="fa-solid fa-bolt" style="color: #F59E0B;"></i> Instant UPI</span>
-                    <span class="mini-badge"><i class="fa-brands fa-google-pay" style="color: #38BDF8;"></i> GPay</span>
-                    <span class="mini-badge"><i class="fa-solid fa-credit-card" style="color: #A855F7;"></i> Cards</span>
-                    <span class="mini-badge"><i class="fa-solid fa-money-bill-wave" style="color: #10B981;"></i> COD</span>
-                </div>
-            </div>
-
-        </div>
-    </footer>
 
 </body>
 </html>
