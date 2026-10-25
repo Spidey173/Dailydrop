@@ -11,6 +11,9 @@
     if (!searchInputs || searchInputs.length === 0) return;
 
     searchInputs.forEach(input => {
+      if (input.dataset.liveBound) return;
+      input.dataset.liveBound = 'true';
+
       const searchBar = input.closest('.search-bar');
       if (!searchBar) return;
 
@@ -232,4 +235,5 @@
 
   // Initialize on DOM ready
   document.addEventListener('DOMContentLoaded', initLiveSearch);
+  window.initLiveSearch = initLiveSearch;
 })();
