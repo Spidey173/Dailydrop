@@ -31,7 +31,7 @@ def test_product_catalog_queries():
 
 def test_product_routes(client):
     category_routes = [
-        '/grocery', '/vegetables', '/dairy_breakfast', '/snacks',
+        '/categories', '/grocery', '/vegetables', '/dairy_breakfast', '/snacks',
         '/beverages', '/frozen_foods', '/household_items',
         '/home_kitchen', '/personal_care', '/baby_care'
     ]

@@ -69,6 +69,9 @@
     <!-- Categories sidebar -->
     <div class="categories-sidebar">
       <h3 class="categories-header"><i class="fas fa-th-list me-2" style="color: var(--primary);"></i> Categories</h3>
+      <a href="{{ url_for('products.categories') }}" class="category-item aisle-hub-pill" title="View all aisles" style="text-decoration: none;">
+        <i class="fas fa-th-large me-1 text-primary"></i> <span>All Aisles</span>
+      </a>
       {% for subcat in category_config.subcategories %}
       <div class="category-item {% if loop.first %}active{% endif %}" data-category="{{ subcat.slug }}">
         <span>{{ subcat.name }}</span> <i class="fas fa-chevron-right fs-xs"></i>
@@ -195,9 +198,23 @@
           (p.category || '').toLowerCase() === 'vegetables' || (!isProduceFruit(p.name) && (p.category === '' || (p.category || '').toLowerCase() === 'vegetables'))
         );
       } else {
-        currentCategoryProducts = products.filter(p => 
-          (p.category || '').toLowerCase() === catTarget || (p.category || '').toLowerCase().includes(catTarget)
-        );
+        currentCategoryProducts = products.filter(p => {
+          const sub = (p.category || '').toLowerCase();
+          const name = (p.name || '').toLowerCase();
+          return sub === catTarget || sub.includes(catTarget) || catTarget.includes(sub) || name.includes(catTarget);
+        });
+      }
+
+      if (currentCategoryProducts.length === 0) {
+        productsGrid.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 48px 16px; color: var(--text-muted);">
+            <i class="fas fa-box-open" style="font-size: 2.4rem; margin-bottom: 12px; opacity: 0.4;"></i>
+            <h4 style="color: #ffffff; font-size: 1.1rem; margin-bottom: 6px;">No products found in this subcategory</h4>
+            <p style="font-size: 0.85rem; margin-bottom: 16px;">Try selecting another subcategory or browse all products in this aisle.</p>
+            <button onclick="renderProducts('all'); document.querySelectorAll('.category-item').forEach(i => i.classList.toggle('active', i.dataset.category==='all'));" style="background: var(--gradient-primary); border: none; padding: 8px 20px; border-radius: 999px; color: #fff; font-weight: 700; font-size: 0.82rem; cursor: pointer;">View All Products</button>
+          </div>
+        `;
+        return;
       }
 
       loadMoreProducts();
@@ -221,7 +238,6 @@
 
         productCard.innerHTML = `
           <div class="product-image-container">
-            <span class="product-badge-speed"><i class="fas fa-bolt"></i> 10 MINS</span>
             <button class="wishlist-heart-btn ${typeof isInWishlist === 'function' && isInWishlist(product.id) ? 'active' : ''}" data-product-id="${product.id}" onclick="toggleWishlist(${product.id}, event)" title="Save to Wishlist">
               <i class="${typeof isInWishlist === 'function' && isInWishlist(product.id) ? 'fas' : 'far'} fa-heart"></i>
             </button>

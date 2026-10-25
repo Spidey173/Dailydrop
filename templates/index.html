@@ -510,7 +510,6 @@ function renderSearchResultsList(filteredProducts, searchTerm) {
 
     productCard.innerHTML = `
       <div class="product-image-container">
-        <span class="product-badge-speed"><i class="fas fa-bolt"></i> 10 MINS</span>
         <button class="wishlist-heart-btn ${isWishlisted ? 'active' : ''}" data-product-id="${pId}" onclick="toggleWishlist(${pId}, event)" title="Save to Wishlist">
           <i class="${isWishlisted ? 'fas' : 'far'} fa-heart"></i>
         </button>
@@ -666,7 +665,6 @@ function renderPopularProducts() {
         
         productCard.innerHTML = `
             <div class="product-image-container">
-                <span class="product-badge-speed"><i class="fas fa-bolt"></i> 10 MINS</span>
                 <button class="wishlist-heart-btn ${isWishlisted ? 'active' : ''}" data-product-id="${pId}" onclick="toggleWishlist(${pId}, event)" title="Save to Wishlist">
                     <i class="${isWishlisted ? 'fas' : 'far'} fa-heart"></i>
                 </button>

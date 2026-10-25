@@ -34,10 +34,12 @@ CATEGORY_DEFINITIONS = {
         'placeholder': 'Search groceries...',
         'subcategories': [
             {'slug': 'all', 'name': 'All Products'},
-            {'slug': 'atta', 'name': 'Atta'},
-            {'slug': 'toor chana', 'name': 'Toor and chana'},
-            {'slug': 'besan maida powder', 'name': 'Besan and Maida'},
-            {'slug': 'rice', 'name': 'Rice'},
+            {'slug': 'atta', 'name': 'Atta & Flours'},
+            {'slug': 'dals', 'name': 'Dals & Pulses'},
+            {'slug': 'rice', 'name': 'Rice & Grains'},
+            {'slug': 'spices', 'name': 'Spices & Masalas'},
+            {'slug': 'salt', 'name': 'Salt & Sugar'},
+            {'slug': 'besan maida powder', 'name': 'Besan & Maida'},
         ]
     },
     'baby_care': {
@@ -48,10 +50,9 @@ CATEGORY_DEFINITIONS = {
         'placeholder': 'Search baby care...',
         'subcategories': [
             {'slug': 'all', 'name': 'All Products'},
-            {'slug': 'daipers', 'name': 'Diapers'},
+            {'slug': 'daipers', 'name': 'Diapers & Wipes'},
             {'slug': 'baby food', 'name': 'Baby Food'},
-            {'slug': 'hair care', 'name': 'Hair Care'},
-            {'slug': 'hygiene', 'name': 'Hygiene'},
+            {'slug': 'hygiene', 'name': 'Baby Hygiene'},
         ]
     },
     'beverages': {
@@ -63,9 +64,9 @@ CATEGORY_DEFINITIONS = {
         'subcategories': [
             {'slug': 'all', 'name': 'All Beverages'},
             {'slug': 'soft drinks', 'name': 'Soft Drinks'},
-            {'slug': 'lassi', 'name': 'Lassi'},
+            {'slug': 'lassi', 'name': 'Lassi & Yogurt'},
             {'slug': 'dairy', 'name': 'Dairy Drinks'},
-            {'slug': 'energy bars', 'name': 'Energy Drinks'},
+            {'slug': 'energy bars', 'name': 'Energy & Juices'},
         ]
     },
     'dairy_breakfast': {
@@ -76,10 +77,10 @@ CATEGORY_DEFINITIONS = {
         'placeholder': 'Search dairy & breakfast...',
         'subcategories': [
             {'slug': 'all', 'name': 'All Products'},
+            {'slug': 'dairy', 'name': 'Dairy & Butter'},
             {'slug': 'milk', 'name': 'Milk'},
-            {'slug': 'dairy', 'name': 'Dairy'},
-            {'slug': 'breakfast', 'name': 'Breakfast'},
-            {'slug': 'chocos', 'name': 'Chocos'},
+            {'slug': 'breakfast', 'name': 'Bread & Breakfast'},
+            {'slug': 'chocos', 'name': 'Cereals & Chocos'},
         ]
     },
     'frozen_foods': {
@@ -101,9 +102,9 @@ CATEGORY_DEFINITIONS = {
         'placeholder': 'Search home & kitchen...',
         'subcategories': [
             {'slug': 'all', 'name': 'All Products'},
+            {'slug': 'kitchen', 'name': 'Kitchen Tools'},
+            {'slug': 'dainning needs', 'name': 'Dining Essentials'},
             {'slug': 'pooja needs', 'name': 'Pooja Needs'},
-            {'slug': 'dainning needs', 'name': 'Dainning Needs'},
-            {'slug': 'kitchen', 'name': 'Kitchen'},
         ]
     },
     'household_items': {
@@ -114,10 +115,8 @@ CATEGORY_DEFINITIONS = {
         'placeholder': 'Search household items...',
         'subcategories': [
             {'slug': 'all', 'name': 'All Products'},
-            {'slug': 'freshners', 'name': 'Freshners'},
-            {'slug': 'toilet cleaner', 'name': 'Toilet Cleaner'},
-            {'slug': 'cleaning tools', 'name': 'Cleaning Tools'},
-            {'slug': 'bathroom essential', 'name': 'Bathroom Essential'},
+            {'slug': 'freshners', 'name': 'Fresheners & Air Care'},
+            {'slug': 'cleaning tools', 'name': 'Cleaning & Detergents'},
         ]
     },
     'personal_care': {
@@ -128,11 +127,11 @@ CATEGORY_DEFINITIONS = {
         'placeholder': 'Search personal care...',
         'subcategories': [
             {'slug': 'all', 'name': 'All Products'},
-            {'slug': 'Facewash', 'name': 'Facewash'},
-            {'slug': 'Femine care', 'name': 'Feminine Care'},
-            {'slug': 'Hair Care', 'name': 'Hair Care'},
-            {'slug': 'Sunscreen', 'name': 'Sunscreen'},
-            {'slug': 'Deodrant', 'name': 'Deodorant'},
+            {'slug': 'facewash', 'name': 'Facewash'},
+            {'slug': 'hair care', 'name': 'Hair Care'},
+            {'slug': 'sunscreen', 'name': 'Sunscreen'},
+            {'slug': 'deodrant', 'name': 'Deodorant'},
+            {'slug': 'femine care', 'name': 'Feminine Care'},
             {'slug': 'personal care', 'name': 'Daily Grooming'},
         ]
     },
@@ -144,10 +143,8 @@ CATEGORY_DEFINITIONS = {
         'placeholder': 'Search snacks...',
         'subcategories': [
             {'slug': 'all', 'name': 'All Products'},
-            {'slug': 'soft drinks', 'name': 'Soft Drinks'},
-            {'slug': 'energy bars', 'name': 'Energy Bars'},
-            {'slug': 'cookie', 'name': 'Cookie'},
-            {'slug': 'chips', 'name': 'Chips'},
+            {'slug': 'chips', 'name': 'Chips & Crisps'},
+            {'slug': 'cookie', 'name': 'Biscuits & Cookies'},
         ]
     }
 }
@@ -167,6 +164,26 @@ def render_category_page(cat_key: str) -> str:
         }
     products = ProductService.get_products_by_category(cat_cfg['db_name'])
     return render_template('category.html', category_config=cat_cfg, products=products)
+
+
+ALL_AISLES_META = [
+    {'slug': 'vegetables', 'url': '/vegetables', 'name': 'Fruits & Vegetables', 'icon': 'fa-apple-alt', 'image': '/static/image/vegetables.jpg', 'desc': 'Fresh farm fruits, crisp vegetables & organic greens'},
+    {'slug': 'dairy_breakfast', 'url': '/dairy_breakfast', 'name': 'Dairy & Breakfast', 'icon': 'fa-egg', 'image': '/static/image/dairy.jpg', 'desc': 'Milk, cheese, butter, wholesome breakfast spreads & breads'},
+    {'slug': 'snacks', 'url': '/snacks', 'name': 'Snacks & Munchies', 'icon': 'fa-cookie-bite', 'image': '/static/image/snaks.jpeg', 'desc': 'Chips, biscuits, chocolates, cookies & namkeen'},
+    {'slug': 'grocery', 'url': '/grocery', 'name': 'Premium Grocery', 'icon': 'fa-shopping-basket', 'image': '/static/image/grocery.jpeg', 'desc': 'Atta, rice, aromatic spices, pulses & daily essentials'},
+    {'slug': 'beverages', 'url': '/beverages', 'name': 'Beverages & Drinks', 'icon': 'fa-glass-whiskey', 'image': '/static/image/beverages.webp', 'desc': 'Juices, craft sodas, refreshing lassis & energy drinks'},
+    {'slug': 'baby_care', 'url': '/baby_care', 'name': 'Baby Care', 'icon': 'fa-baby', 'image': '/static/image/babycare.jpeg', 'desc': 'Diapers, gentle wipes, organic baby food & lotions'},
+    {'slug': 'personal_care', 'url': '/personal_care', 'name': 'Personal Care', 'icon': 'fa-spa', 'image': '/static/image/personalcare.jpeg', 'desc': 'Facewashes, soaps, shampoos, hair oils & grooming'},
+    {'slug': 'household_items', 'url': '/household_items', 'name': 'Household Items', 'icon': 'fa-home', 'image': '/static/image/households.jpeg', 'desc': 'Cleaning supplies, detergents, dishwash & air fresheners'},
+    {'slug': 'home_kitchen', 'url': '/home_kitchen', 'name': 'Home & Kitchen', 'icon': 'fa-utensils', 'image': '/static/image/kitchen.jpeg', 'desc': 'Cookware, dining essentials, storage containers & pooja needs'},
+    {'slug': 'frozen_foods', 'url': '/frozen_foods', 'name': 'Frozen Foods', 'icon': 'fa-ice-cream', 'image': '/static/slider/frozen_foods.webp', 'desc': 'Gourmet ice creams, frozen treats & desserts'}
+]
+
+
+@products_bp.route('/categories', endpoint='categories')
+def categories_directory() -> str:
+    """Display comprehensive visual directory of all shopping aisles."""
+    return render_template('categories.html', aisles=ALL_AISLES_META)
 
 
 @products_bp.route('/category/<string:category_slug>', endpoint='category_view')
