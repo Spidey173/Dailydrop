@@ -61,11 +61,14 @@ function updateWishlistHeartButtons() {
 }
 
 // Toggle wishlist item
-async function toggleWishlist(productId, evtOrEl) {
+async function toggleWishlist(productId, evtOrEl, productName) {
   if (evtOrEl && typeof evtOrEl.stopPropagation === 'function') {
     evtOrEl.stopPropagation();
     evtOrEl.preventDefault();
   }
+
+  const targetEl = (evtOrEl && evtOrEl.target) ? evtOrEl.target : (evtOrEl instanceof HTMLElement ? evtOrEl : null);
+  const title = productName || targetEl?.closest?.('[data-title]')?.getAttribute('data-title') || '';
 
   // Check login
   if (typeof isUserLoggedIn === 'function' && !isUserLoggedIn()) {
@@ -109,7 +112,10 @@ async function toggleWishlist(productId, evtOrEl) {
       }
       updateWishlistNavbarBadge(data.count !== undefined ? data.count : window.wishlistProductIds.size);
       updateWishlistHeartButtons();
-      showWishlistToast(data.message || (data.in_wishlist ? 'Saved to Wishlist' : 'Removed from Wishlist'), data.in_wishlist);
+      const toastMsg = data.in_wishlist
+        ? (title ? `Saved "${title}" to Wishlist!` : 'Saved to Wishlist!')
+        : (title ? `Removed "${title}" from Wishlist` : 'Removed from Wishlist');
+      showWishlistToast(toastMsg, data.in_wishlist);
     } else {
       // Revert on error
       if (isCurrentlySaved) window.wishlistProductIds.add(pid);

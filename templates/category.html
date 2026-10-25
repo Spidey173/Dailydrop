@@ -516,7 +516,6 @@
           <a href="{{ url_for('wishlist') }}" class="wishlist-nav-icon" title="My Wishlist">
             <i class="fas fa-heart"></i> <span class="nav-text">Wishlist</span> <span id="wishlist-count" class="wishlist-badge">0</span>
           </a>
-          <a href="{{ url_for('logout') }}" class="login-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
         {% else %}
           <a href="{{ url_for('login') }}" class="login-btn"><i class="fas fa-sign-in-alt"></i> Login</a>
         {% endif %}
@@ -835,7 +834,7 @@
         card.innerHTML = `
           <div class="quick-img-wrapper">
             <span class="quick-discount-tag">${discountPct}% OFF</span>
-            <button class="quick-wish-btn ${isWishlisted ? 'active' : ''}" data-product-id="${pid}" onclick="toggleWishlist(${pid}, event)" title="Save to Wishlist">
+            <button class="quick-wish-btn ${isWishlisted ? 'active' : ''}" data-product-id="${pid}" onclick="toggleWishlist(${pid}, event, '${safeTitle}')" title="Save to Wishlist">
               <i class="${isWishlisted ? 'fas' : 'far'} fa-heart"></i>
             </button>
             <img src="${product.image}" alt="${title}" loading="lazy" onerror="this.onerror=null; this.src='/static/logo1.webp'" onclick="showDetails('${safeTitle}', ${price}, '${product.image}', '${product.category}')" />
