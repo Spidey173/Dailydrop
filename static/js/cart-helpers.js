@@ -574,13 +574,6 @@ function initMobileExperience() {
           </div>
           <div class="drawer-divider"></div>
           <div class="drawer-links-group">
-              <a href="/vegetables" class="drawer-link ${isCategory ? 'active' : ''}">
-                  <div class="drawer-link-content">
-                      <i class="fas fa-carrot"></i>
-                      <span>All Categories</span>
-                  </div>
-                  <i class="fas fa-chevron-right" style="font-size: 0.75rem; opacity: 0.5;"></i>
-              </a>
               <a href="/about-us" class="drawer-link ${isAbout ? 'active' : ''}">
                   <div class="drawer-link-content">
                       <i class="fas fa-info-circle"></i>
