@@ -176,11 +176,6 @@ def api_add_product():
         if 'image_file' in request.files:
             file = request.files['image_file']
             if file and file.filename:
-                if current_app.config.get('DISABLE_FILE_UPLOADS', False):
-                    return jsonify({
-                        'success': False,
-                        'error': 'File uploads are disabled in the serverless demo environment. Please use an image URL or default product image.'
-                    }), 400
                 raw_filename = file.filename
                 ext = os.path.splitext(raw_filename)[1].lower()
                 allowed_exts = current_app.config.get('ALLOWED_IMAGE_EXTENSIONS', {'.png', '.jpg', '.jpeg', '.webp'})
@@ -191,22 +186,38 @@ def api_add_product():
                         'error': f"Invalid image format '{ext}'. Allowed formats: {', '.join(sorted(allowed_exts))}"
                     }), 400
 
-                clean_base = secure_filename(os.path.splitext(raw_filename)[0]) or 'uploaded_image'
-                timestamp = int(datetime.now().timestamp())
-                filename = f"{timestamp}_{clean_base}{ext}"
+                # In serverless environments (e.g. Vercel) or when local disk uploads are disabled,
+                # encode the image as a Base64 Data URL so it permanently persists in PostgreSQL!
+                if current_app.config.get('DISABLE_FILE_UPLOADS', False) or os.getenv('VERCEL') == '1':
+                    import base64
+                    file_bytes = file.read()
+                    mime = 'image/jpeg' if ext in ('.jpg', '.jpeg') else f'image/{ext.lstrip(".")}'
+                    image_path = f"data:{mime};base64,{base64.b64encode(file_bytes).decode('utf-8')}"
+                else:
+                    clean_base = secure_filename(os.path.splitext(raw_filename)[0]) or 'uploaded_image'
+                    timestamp = int(datetime.now().timestamp())
+                    filename = f"{timestamp}_{clean_base}{ext}"
 
-                uploads_dir = os.path.join(current_app.static_folder or 'static', 'uploads')
-                try:
-                    os.makedirs(uploads_dir, exist_ok=True)
-                    save_path = os.path.join(uploads_dir, filename)
-                    file.save(save_path)
-                    image_path = f'/static/uploads/{filename}'
-                except (OSError, IOError) as upload_err:
-                    logger.warning(f"Could not persist upload locally: {upload_err}. Falling back to default image.")
-                    image_path = '/static/logo.webp'
+                    uploads_dir = os.path.join(current_app.static_folder or 'static', 'uploads')
+                    try:
+                        os.makedirs(uploads_dir, exist_ok=True)
+                        save_path = os.path.join(uploads_dir, filename)
+                        file.save(save_path)
+                        image_path = f'/static/uploads/{filename}'
+                    except (OSError, IOError) as upload_err:
+                        logger.warning(f"Could not persist upload locally: {upload_err}. Encoding as data URL.")
+                        import base64
+                        file.seek(0)
+                        file_bytes = file.read()
+                        mime = 'image/jpeg' if ext in ('.jpg', '.jpeg') else f'image/{ext.lstrip(".")}'
+                        image_path = f"data:{mime};base64,{base64.b64encode(file_bytes).decode('utf-8')}"
 
         if not image_path:
-            image_path = '/static/logo.webp'
+            cat_lower = category.lower()
+            if 'veg' in cat_lower or 'fruit' in cat_lower:
+                image_path = '/static/fruits-vegetables/pineapple.jpeg' if 'pineapple' in name.lower() else '/static/fruits-vegetables/apples.jpeg'
+            else:
+                image_path = '/static/logo.webp'
 
         success, message, new_id = ProductService.create_product(
             name=name, price=price, category=category,

@@ -1078,8 +1078,11 @@
                         </select>
                     </div>
                     <div class="form-group full">
-                        <label>Product Image File</label>
-                        <input type="file" name="image_file" required accept="image/*" class="input-control" style="padding: 10px;">
+                        <label>Product Image</label>
+                        <input type="file" name="image_file" accept="image/png,image/jpeg,image/webp" class="input-control" style="padding: 10px;">
+                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">
+                            Optional: Choose an image file (.jpg, .png, .webp) or leave empty for default category image.
+                        </div>
                     </div>
                 </div>
                 <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
