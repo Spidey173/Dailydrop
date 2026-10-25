@@ -135,6 +135,6 @@ def logout():
     _clear_auth_session()
     logger.info(f"User #{user_id} ({email}) logged out")
     flash('You have been logged out successfully.', 'info')
-    return redirect(url_for('auth.login'))
+    return redirect(url_for('main.intro'))
 
 

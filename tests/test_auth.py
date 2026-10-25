@@ -90,3 +90,9 @@ def test_demo_customer_authentication():
     assert demo_user['email'] == 'demo_dailydrop@gmail.com'
     assert demo_user['role'] == 'customer'
 
+
+def test_logout_redirects_to_intro(client):
+    res = client.get('/logout', follow_redirects=False)
+    assert res.status_code == 302
+    assert res.headers['Location'] == '/'
+
