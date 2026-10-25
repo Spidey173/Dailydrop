@@ -39,6 +39,11 @@ function updateWishlistNavbarBadge(count) {
     mobileBadge.textContent = count;
     mobileBadge.style.display = count > 0 ? 'flex' : 'none';
   }
+  const drawerBadge = document.getElementById('drawer-wishlist-badge');
+  if (drawerBadge) {
+    drawerBadge.textContent = count;
+    drawerBadge.style.display = count > 0 ? 'inline-block' : 'none';
+  }
 }
 
 // Update all heart buttons on the page

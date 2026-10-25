@@ -36,6 +36,7 @@ def dashboard():
 
 
 @main_bp.route('/contact_us', methods=['GET', 'POST'], endpoint='contact_us')
+@main_bp.route('/contact-us', methods=['GET', 'POST'])
 def contact_us():
     """Handle contact form submissions."""
     user = None
@@ -118,6 +119,8 @@ def faqs() -> str:
 
 
 @main_bp.route('/about_us', endpoint='about_us')
+@main_bp.route('/about-us')
+@main_bp.route('/about')
 def about_us() -> str:
     """Display about us page."""
     return render_template('about_us.html')

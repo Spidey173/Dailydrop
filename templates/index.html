@@ -25,31 +25,43 @@
 <body>
 
   <!-- Portfolio Demo Disclaimer Banner -->
-  <div style="background: linear-gradient(90deg, #1e293b, #0f172a); color: #cbd5e1; border-bottom: 1px solid rgba(255,255,255,0.1); padding: 0.45rem 1rem; font-size: 0.8rem; text-align: center; position: sticky; top: 0; z-index: 1050; letter-spacing: 0.2px;">
-    <span style="display: inline-flex; align-items: center; gap: 0.4rem; justify-content: center; flex-wrap: wrap;">
-      <span style="background: rgba(249, 115, 22, 0.2); color: #f97316; border: 1px solid rgba(249, 115, 22, 0.35); padding: 0.1rem 0.5rem; border-radius: 4px; font-weight: 600; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.5px;">Portfolio Demo</span>
-      <span>DailyDrop is a simulated full-stack engineering demonstration. No actual grocery orders, transactions, or live deliveries take place.</span>
-    </span>
+  <div class="portfolio-demo-banner">
+    <span class="portfolio-demo-pill">Portfolio Demo</span>
+    <span>DailyDrop is a simulated full-stack engineering demonstration. No actual grocery orders, transactions, or live deliveries take place.</span>
   </div>
 
-
-    <!-- Animated Glowing Blobs -->
-    <div class="glow-blob glow-blob-1"></div>
-    <div class="glow-blob glow-blob-2"></div>
-    <div class="glow-blob glow-blob-3"></div>
+  <!-- Animated Glowing Blobs -->
+  <div class="glow-blob glow-blob-1"></div>
+  <div class="glow-blob glow-blob-2"></div>
+  <div class="glow-blob glow-blob-3"></div>
 
 <nav class="navbar">
     <div class="container navbar-container">
         <a href="{{ url_for('index') }}" class="logo">
-            <i class="fas fa-shopping-basket"></i> Daily<span>Drop</span> <span class="delivery-badge-pill"><i class="fas fa-bolt"></i> 10m</span>
+            <i class="fas fa-shopping-basket"></i> Daily<span>Drop</span>
         </a>
+
+        <!-- Mobile Header Controls: Quick Cart + "Three -" Hamburger Menu -->
+        <div class="mobile-header-controls" id="mobileHeaderControls">
+            <a href="{{ url_for('cart') }}" class="mobile-top-cart-btn" aria-label="Shopping Cart">
+                <i class="fas fa-shopping-cart"></i>
+                <span class="mobile-top-cart-badge" id="mobile-top-cart-badge" style="display: none;">0</span>
+            </a>
+            <button class="mobile-hamburger-btn" id="mobileHamburgerBtn" aria-label="Open Navigation Menu" type="button">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </button>
+        </div>
+
         <div class="search-bar">
             <input type="text" id="searchInput" placeholder="Search for products..." autocomplete="off" />
         </div>
+
         <div class="nav-actions">
             <!-- Conditional login/logout -->
             {% if 'user_id' in session %}
-<a href="{{ url_for('orders') }}" class="login-btn-outline"><i class="fas fa-box"></i> My Orders</a>
+                <a href="{{ url_for('orders') }}" class="login-btn-outline"><i class="fas fa-box"></i> My Orders</a>
                 <a href="{{ url_for('wishlist') }}" class="wishlist-nav-icon" title="My Wishlist">
                     <i class="fas fa-heart"></i> <span class="nav-text">Wishlist</span> <span id="wishlist-count" class="wishlist-badge">0</span>
                 </a>
@@ -64,6 +76,88 @@
         </div>
     </div>
 </nav>
+
+<!-- Mobile Slide-Out Drawer ("The Three -" Hamburger Menu) -->
+<div class="mobile-drawer-backdrop" id="mobileDrawerBackdrop"></div>
+<aside class="mobile-drawer-nav" id="mobileDrawerNav" aria-label="Mobile Navigation Drawer">
+    <div class="drawer-header">
+        <a href="{{ url_for('index') }}" class="logo">
+            <i class="fas fa-shopping-basket"></i> Daily<span>Drop</span>
+        </a>
+        <button class="drawer-close-btn" id="drawerCloseBtn" aria-label="Close navigation menu" type="button">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="drawer-user-info">
+        <div class="drawer-avatar">
+            <i class="fas {% if 'user_id' in session %}fa-user-check{% else %}fa-user{% endif %}"></i>
+        </div>
+        <div class="drawer-user-details">
+            <h5>{% if 'user_id' in session %}Welcome Back!{% else %}Welcome to DailyDrop{% endif %}</h5>
+            <p>{% if 'user_id' in session %}Fast & fresh grocery delivery{% else %}Sign in for orders & wishlist{% endif %}</p>
+        </div>
+    </div>
+    <div class="drawer-links-group">
+        <a href="{{ url_for('orders') }}" class="drawer-link">
+            <div class="drawer-link-content">
+                <i class="fas fa-box"></i>
+                <span>My Orders</span>
+            </div>
+            <i class="fas fa-chevron-right" style="font-size: 0.75rem; opacity: 0.5;"></i>
+        </a>
+        <a href="{{ url_for('wishlist') }}" class="drawer-link">
+            <div class="drawer-link-content">
+                <i class="fas fa-heart"></i>
+                <span>Wishlist</span>
+            </div>
+            <span class="drawer-badge" id="drawer-wishlist-badge" style="display: none;">0</span>
+        </a>
+        <a href="{{ url_for('cart') }}" class="drawer-link">
+            <div class="drawer-link-content">
+                <i class="fas fa-shopping-cart"></i>
+                <span>My Cart</span>
+            </div>
+            <span class="drawer-badge" id="drawer-cart-badge" style="display: none;">0</span>
+        </a>
+    </div>
+    <div class="drawer-divider"></div>
+    <div class="drawer-links-group">
+        <a href="{{ url_for('vegetables') }}" class="drawer-link">
+            <div class="drawer-link-content">
+                <i class="fas fa-carrot"></i>
+                <span>All Categories</span>
+            </div>
+            <i class="fas fa-chevron-right" style="font-size: 0.75rem; opacity: 0.5;"></i>
+        </a>
+        <a href="{{ url_for('main.about_us') }}" class="drawer-link">
+            <div class="drawer-link-content">
+                <i class="fas fa-info-circle"></i>
+                <span>About Us</span>
+            </div>
+        </a>
+        <a href="{{ url_for('main.contact_us') }}" class="drawer-link">
+            <div class="drawer-link-content">
+                <i class="fas fa-envelope"></i>
+                <span>Contact Us</span>
+            </div>
+        </a>
+        <a href="{{ url_for('main.faqs') }}" class="drawer-link">
+            <div class="drawer-link-content">
+                <i class="fas fa-question-circle"></i>
+                <span>FAQs & Help</span>
+            </div>
+        </a>
+    </div>
+    {% if 'user_id' in session %}
+        <a href="{{ url_for('logout') }}" class="drawer-auth-btn logout">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+    {% else %}
+        <a href="{{ url_for('login') }}" class="drawer-auth-btn login">
+            <i class="fas fa-sign-in-alt"></i> Login / Sign Up
+        </a>
+    {% endif %}
+</aside>
       <section class="container search-results-container" style="display: none;">
         <h2 class="products-title">Search Results</h2>
         <div class="products-grid" id="search-results-grid"></div>
