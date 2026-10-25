@@ -1521,28 +1521,31 @@ textarea.form-input {
     padding-bottom: 120px !important; /* Room for fixed bottom nav bar & floating cart bar */
   }
 
-  /* Compact 2-row Mobile Header */
+  /* Clean Single-Row Mobile Header: DailyDrop (Logo) + Search Bar + "The Three -" */
   .navbar {
-    padding: 8px 0 10px;
+    padding: 8px 0;
   }
 
   .navbar-container {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 12px;
-    gap: 8px 10px;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 0 10px !important;
+    gap: 8px !important;
   }
 
   .navbar .logo {
-    order: 1;
-    font-size: 1.35rem;
-    gap: 8px;
+    order: 1 !important;
+    font-size: 1.15rem !important;
+    gap: 6px !important;
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
   }
 
   .navbar .logo i {
-    font-size: 1.4rem;
+    font-size: 1.25rem !important;
   }
 
   /* Hide cluttered desktop nav buttons on mobile */
@@ -1550,138 +1553,79 @@ textarea.form-input {
     display: none !important;
   }
 
-  /* Mobile Top Header: Cart + "Three -" Hamburger Menu */
-  .mobile-header-controls {
-    order: 2;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .mobile-top-cart-btn {
-    position: relative;
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    background: rgba(16, 185, 129, 0.15);
-    border: 1px solid rgba(52, 211, 153, 0.35);
-    color: #34d399;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.95rem;
-    text-decoration: none;
-    transition: all 0.2s ease;
-  }
-
-  .mobile-top-cart-btn:hover,
-  .mobile-top-cart-btn:active {
-    background: rgba(16, 185, 129, 0.28);
-    color: #ffffff;
-    text-decoration: none;
-  }
-
-  .mobile-top-cart-badge {
-    position: absolute;
-    top: -4px;
-    right: -4px;
-    background: var(--hot-pink);
-    color: white;
-    font-size: 0.65rem;
-    font-weight: 800;
-    min-width: 18px;
-    height: 18px;
-    border-radius: 999px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 4px;
-    border: 1.5px solid #020805;
-    line-height: 1;
-  }
-
-  /* The "Three -" Hamburger Menu Button */
-  .mobile-hamburger-btn {
-    width: 38px;
-    height: 38px;
-    border-radius: 10px;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    color: var(--text-primary);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    padding: 0;
-  }
-
-  .mobile-hamburger-btn:hover,
-  .mobile-hamburger-btn:active {
-    background: rgba(16, 185, 129, 0.18);
-    border-color: rgba(52, 211, 153, 0.4);
-    color: #34d399;
-  }
-
-  .mobile-hamburger-btn .bar {
-    width: 18px;
-    height: 2px;
-    background-color: currentColor;
-    border-radius: 2px;
-    transition: all 0.25s ease;
-  }
-
-  /* Hide Cmd+K shortcut and desktop keyboard hints on phones */
-  .nav-kbd-badge,
-  .cmd-footer,
-  .cmd-key-hint {
-    display: none !important;
-  }
-
-  /* Mobile Navbar: Prominent Blinkit-style 2-Row Header with Full-Width Search */
+  /* Full Search Bar in Middle of Top Nav */
   .navbar .search-bar {
+    order: 2 !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    margin: 0 !important;
     display: block !important;
-    order: 3;
-    width: 100%;
-    max-width: 100%;
-    margin: 6px 0 2px 0;
-    position: relative;
+    position: relative !important;
   }
 
   .navbar .search-bar input {
-    width: 100%;
-    height: 42px;
-    padding: 0 38px 0 40px;
-    font-size: 0.88rem;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(16, 185, 129, 0.28);
-    color: #ffffff;
-    box-shadow: none;
-    transition: all 0.2s ease;
+    width: 100% !important;
+    height: 38px !important;
+    padding: 0 28px 0 34px !important;
+    font-size: 0.82rem !important;
+    border-radius: 10px !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(16, 185, 129, 0.28) !important;
+    color: #ffffff !important;
+    box-shadow: none !important;
+    transition: all 0.2s ease !important;
   }
 
   .navbar .search-bar input:focus {
-    background: rgba(16, 185, 129, 0.08);
-    border-color: #34d399;
-    box-shadow: 0 0 12px rgba(16, 185, 129, 0.22);
+    background: rgba(16, 185, 129, 0.09) !important;
+    border-color: #34d399 !important;
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.22) !important;
   }
 
   .navbar .search-bar::before {
-    left: 14px;
-    font-size: 0.92rem;
-    color: #34d399;
+    left: 11px !important;
+    font-size: 0.85rem !important;
+    color: #34d399 !important;
+  }
+
+  .search-clear-btn {
+    right: 7px !important;
+    width: 20px !important;
+    height: 20px !important;
+    font-size: 0.65rem !important;
   }
 
   .navbar .search-autocomplete-dropdown {
     top: calc(100% + 6px);
-    width: 100%;
+    width: calc(100vw - 20px);
+    left: calc(-1 * (100vw - 20px - 100%) / 2);
     max-height: 60vh;
     border-radius: 14px;
     box-shadow: 0 16px 40px rgba(0, 0, 0, 0.9), 0 0 20px rgba(16, 185, 129, 0.2);
     z-index: 1080;
+  }
+
+  /* The "Three -" Hamburger Menu Button on Top Right */
+  .mobile-header-controls {
+    order: 3 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0 !important;
+    flex-shrink: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Cart completely removed from top navbar as requested */
+  .mobile-top-cart-btn {
+    display: none !important;
+  }
+
+  .mobile-hamburger-btn {
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 10px !important;
+    flex-shrink: 0 !important;
   }
 
   /* Category layout: horizontal scroll chip rail */

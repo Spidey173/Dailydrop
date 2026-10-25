@@ -469,17 +469,13 @@ function initMobileExperience() {
   const isFaqs = currentPath.includes('/faqs');
   const loggedIn = isUserLoggedIn();
 
-  // 1. Render Mobile Top Header Controls (Cart + "Three -" Hamburger Menu) inside .navbar-container
+  // 1. Render Mobile Top Header Controls ("Three -" Hamburger Menu) inside .navbar-container
   const navbarContainer = document.querySelector('.navbar-container');
   if (navbarContainer && !document.getElementById('mobileHeaderControls')) {
       const controls = document.createElement('div');
       controls.className = 'mobile-header-controls';
       controls.id = 'mobileHeaderControls';
       controls.innerHTML = `
-          <a href="/cart" class="mobile-top-cart-btn" aria-label="Shopping Cart">
-              <i class="fas fa-shopping-cart"></i>
-              <span class="mobile-top-cart-badge" id="mobile-top-cart-badge" style="display: none;">0</span>
-          </a>
           <button class="mobile-hamburger-btn" id="mobileHamburgerBtn" aria-label="Open navigation menu" type="button">
               <span class="bar"></span>
               <span class="bar"></span>
