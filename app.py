@@ -43,7 +43,15 @@ def create_app(config_name: Optional[str] = None) -> Flask:
 
     # Initialize extensions
     csrf.init_app(app)
-    limiter.init_app(app)
+    try:
+        limiter.init_app(app)
+    except Exception as limiter_err:
+        logger.warning(f"Rate limiter failed to initialize with storage ({limiter_err}). Falling back to in-memory storage.")
+        try:
+            limiter._storage_uri = "memory://"
+            limiter.init_app(app)
+        except Exception:
+            pass
 
     # Register template filters
     @app.template_filter('from_json_or_list')

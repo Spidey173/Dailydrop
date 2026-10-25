@@ -6,12 +6,37 @@ application, including database paths, Flask settings, and security parameters.
 """
 
 import os
+import re
 from typing import Optional
 from datetime import timedelta
 from dotenv import load_dotenv
 
 # Load environment variables from .env
 load_dotenv()
+
+
+def sanitize_redis_url(raw_url: Optional[str]) -> str:
+    """
+    Sanitize and extract clean Redis URL from connection string or CLI snippets.
+    Handles cases where user pastes Upstash CLI string like:
+    'redis-cli --tls -u redis://default:xxx@host:port' -> 'rediss://default:xxx@host:port'
+    """
+    if not raw_url:
+        return 'redis://127.0.0.1:6379/0'
+    url = raw_url.strip().strip('\'\"')
+    if 'redis-cli' in url:
+        has_tls = '--tls' in url
+        match = re.search(r'-u\s+([^\s\'\"]+)', url)
+        if match:
+            url = match.group(1).strip('\'\"')
+        else:
+            match = re.search(r'(rediss?://[^\s\'\"]+)', url)
+            if match:
+                url = match.group(1).strip('\'\"')
+        if has_tls and url.startswith('redis://'):
+            url = 'rediss://' + url[8:]
+    return url
+
 
 # Get environment or use defaults
 ENV = os.getenv('FLASK_ENV', 'development')
@@ -52,7 +77,7 @@ class Config:
     DB_TIMEOUT = 30
 
     # Redis Cache & Distributed Lock Settings
-    REDIS_URL = os.getenv('REDIS_URL', 'redis://127.0.0.1:6379/0')
+    REDIS_URL = sanitize_redis_url(os.getenv('REDIS_URL', 'redis://127.0.0.1:6379/0'))
     REDIS_SOCKET_TIMEOUT = float(os.getenv('REDIS_SOCKET_TIMEOUT', 2.0))
     REDIS_ENABLED = os.getenv('REDIS_ENABLED', 'true').lower() in ('true', '1', 'yes')
     CACHE_CATALOG_TTL = int(os.getenv('CACHE_CATALOG_TTL', 600))  # 10 minutes
