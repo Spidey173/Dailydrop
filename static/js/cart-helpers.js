@@ -460,7 +460,7 @@ function initMobileExperience() {
   if (currentPath.includes('/admin')) return;
 
   const isHome = currentPath === '/' || currentPath.includes('/intro');
-  const isCategory = ['/vegetables', '/dairy_breakfast', '/snacks', '/baby_care', '/personal_care', '/household_items', '/home_kitchen', '/grocery', '/beverages', '/frozen_foods'].some(p => currentPath.includes(p));
+  const isCategory = ['/categories', '/category', '/vegetables', '/dairy_breakfast', '/snacks', '/baby_care', '/personal_care', '/household_items', '/home_kitchen', '/grocery', '/beverages', '/frozen_foods'].some(p => currentPath.includes(p));
   const isWishlist = currentPath.includes('/wishlist');
   const isOrders = currentPath.includes('/orders');
   const isCart = currentPath.includes('/cart');
@@ -497,7 +497,7 @@ function initMobileExperience() {
               <i class="fas fa-house"></i>
               <span>Home</span>
           </a>
-          <a href="/vegetables" class="mobile-nav-item ${isCategory ? 'active' : ''}" title="Categories">
+          <a href="/categories" class="mobile-nav-item ${isCategory ? 'active' : ''}" title="Categories">
               <i class="fas fa-border-all"></i>
               <span>Categories</span>
           </a>
