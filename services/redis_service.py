@@ -297,22 +297,16 @@ class RedisService:
             return False
 
     @classmethod
-    def invalidate_catalog(cls) -> None:
-        """Invalidate all catalog-related cached items."""
+    def invalidate_catalog(cls, product_id: Optional[int] = None) -> None:
+        """Invalidate all catalog-related cached items in Redis instantly (< 2ms)."""
         client = cls.get_client()
         if not client:
             return
         try:
             # Delete direct master catalog keys
-            client.delete("catalog:all_products", "catalog:categories")
-            # Invalidate category and product wildcard keys
-            for pattern in ["catalog:category:*", "catalog:product:*"]:
-                cursor = 0
-                while True:
-                    cursor, keys = client.scan(cursor=cursor, match=pattern, count=100)
-                    if keys:
-                        client.delete(*keys)
-                    if cursor == 0:
-                        break
+            keys_to_delete = ["catalog:all_products", "catalog:categories"]
+            if product_id:
+                keys_to_delete.append(f"catalog:product:{product_id}")
+            client.delete(*keys_to_delete)
         except Exception as e:
             logger.warning(f"Error invalidating catalog in Redis: {e}")

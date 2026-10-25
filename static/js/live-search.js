@@ -161,11 +161,11 @@
       const highlightedName = highlightMatch(item.name || item.title || '', query);
       const categoryLabel = item.category || 'Grocery';
       const priceVal = Number(item.price || 0).toFixed(2);
-      const imageSrc = item.image_path || item.image || '/static/logo.webp';
-      const cleanName = (item.name || item.title || '').replace(/'/g, "\\'");
+      const prodTitle = item.name || item.title || 'Product';
+      const cleanName = escapeHtml(prodTitle);
 
       itemEl.innerHTML = `
-        <img src="${imageSrc}" alt="${escapeHtml(item.name || '')}" class="suggestion-thumb" onerror="this.src='/static/logo.webp'" />
+        <img src="${imageSrc}" alt="${cleanName}" class="suggestion-thumb" onerror="this.src='/static/logo.webp'" />
         <div class="suggestion-info">
           <div class="suggestion-title">${highlightedName}</div>
           <div class="suggestion-meta">
@@ -173,15 +173,25 @@
             <span class="suggestion-price">Rs. ${priceVal}</span>
           </div>
         </div>
-        <button type="button" class="suggestion-quick-add" title="Add to Cart" onclick="event.stopPropagation(); if (typeof addToCart === 'function') { addToCart('${cleanName}', ${priceVal}, '${imageSrc}', this); }">
+        <button type="button" class="suggestion-quick-add" title="Add to Cart">
           <i class="fas fa-plus"></i> Add
         </button>
       `;
 
+      const addBtn = itemEl.querySelector('.suggestion-quick-add');
+      if (addBtn) {
+        addBtn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          if (typeof addToCart === 'function') {
+            addToCart(prodTitle, priceVal, imageSrc, addBtn);
+          }
+        });
+      }
+
       // Click to open details or perform page search
       itemEl.addEventListener('click', function () {
         if (typeof showDetails === 'function') {
-          showDetails(item.name || item.title, `Rs.${priceVal}`, imageSrc);
+          showDetails(prodTitle, `Rs.${priceVal}`, imageSrc);
           const modal = document.getElementById('productModal');
           if (modal && window.bootstrap) {
             new bootstrap.Modal(modal).show();

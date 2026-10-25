@@ -47,7 +47,8 @@
 * **Resilient Glassmorphic Error Templates**: Dedicated `404.html` and `500.html` error templates styled to the application design system handle routing misses and server faults gracefully without unformatted HTML or stack trace leakage.
 * **Cross-Platform Asynchronous Worker**: `worker.py` provides an RQ background consumer with automatic `SimpleWorker` selection on macOS (`darwin`) and Windows to prevent multi-threading fork crashes (`Signal 11 SIGSEGV`), supporting continuous daemon consumption and `--burst` queue draining.
 * **Transaction Failure Isolation**: Database writes during checkout utilize PostgreSQL `SAVEPOINT`s and defensive validation, preventing foreign key exceptions from triggering cascading transaction aborts.
-* **Hosting Alignment**: Gracefully detects serverless environments (Vercel) vs persistent containers. Ephemeral local uploads are safely blocked (`DISABLE_FILE_UPLOADS`) in serverless demos with clean HTTP 400 feedback.
+* **Hosting Alignment & Serverless Media Persistence**: Gracefully detects serverless environments (Vercel) vs persistent containers. When local disk uploads are disabled (`DISABLE_FILE_UPLOADS`) or executing on Vercel, uploaded product images are automatically converted to optimized Base64 Data URLs and stored permanently in PostgreSQL `products.image_path`, ensuring media persists seamlessly across serverless invocations.
+* **Live Catalog Synchronization & Category Aliasing**: Product catalogs now feature bidirectional category aliasing (e.g., `'Vegetables'` and `'Fruits & Vegetables'` seamlessly map to each other across database queries and frontend UI filters). Category pages and home page search synchronize directly with PostgreSQL, ensuring newly created products are immediately searchable and visible in user storefronts and the Admin Portal.
 
 ---
 

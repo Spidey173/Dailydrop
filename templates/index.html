@@ -361,30 +361,17 @@ const searchResultsGrid = document.getElementById('search-results-grid');
 const allSections = document.querySelectorAll('.hero-slider, .categories-section, .products-container');
 const allProducts = document.querySelectorAll('.product-card');
 
-// Replace existing search functionality with this
-searchInput.addEventListener('input', function() {
-  const searchTerm = this.value.trim().toLowerCase();
+// Live Search Functionality with Backend Database Integration & Client Fallback
+let searchDebounceTimer = null;
+
+function renderSearchResultsList(filteredProducts, searchTerm) {
   searchResultsGrid.innerHTML = '';
 
-  if (!searchTerm) {
-    searchResultsContainer.style.display = 'none';
-    allSections.forEach(section => section.style.display = '');
-    document.querySelector('.products-container.active').style.display = 'block';
-    return;
-  }
-
-  allSections.forEach(section => section.style.display = 'none');
-  searchResultsContainer.style.display = 'block';
-
-  const filteredProducts = window.productsDB.filter(product =>
-    product.title.toLowerCase().includes(searchTerm)
-  );
-
-  if (filteredProducts.length === 0) {
+  if (!filteredProducts || filteredProducts.length === 0) {
     searchResultsGrid.innerHTML = `
       <div class="no-results">
         <i class="fas fa-search"></i>
-        <p>No products found for "${searchTerm}"</p>
+        <p>No products found for "${escapeHtml(searchTerm)}"</p>
       </div>
     `;
     return;
@@ -431,6 +418,59 @@ searchInput.addEventListener('input', function() {
   });
   if (typeof updateProductButtons === 'function') updateProductButtons();
   if (typeof updateWishlistHeartButtons === 'function') updateWishlistHeartButtons();
+}
+
+function escapeHtml(str) {
+  return String(str || '').replace(/[&<>"']/g, m => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  })[m]);
+}
+
+searchInput.addEventListener('input', function() {
+  const searchTerm = this.value.trim().toLowerCase();
+  clearTimeout(searchDebounceTimer);
+
+  if (!searchTerm) {
+    searchResultsContainer.style.display = 'none';
+    allSections.forEach(section => section.style.display = '');
+    const activeSection = document.querySelector('.products-container.active');
+    if (activeSection) activeSection.style.display = 'block';
+    return;
+  }
+
+  allSections.forEach(section => section.style.display = 'none');
+  searchResultsContainer.style.display = 'block';
+
+  searchDebounceTimer = setTimeout(async () => {
+    let matchedProducts = [];
+    try {
+      const res = await fetch(`/api/v1/products/search?q=${encodeURIComponent(searchTerm)}&limit=24`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.results) && data.results.length > 0) {
+          matchedProducts = data.results.map(p => ({
+            id: p.product_id || p.id,
+            title: p.name || p.title,
+            price: p.price,
+            image: p.image_path || p.image,
+            category: p.category,
+            discount: p.discount || 0
+          }));
+        }
+      }
+    } catch (e) {
+      console.debug('Search API error, checking local DB:', e);
+    }
+
+    if (matchedProducts.length === 0 && Array.isArray(window.productsDB)) {
+      matchedProducts = window.productsDB.filter(product =>
+        (product.title || '').toLowerCase().includes(searchTerm) ||
+        (product.category || '').toLowerCase().includes(searchTerm)
+      );
+    }
+
+    renderSearchResultsList(matchedProducts, searchTerm);
+  }, 120);
 });
 
 // Category Filtering
@@ -535,11 +575,36 @@ function renderPopularProducts() {
     }
 }
 
+// Synchronize window.productsDB with live database catalog
+async function syncCatalogWithServer() {
+    try {
+        const res = await fetch('/api/v1/products/list');
+        if (res.ok) {
+            const data = await res.json();
+            if (data.success && Array.isArray(data.products) && data.products.length > 0) {
+                window.productsDB = data.products.map(p => ({
+                    id: p.product_id || p.id,
+                    title: p.name || p.title,
+                    category: p.category,
+                    subcategory: p.subcategory || '',
+                    price: parseFloat(p.price || 0),
+                    image: p.image_path || p.image || '/static/logo1.webp',
+                    description: p.description || ''
+                }));
+                document.dispatchEvent(new CustomEvent('productsSynced', { detail: window.productsDB }));
+            }
+        }
+    } catch (e) {
+        console.debug('Catalog live sync deferred:', e);
+    }
+}
+
 // Call this when the page loads
 document.addEventListener('DOMContentLoaded', () => {
     initializeCart();
     renderPopularProducts();
     updateProductButtons();
+    syncCatalogWithServer();
 });
 
 document.addEventListener('productsSynced', renderPopularProducts);

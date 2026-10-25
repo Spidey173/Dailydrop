@@ -843,8 +843,9 @@
                     </div>
                     <select id="categoryFilter" class="select-control" onchange="filterProducts()">
                         <option value="">All Categories</option>
-                        <option value="Grocery">Grocery</option>
+                        <option value="Fruits & Vegetables">Fruits & Vegetables</option>
                         <option value="Vegetables">Vegetables</option>
+                        <option value="Grocery">Grocery</option>
                         <option value="Dairy & Breakfast">Dairy & Breakfast</option>
                         <option value="Snacks">Snacks</option>
                         <option value="Beverages">Beverages</option>
@@ -1065,8 +1066,8 @@
                     <div class="form-group full">
                         <label>Category</label>
                         <select name="category" required class="select-control" style="width: 100%;">
+                            <option value="Fruits & Vegetables">Fruits & Vegetables</option>
                             <option value="Grocery">Grocery</option>
-                            <option value="Vegetables">Vegetables</option>
                             <option value="Dairy & Breakfast">Dairy & Breakfast</option>
                             <option value="Snacks">Snacks</option>
                             <option value="Beverages">Beverages</option>
@@ -1076,6 +1077,10 @@
                             <option value="Personal Care">Personal Care</option>
                             <option value="Baby Care">Baby Care</option>
                         </select>
+                    </div>
+                    <div class="form-group full">
+                        <label>Subcategory (Optional)</label>
+                        <input type="text" name="subcategory" class="input-control" placeholder="e.g. vegetables, fruits, leafy, melons, atta, milk">
                     </div>
                     <div class="form-group full">
                         <label>Product Image</label>
@@ -1304,15 +1309,29 @@
 
         // Filter & Search
         function filterProducts() {
-            const search = document.getElementById('searchInput').value.toLowerCase();
-            const category = document.getElementById('categoryFilter').value;
+            const search = (document.getElementById('searchInput').value || '').toLowerCase().trim();
+            const category = (document.getElementById('categoryFilter').value || '').toLowerCase().trim();
             const rows = document.querySelectorAll('#productTableBody tr[id^="product-row-"]');
 
             rows.forEach(row => {
-                const name = row.getAttribute('data-name');
-                const cat = row.getAttribute('data-category');
-                const matchesSearch = name.includes(search);
-                const matchesCat = !category || cat === category;
+                const name = (row.getAttribute('data-name') || '').toLowerCase();
+                const cat = (row.getAttribute('data-category') || '').toLowerCase();
+                const matchesSearch = !search || name.includes(search);
+                
+                let matchesCat = !category;
+                if (category) {
+                    if (cat === category) {
+                        matchesCat = true;
+                    } else if ((category.includes('veg') || category.includes('fruit')) && (cat.includes('veg') || cat.includes('fruit'))) {
+                        matchesCat = true;
+                    } else if (category.includes('dairy') && cat.includes('dairy')) {
+                        matchesCat = true;
+                    } else if (category.includes('house') && cat.includes('house')) {
+                        matchesCat = true;
+                    } else if (category.includes('kitchen') && cat.includes('kitchen')) {
+                        matchesCat = true;
+                    }
+                }
 
                 row.style.display = (matchesSearch && matchesCat) ? '' : 'none';
             });

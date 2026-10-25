@@ -12,6 +12,7 @@ from services.order_service import OrderService
 from services.contact_service import ContactService
 from blueprints.helpers import admin_required
 from utils import sanitize_string
+from database import normalize_category, clear_product_cache
 
 logger = logging.getLogger(__name__)
 
@@ -169,9 +170,19 @@ def api_add_product():
     try:
         name = sanitize_string(data.get('name', ''))
         price = float(data.get('price', 0))
-        category = sanitize_string(data.get('category', 'Grocery'))
+        raw_category = sanitize_string(data.get('category', 'Grocery'))
+        category = normalize_category(raw_category)
+        subcategory = sanitize_string(data.get('subcategory', ''))
         stock = int(data.get('stock', 50))
         image_path = sanitize_string(data.get('image_path', ''))
+
+        # If subcategory is empty, intelligently infer it for Produce
+        if not subcategory and category == 'Fruits & Vegetables':
+            name_lower = name.lower()
+            if any(f in name_lower for f in ('apple', 'banana', 'melon', 'fruit', 'mango', 'orange', 'grape', 'berry', 'watermelon', 'pineapple')):
+                subcategory = 'fruits'
+            else:
+                subcategory = 'vegetables'
 
         if 'image_file' in request.files:
             file = request.files['image_file']
@@ -221,15 +232,18 @@ def api_add_product():
 
         success, message, new_id = ProductService.create_product(
             name=name, price=price, category=category,
-            subcategory='', image_path=image_path,
+            subcategory=subcategory, image_path=image_path,
             description='', stock=stock
         )
 
         if success:
+            clear_product_cache(new_id)
             return jsonify({
                 'success': True,
                 'message': message,
                 'product_id': new_id,
+                'category': category,
+                'subcategory': subcategory,
                 'image_path': image_path
             }), 201
         return jsonify({'success': False, 'error': message}), 400

@@ -109,20 +109,52 @@
       });
     }
 
-    // Load products from centralized products database
+    // Load products from backend server catalog (with client-side fallback)
+    const serverProducts = {{ (products or []) | tojson }};
     const categoryName = {{ category_config.db_name | tojson }};
     let products = [];
 
+    function isProduceFruit(title) {
+      const lower = (title || '').toLowerCase();
+      return ['apple', 'banana', 'melon', 'fruit', 'mango', 'orange', 'grape', 'berry', 'watermelon', 'pineapple', 'pomegranate', 'kiwi', 'papaya', 'guava', 'pear', 'plum'].some(f => lower.includes(f));
+    }
+
+    function isCategoryMatch(prodCat, targetCat) {
+      if (!targetCat) return true;
+      if (!prodCat) return false;
+      const p = prodCat.toLowerCase();
+      const t = targetCat.toLowerCase();
+      if (p === t) return true;
+      if ((t.includes('veg') || t.includes('fruit')) && (p.includes('veg') || p.includes('fruit'))) return true;
+      if (t.includes('dairy') && p.includes('dairy')) return true;
+      if (t.includes('house') && p.includes('house')) return true;
+      if (t.includes('kitchen') && p.includes('kitchen')) return true;
+      return false;
+    }
+
     function getCategoryProducts() {
+      if (Array.isArray(serverProducts) && serverProducts.length > 0) {
+        return serverProducts.map(p => ({
+          id: p.product_id || p.id,
+          name: p.name || p.title,
+          price: parseFloat(p.price || 0),
+          image: p.image_path || p.image || '/static/logo1.webp',
+          category: p.subcategory || '',
+          mainCategory: p.category || categoryName,
+          description: p.description || ''
+        }));
+      }
+
       return (window.productsDB || [])
-        .filter(p => p.category === categoryName)
+        .filter(p => isCategoryMatch(p.category, categoryName))
         .map(p => ({
           id: p.id,
           name: p.title,
-          price: p.price,
-          image: p.image,
-          category: p.subcategory || '', // Map subcategory to category for legacy frontend compatibility
-          description: p.description
+          price: parseFloat(p.price || 0),
+          image: p.image || '/static/logo1.webp',
+          category: p.subcategory || '',
+          mainCategory: p.category || categoryName,
+          description: p.description || ''
         }));
     }
 
@@ -138,9 +170,22 @@
       productsGrid.innerHTML = '';
       renderedCount = 0;
 
-      currentCategoryProducts = category === 'all'
-        ? products
-        : products.filter(product => (product.category || '').toLowerCase() === category.toLowerCase());
+      const catTarget = (category || 'all').toLowerCase();
+      if (catTarget === 'all') {
+        currentCategoryProducts = products;
+      } else if (catTarget === 'fruits') {
+        currentCategoryProducts = products.filter(p => 
+          (p.category || '').toLowerCase() === 'fruits' || isProduceFruit(p.name)
+        );
+      } else if (catTarget === 'vegetables') {
+        currentCategoryProducts = products.filter(p => 
+          (p.category || '').toLowerCase() === 'vegetables' || (!isProduceFruit(p.name) && (p.category === '' || (p.category || '').toLowerCase() === 'vegetables'))
+        );
+      } else {
+        currentCategoryProducts = products.filter(p => 
+          (p.category || '').toLowerCase() === catTarget || (p.category || '').toLowerCase().includes(catTarget)
+        );
+      }
 
       loadMoreProducts();
     }
