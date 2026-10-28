@@ -37,16 +37,22 @@ _db_pool: Optional[pool.ThreadedConnectionPool] = None
 def get_pool() -> pool.ThreadedConnectionPool:
     """
     Get or initialize the threaded connection pool for Neon PostgreSQL.
+    Adapts pool size automatically for serverless environments (e.g. Vercel)
+    to minimize TCP/TLS handshakes and speed up cold starts.
     """
     global _db_pool
     if _db_pool is None or _db_pool.closed:
         try:
+            is_serverless = bool(os.getenv('VERCEL') or os.getenv('AWS_LAMBDA_FUNCTION_NAME'))
+            minconn = 1 if is_serverless else Config.DB_MIN_CONN
+            maxconn = 4 if is_serverless else Config.DB_MAX_CONN
+
             _db_pool = pool.ThreadedConnectionPool(
-                minconn=Config.DB_MIN_CONN,
-                maxconn=Config.DB_MAX_CONN,
+                minconn=minconn,
+                maxconn=maxconn,
                 dsn=Config.DATABASE_URL
             )
-            logger.info("Initialized Neon PostgreSQL connection pool.")
+            logger.info(f"Initialized Neon PostgreSQL connection pool (minconn={minconn}, maxconn={maxconn}).")
         except Exception as e:
             logger.error(f"Failed to create Neon PostgreSQL connection pool: {e}")
             raise DatabaseError(f"Database connection pool error: {e}") from e
@@ -319,13 +325,14 @@ def init_database() -> None:
                 except Exception as oi_err:
                     logger.warning(f"Note on order_items table backfill check: {oi_err}")
 
-        # Pre-warm product master cache, analytics, and demo/admin user accounts
+        # Pre-warm product master cache and demo/admin user accounts (skip expensive analytics on serverless cold starts)
         try:
             get_all_products()
-            get_unified_analytics(days=30)
             get_user_by_email('admin_dailydrop@gmail.com')
             get_user_by_email('demo_dailydrop@gmail.com')
-            logger.info("Product, analytics, and user cache pre-warmed for instant sub-millisecond responses.")
+            if not os.getenv('VERCEL'):
+                get_unified_analytics(days=30)
+            logger.info("Product and user cache pre-warmed for fast responses.")
         except Exception as e:
             logger.warning(f"Could not pre-warm cache: {e}")
 
