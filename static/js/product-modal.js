@@ -435,20 +435,36 @@ window.showDetails = function(name, priceStr, image, categoryHint = '') {
   injectProductModalHTML();
 
   // Find product details from productsDB or fallback
-  const catalog = window.productsDB || window.serverInitialProducts || [];
-  const productMatch = catalog.find(p => (p.title === name || p.name === name)) || {};
+  const catalog = (window.productsDB && window.productsDB.length > 0)
+    ? window.productsDB
+    : (window.serverInitialProducts || []);
+  const productMatch = catalog.find(p => {
+    const title = (p.title || p.name || '').trim().toLowerCase();
+    const target = (name || '').trim().toLowerCase();
+    return title === target;
+  }) || {};
   const category = productMatch.category || categoryHint || window.categoryName || 'Daily Essential';
   const description = productMatch.description || 'Premium quality product carefully sourced, inspected, and delivered fresh to your doorstep.';
 
-  // Format Price
+  // Format Price: prioritize verified catalog price if available
   let rawPrice = 0;
-  if (typeof priceStr === 'number') {
+  if (typeof productMatch.price === 'number' && productMatch.price > 0) {
+    rawPrice = productMatch.price;
+  } else if (typeof priceStr === 'number') {
     rawPrice = priceStr;
   } else if (typeof priceStr === 'string') {
     rawPrice = parseFloat(priceStr.replace(/[^0-9.]/g, '')) || 0;
   }
   const formattedPrice = `Rs. ${rawPrice.toFixed(2)}`;
   const strikePrice = `Rs. ${(rawPrice * 1.15).toFixed(2)}`;
+
+  // Store active authoritative product reference
+  window.currentActiveModalProduct = {
+    name: name,
+    price: rawPrice,
+    image: image || productMatch.image || productMatch.image_path,
+    id: productMatch.product_id || productMatch.id
+  };
 
   // Populate basic text fields
   const titleEl = document.getElementById('modalTitle');
@@ -540,11 +556,27 @@ window.addToCartFromModal = function() {
 window.addModalItemToCart = function() {
   const titleEl = document.getElementById('modalTitle');
   const name = titleEl ? titleEl.innerText.trim() : 'Product';
-  const priceEl = document.getElementById('modalPrice');
-  const priceText = priceEl ? priceEl.innerText : '0';
+
+  // Authoritative price resolution
+  let price = 0;
+  if (window.currentActiveModalProduct && window.currentActiveModalProduct.name === name && window.currentActiveModalProduct.price > 0) {
+    price = window.currentActiveModalProduct.price;
+  } else {
+    const catalog = (window.productsDB && window.productsDB.length > 0)
+      ? window.productsDB
+      : (window.serverInitialProducts || []);
+    const match = catalog.find(p => (p.title || p.name || '').trim().toLowerCase() === name.toLowerCase());
+    if (match && typeof match.price === 'number' && match.price > 0) {
+      price = match.price;
+    } else {
+      const priceEl = document.getElementById('modalPrice');
+      const priceText = priceEl ? priceEl.innerText : '0';
+      price = parseFloat(priceText.replace(/[^0-9.]/g, '')) || 0;
+    }
+  }
+
   const imgEl = document.getElementById('modalImage');
-  const image = imgEl ? imgEl.src : '/static/product-placeholder.svg';
-  const price = parseFloat(priceText.replace(/[^0-9.]/g, '')) || 0;
+  const image = (window.currentActiveModalProduct && window.currentActiveModalProduct.image) || (imgEl ? imgEl.src : '/static/product-placeholder.svg');
   const qtyToAdd = Math.max(1, parseInt(modalItemQty) || 1);
 
   // 1. Hide modal cleanly using Bootstrap instance
@@ -580,12 +612,14 @@ window.addModalItemToCart = function() {
   const existingItem = cart.find(item => item.name === name);
   if (existingItem) {
     existingItem.quantity += qtyToAdd;
+    if (price > 0) existingItem.price = price;
   } else {
     cart.push({
       name: name,
       price: price,
       image: image,
-      quantity: qtyToAdd
+      quantity: qtyToAdd,
+      product_id: window.currentActiveModalProduct ? window.currentActiveModalProduct.id : undefined
     });
   }
   localStorage.setItem('cart', JSON.stringify(cart));

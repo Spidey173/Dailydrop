@@ -384,8 +384,9 @@
       }
     }
   </style>
+  <script src="{{ url_for('static', filename='js/products.js') }}?v=20261028_2"></script>
   <script src="{{ url_for('static', filename='js/wishlist.js') }}" defer></script>
-  <script src="{{ url_for('static', filename='js/cart-helpers.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='js/cart-helpers.js') }}"></script>
   <script src="{{ url_for('static', filename='js/live-search.js') }}" defer></script>
 </head>
 <body>
@@ -481,7 +482,41 @@
     }
 
     function loadCart() {
-        const cart = JSON.parse(localStorage.getItem('cart')) || [];
+        if (typeof reconcileCartWithCatalog === 'function') {
+            reconcileCartWithCatalog();
+        }
+
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        const catalog = (window.productsDB && window.productsDB.length > 0)
+            ? window.productsDB
+            : (window.serverInitialProducts || []);
+
+        // Self-heal cart items against authoritative catalog
+        let cartFixed = false;
+        cart = cart.map(item => {
+            let price = parseFloat(item.price) || 0;
+            const qty = Math.max(1, parseInt(item.quantity) || 1);
+            if (catalog.length > 0) {
+                const match = catalog.find(p => (p.title || p.name || '').trim().toLowerCase() === (item.name || '').trim().toLowerCase());
+                if (match && typeof match.price === 'number' && match.price > 0) {
+                    if (Math.abs(price - match.price) > 0.001) {
+                        price = match.price;
+                        cartFixed = true;
+                    }
+                }
+            }
+            if (item.price !== price || item.quantity !== qty) {
+                item.price = price;
+                item.quantity = qty;
+                cartFixed = true;
+            }
+            return item;
+        });
+
+        if (cartFixed) {
+            localStorage.setItem('cart', JSON.stringify(cart));
+        }
+
         const cartItemsDiv = document.getElementById('cartItems');
         const cartContentDiv = document.getElementById('cartContent');
         cartItemsDiv.innerHTML = '';
@@ -503,16 +538,17 @@
 
         let grandTotal = 0;
         cart.forEach(item => {
-            const itemTotal = item.price * item.quantity;
+            const unitPrice = parseFloat(item.price) || 0;
+            const itemTotal = unitPrice * item.quantity;
             grandTotal += itemTotal;
 
             const itemDiv = document.createElement('div');
             itemDiv.className = 'cart-item';
             itemDiv.innerHTML = `
-                <img src="${item.image}" alt="${item.name}" />
+                <img src="${item.image}" alt="${item.name}" onerror="this.src='/static/product-placeholder.svg'" />
                 <div class="cart-item-details">
                     <h3 class="cart-item-title">${item.name}</h3>
-                    <div class="cart-item-price">Price: <span>Rs. ${item.price.toFixed(2)}</span></div>
+                    <div class="cart-item-price">Price: <span>Rs. ${unitPrice.toFixed(2)}</span></div>
                     <div class="cart-item-actions">
                         <div class="qty-controls">
                             <button onclick="decreaseQuantity('${item.name}')" class="qty-btn">-</button>
@@ -580,6 +616,10 @@
     function proceedToCheckout() {
       window.location.href = "{{ url_for('payment') }}";
     }
+
+    window.addEventListener('storage', loadCart);
+    document.addEventListener('cartUpdated', loadCart);
+    document.addEventListener('productsSynced', loadCart);
 
     loadCart();
   </script>

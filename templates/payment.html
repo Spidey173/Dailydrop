@@ -17,7 +17,8 @@
   <!-- Centralized Stylesheet -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 
-  <!-- Razorpay Checkout SDK -->
+  <!-- Razorpay Checkout SDK & Authoritative Catalog -->
+  <script src="{{ url_for('static', filename='js/products.js') }}?v=20261028_2"></script>
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <script src="{{ url_for('static', filename='js/cart-helpers.js') }}"></script>
 
@@ -569,6 +570,9 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+        if (typeof reconcileCartWithCatalog === 'function') {
+            reconcileCartWithCatalog();
+        }
         const cart = JSON.parse(localStorage.getItem('cart')) || [];
         const total = calculateTotal(cart);
         const orderItemsDiv = document.getElementById('orderItems');
@@ -583,14 +587,15 @@
         }
 
         cart.forEach(item => {
+            const unitPrice = parseFloat(item.price) || 0;
             const itemHTML = `
                 <div class="order-item">
-                    <img src="${item.image}" alt="${item.name}">
+                    <img src="${item.image}" alt="${item.name}" onerror="this.src='/static/product-placeholder.svg'">
                     <div class="item-info">
                         <h4 class="item-name">${item.name}</h4>
                         <div class="item-meta">
                             <span>Qty: ${item.quantity}</span>
-                            <span>Rs. ${(item.price * item.quantity).toFixed(2)}</span>
+                            <span>Rs. ${(unitPrice * item.quantity).toFixed(2)}</span>
                         </div>
                     </div>
                 </div>
@@ -607,7 +612,7 @@
     });
 
     function calculateTotal(items) {
-        return items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        return items.reduce((sum, item) => sum + ((parseFloat(item.price) || 0) * (parseInt(item.quantity) || 1)), 0);
     }
 
     function updateCartCount() {

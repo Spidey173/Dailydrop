@@ -202,7 +202,8 @@
 
       const highlightedName = highlightMatch(item.name || item.title || '', query);
       const categoryLabel = item.category || 'Grocery';
-      const priceVal = Number(item.price || 0).toFixed(2);
+      const numPrice = Number(item.price || 0);
+      const priceVal = numPrice.toFixed(2);
       const prodTitle = item.name || item.title || 'Product';
       const cleanName = escapeHtml(prodTitle);
 
@@ -225,7 +226,7 @@
         addBtn.addEventListener('click', function (e) {
           e.stopPropagation();
           if (typeof addToCart === 'function') {
-            addToCart(prodTitle, priceVal, imageSrc, addBtn);
+            addToCart(prodTitle, numPrice, imageSrc, addBtn);
           }
         });
       }
@@ -233,7 +234,7 @@
       // Click to open details or perform page search
       itemEl.addEventListener('click', function () {
         if (typeof showDetails === 'function') {
-          showDetails(prodTitle, `Rs.${priceVal}`, imageSrc);
+          showDetails(prodTitle, numPrice, imageSrc);
           const modal = document.getElementById('productModal');
           if (modal && window.bootstrap) {
             new bootstrap.Modal(modal).show();

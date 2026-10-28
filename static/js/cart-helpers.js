@@ -57,14 +57,107 @@ function showGuestLoginAlert() {
     }, 1000);
 }
 
-let cart = JSON.parse(localStorage.getItem('cart')) || [];
-if (cart.length > 0) {
-  cart = cart.map(item => ({
-    ...item,
-    quantity: Number(item.quantity) || 1
-  }));
-  localStorage.setItem('cart', JSON.stringify(cart));
+// Authoritative Cart Self-Healing & Catalog Price Reconciliation Engine
+function reconcileCartWithCatalog() {
+  const catalog = (window.productsDB && window.productsDB.length > 0)
+    ? window.productsDB
+    : ((window.serverInitialProducts && window.serverInitialProducts.length > 0)
+      ? window.serverInitialProducts
+      : null);
+
+  let cart = JSON.parse(localStorage.getItem('cart')) || [];
+  if (!Array.isArray(cart) || cart.length === 0) return false;
+
+  let changed = false;
+
+  cart = cart.map(item => {
+    let price = parseFloat(item.price) || 0;
+    let qty = Math.max(1, parseInt(item.quantity) || 1);
+
+    if (catalog && catalog.length > 0) {
+      const match = catalog.find(p => {
+        const title = (p.title || p.name || '').trim().toLowerCase();
+        const itemTitle = (item.name || '').trim().toLowerCase();
+        const pId = p.product_id || p.id;
+        const itemId = item.product_id || item.id;
+        return (itemId && pId && String(itemId) === String(pId)) || (title && itemTitle && title === itemTitle);
+      });
+
+      if (match) {
+        const catalogPrice = Number(match.price);
+        if (typeof catalogPrice === 'number' && catalogPrice > 0 && Math.abs(price - catalogPrice) > 0.001) {
+          console.info(`[Cart Healing] Reconciled price for "${item.name}": Rs. ${price} -> Rs. ${catalogPrice}`);
+          price = catalogPrice;
+          changed = true;
+        }
+        if (match.image && (!item.image || item.image.includes('placeholder'))) {
+          item.image = match.image || match.image_path;
+          changed = true;
+        }
+        if ((match.product_id || match.id) && !item.product_id) {
+          item.product_id = match.product_id || match.id;
+          changed = true;
+        }
+      }
+    }
+
+    if (item.price !== price || item.quantity !== qty) {
+      item.price = price;
+      item.quantity = qty;
+      changed = true;
+    }
+
+    return item;
+  });
+
+  if (changed) {
+    localStorage.setItem('cart', JSON.stringify(cart));
+  }
+  return changed;
 }
+
+// Background asynchronous catalog fetch to guarantee client-side healing if productsDB not in DOM
+async function ensureCatalogAndReconcileCart() {
+  if (reconcileCartWithCatalog()) {
+    updateCartCount();
+    if (typeof loadCart === 'function') loadCart();
+    if (typeof updateProductButtons === 'function') updateProductButtons();
+    return;
+  }
+
+  if (!window.productsDB || window.productsDB.length === 0) {
+    try {
+      const res = await fetch('/api/v1/products/list');
+      if (res.ok) {
+        const data = await res.json();
+        const prods = (data && (data.products || (Array.isArray(data) ? data : []))) || [];
+        if (prods.length > 0) {
+          window.productsDB = prods.map(p => ({
+            id: p.product_id || p.id,
+            product_id: p.product_id || p.id,
+            title: p.name || p.title,
+            name: p.name || p.title,
+            category: p.category,
+            subcategory: p.subcategory || '',
+            price: parseFloat(p.price || 0),
+            image: p.image_path || p.image || '/static/product-placeholder.svg',
+            description: p.description || ''
+          }));
+          if (reconcileCartWithCatalog()) {
+            updateCartCount();
+            if (typeof loadCart === 'function') loadCart();
+            if (typeof updateProductButtons === 'function') updateProductButtons();
+          }
+        }
+      }
+    } catch (e) {
+      // offline / deferred fallback
+    }
+  }
+}
+
+// Initial immediate sync pass
+reconcileCartWithCatalog();
 
 
 window.addEventListener('storage', () => {
@@ -169,17 +262,29 @@ function addToCart(productName, productPrice, productImage, evt) {
     // Launch Parabolic Fly Animation
     animateFlyToCart(productImage, evt || window.event);
 
+    // Authoritative price check
+    let numericPrice = parseFloat(productPrice) || 0;
+    const catalog = (window.productsDB && window.productsDB.length > 0)
+        ? window.productsDB
+        : (window.serverInitialProducts || []);
+    const match = catalog.find(p => (p.title || p.name || '').trim().toLowerCase() === (productName || '').trim().toLowerCase());
+    if (match && typeof match.price === 'number' && match.price > 0) {
+        numericPrice = match.price;
+    }
+
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
     const existingItem = cart.find(item => item.name === productName);
 
     if (existingItem) {
         existingItem.quantity += 1;
+        if (numericPrice > 0) existingItem.price = numericPrice;
     } else {
         cart.push({
             name: productName,
-            price: productPrice,
+            price: numericPrice,
             image: productImage,
-            quantity: 1
+            quantity: 1,
+            product_id: match ? (match.product_id || match.id) : undefined
         });
     }
 
@@ -204,20 +309,32 @@ function changeQuantity(productName, delta, price, img, event) {
         animateFlyToCart(img, event || window.event);
     }
 
+    // Authoritative price check
+    let unitPrice = parseFloat(price) || 0;
+    const catalog = (window.productsDB && window.productsDB.length > 0)
+        ? window.productsDB
+        : (window.serverInitialProducts || []);
+    const match = catalog.find(p => (p.title || p.name || '').trim().toLowerCase() === (productName || '').trim().toLowerCase());
+    if (match && typeof match.price === 'number' && match.price > 0) {
+        unitPrice = match.price;
+    }
+
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
     const existingItem = cart.find(item => item.name === productName);
     
     if (existingItem) {
         existingItem.quantity += delta;
+        if (unitPrice > 0) existingItem.price = unitPrice;
         if (existingItem.quantity <= 0) {
             cart = cart.filter(item => item.name !== productName);
         }
     } else if (delta > 0) {
         cart.push({
             name: productName,
-            price: price,
+            price: unitPrice,
             image: img,
-            quantity: 1
+            quantity: 1,
+            product_id: match ? (match.product_id || match.id) : undefined
         });
     }
     
@@ -698,8 +815,14 @@ function showAddedToCartAlert(productName) {
 // Automatically bind to DOM load
 document.addEventListener('DOMContentLoaded', () => {
     initMobileExperience();
+    ensureCatalogAndReconcileCart();
     updateCartCount();
     updateProductButtons();
+});
+
+// Reconcile prices dynamically when live database products are synced
+document.addEventListener('productsSynced', () => {
+    ensureCatalogAndReconcileCart();
 });
 
 // Re-evaluate on resize/orientation change
