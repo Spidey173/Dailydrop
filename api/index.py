@@ -11,13 +11,19 @@ from flask import Flask, render_template_string, jsonify
 
 def _init_serverless_app():
     # Secure serverless initialization: DATABASE_URL is injected via Vercel Environment Variables
+    import hashlib
     import secrets
-    current_key = os.getenv('SECRET_KEY', '')
-    target_env = os.getenv('FLASK_ENV', 'production').lower()
 
-    # In development/preview serverless runs, auto-generate an ephemeral secret if missing
-    if (not current_key or len(current_key) < 16) and target_env != 'production':
-        os.environ['SECRET_KEY'] = secrets.token_hex(32)
+    current_key = os.getenv('SECRET_KEY', '')
+    if not current_key or len(current_key) < 16:
+        # If SECRET_KEY is not explicitly defined in Vercel settings, derive a strong,
+        # deployment-specific persistent key from the deployment's private DATABASE_URL
+        # so all serverless lambdas share the same key without dropping sessions or exposing secrets.
+        db_url = os.getenv('DATABASE_URL', '')
+        if db_url:
+            os.environ['SECRET_KEY'] = hashlib.sha256((db_url + ':dailydrop-app-secret-salt-2026').encode('utf-8')).hexdigest()
+        else:
+            os.environ['SECRET_KEY'] = secrets.token_hex(32)
     
     from config import Config, ProductionConfig
     if os.getenv('SECRET_KEY'):
