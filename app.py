@@ -7,10 +7,18 @@ backed by high-performance Neon PostgreSQL and structured with modular Blueprint
 import logging
 import os
 import json
+import mimetypes
 from typing import Tuple, Optional
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_wtf.csrf import CSRFError
 from werkzeug.middleware.proxy_fix import ProxyFix
+
+# Ensure standard image MIME types are registered
+mimetypes.add_type('image/webp', '.webp')
+mimetypes.add_type('image/jpeg', '.jpeg')
+mimetypes.add_type('image/jpeg', '.jpg')
+mimetypes.add_type('image/png', '.png')
+mimetypes.add_type('image/svg+xml', '.svg')
 
 
 from config import config_dict

@@ -24,13 +24,14 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   
   <!-- Centralized Site Stylesheet & Global Engine Scripts -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-  <script src="{{ url_for('static', filename='js/products.js') }}" defer></script>
-  <script src="{{ url_for('static', filename='js/cart-helpers.js') }}" defer></script>
-  <script src="{{ url_for('static', filename='js/product-modal.js') }}" defer></script>
-  <script src="{{ url_for('static', filename='js/wishlist.js') }}" defer></script>
-  <script src="{{ url_for('static', filename='js/live-search.js') }}" defer></script>
-  <script src="{{ url_for('static', filename='js/command-palette.js') }}" defer></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}?v=20261028_2">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="{{ url_for('static', filename='js/products.js') }}?v=20261028_2" defer></script>
+  <script src="{{ url_for('static', filename='js/cart-helpers.js') }}?v=20261028_2" defer></script>
+  <script src="{{ url_for('static', filename='js/product-modal.js') }}?v=20261028_2" defer></script>
+  <script src="{{ url_for('static', filename='js/wishlist.js') }}?v=20261028_2" defer></script>
+  <script src="{{ url_for('static', filename='js/live-search.js') }}?v=20261028_2" defer></script>
+  <script src="{{ url_for('static', filename='js/command-palette.js') }}?v=20261028_2" defer></script>
 
   <style>
     /* Prevent overflow clipping that breaks position: sticky on browsers */
@@ -662,20 +663,8 @@
     <i class="fas fa-arrow-up"></i>
   </button>
 
-  <!-- Product Details Modal (Reused from standard application modal) -->
-  <div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-      <div class="modal-content" style="border-radius: 20px; overflow: hidden; border: 1px solid rgba(52, 211, 153, 0.3); background: #041209; color: #F8FAFC;">
-        <div class="modal-header" style="border-bottom: 1px solid rgba(52, 211, 153, 0.18); padding: 18px 24px;">
-          <h5 class="modal-title font-weight-bold" id="productModalLabel" style="font-weight: 800; font-size: 1.15rem; color: #34D399;">Product Details</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body" id="productModalBody" style="padding: 24px;">
-          <!-- Dynamically populated by product-modal.js -->
-        </div>
-      </div>
-    </div>
-  </div>
+  <!-- Product Details Modal with Graphical Explanation -->
+  {% include 'includes/product_modal.html' %}
 
   <!-- Sleek Unobtrusive Footer -->
   <footer style="margin-top: 50px; padding: 32px 20px 30px; border-top: 1px solid rgba(52, 211, 153, 0.12); text-align: center; color: #64748B; font-size: 0.82rem; position: relative; z-index: 10;">

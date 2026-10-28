@@ -22,7 +22,7 @@ def intro() -> str:
 @main_bp.route('/index', endpoint='index')
 def index() -> str:
     """Render the home page with featured products."""
-    products = ProductService.get_products_by_category(limit=6)
+    products = ProductService.get_products_by_category(limit=16)
     return render_template('index.html', products=products)
 
 

@@ -1,5 +1,13 @@
 import sys
 import os
+import mimetypes
+
+# Ensure standard image MIME types are registered for serverless static serving
+mimetypes.add_type('image/webp', '.webp')
+mimetypes.add_type('image/jpeg', '.jpeg')
+mimetypes.add_type('image/jpeg', '.jpg')
+mimetypes.add_type('image/png', '.png')
+mimetypes.add_type('image/svg+xml', '.svg')
 
 # Ensure the project root directory is on the Python path
 current_dir = os.path.dirname(os.path.abspath(__file__))

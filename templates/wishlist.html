@@ -17,13 +17,14 @@
   <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <!-- Custom Styles -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}?v=20261028_2" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script>window.IS_USER_LOGGED_IN = {{ 'true' if session.get('user_id') else 'false' }};</script>
-  <script src="{{ url_for('static', filename='js/products.js') }}" defer></script>
-  <script src="{{ url_for('static', filename='js/cart-helpers.js') }}" defer></script>
-  <script src="{{ url_for('static', filename='js/product-modal.js') }}" defer></script>
-  <script src="{{ url_for('static', filename='js/wishlist.js') }}" defer></script>
-  <script src="{{ url_for('static', filename='js/live-search.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='js/products.js') }}?v=20261028_2" defer></script>
+  <script src="{{ url_for('static', filename='js/cart-helpers.js') }}?v=20261028_2" defer></script>
+  <script src="{{ url_for('static', filename='js/product-modal.js') }}?v=20261028_2" defer></script>
+  <script src="{{ url_for('static', filename='js/wishlist.js') }}?v=20261028_2" defer></script>
+  <script src="{{ url_for('static', filename='js/live-search.js') }}?v=20261028_2" defer></script>
   <style>
     .wishlist-hero {
       padding: 40px 0 20px;
@@ -156,11 +157,11 @@
               <button class="wishlist-heart-btn active" data-product-id="{{ item.product_id }}" onclick="removeFromWishlistPage({{ item.product_id }}, this)" title="Remove from Wishlist">
                 <i class="fas fa-heart"></i>
               </button>
-              <img src="{{ item.image_path }}" alt="{{ item.name }}" class="product-image" loading="lazy" onerror="this.onerror=null; this.src='/static/product-placeholder.svg'" />
+              <img src="{{ item.image_path }}" alt="{{ item.name }}" class="product-image" loading="lazy" style="cursor: pointer;" onclick="showDetails('{{ item.name|replace("'", "\\'") }}', {{ item.price }}, '{{ item.image_path }}', '{{ item.category }}')" onerror="this.onerror=null; this.src='/static/product-placeholder.svg'" />
             </div>
             <div class="product-details">
               <div class="product-category">{{ item.category }} {% if item.subcategory %}&bull; {{ item.subcategory }}{% endif %}</div>
-              <div class="product-title" title="{{ item.name }}">{{ item.name }}</div>
+              <div class="product-title" title="{{ item.name }}" style="cursor: pointer;" onclick="showDetails('{{ item.name|replace("'", "\\'") }}', {{ item.price }}, '{{ item.image_path }}', '{{ item.category }}')">{{ item.name }}</div>
               <div class="product-price">Rs. {{ "%.2f"|format(item.price|float) }}</div>
               <div class="product-actions mt-3">
                 <button class="add-to-cart-btn" onclick="moveToCartFromWishlist('{{ item.name|replace("'", "\\'") }}', {{ item.price }}, '{{ item.image_path }}', {{ item.product_id }}, this)">
@@ -195,29 +196,8 @@
     {% endif %}
   </div>
 
-  <!-- Product Modal -->
-  <div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content" style="background: var(--bg-card); border: 1px solid var(--border-glass); border-radius: var(--radius-md); backdrop-filter: blur(20px); color: var(--text-primary);">
-        <div class="modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.08);">
-          <h5 class="modal-title" id="productModalLabel">Product Details</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body text-center">
-          <img id="modalProductImage" src="" alt="Product" style="max-height: 200px; object-fit: contain; margin-bottom: 15px; border-radius: var(--radius-sm);" onerror="this.onerror=null; this.src='/static/product-placeholder.svg'" />
-          <h4 id="modalProductName" style="font-weight: 700; color: var(--text-primary);"></h4>
-          <p id="modalProductPrice" style="font-size: 1.3rem; color: var(--accent); font-weight: 800;"></p>
-          <p id="modalProductDescription" style="color: var(--text-secondary);"></p>
-        </div>
-        <div class="modal-footer" style="border-top: 1px solid rgba(255,255,255,0.08);">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius: var(--radius-xl);">Close</button>
-          <button type="button" class="btn btn-success" id="modalAddToCartBtn" style="border-radius: var(--radius-xl); background: var(--primary); border: none; font-weight: 600;">
-            <i class="fas fa-shopping-basket"></i> Add to Cart
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
+  <!-- Universal Product Modal with Graphical Explanation -->
+  {% include 'includes/product_modal.html' %}
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

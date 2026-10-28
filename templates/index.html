@@ -15,15 +15,19 @@
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo1.webp') }}">
 
   <!-- Centralized Premium Styling & Scripts -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
-  <script>window.IS_USER_LOGGED_IN = {{ 'true' if is_logged_in else 'false' }};</script>
-  <script src="{{ url_for('static', filename='js/products.js') }}" defer></script>
-  <script src="{{ url_for('static', filename='js/cart-helpers.js') }}" defer></script>
-  <script src="{{ url_for('static', filename='js/product-modal.js') }}" defer></script>
-  <script src="{{ url_for('static', filename='js/command-palette.js') }}" defer></script>
-  <script src="{{ url_for('static', filename='js/wishlist.js') }}" defer></script>
-  <script src="{{ url_for('static', filename='js/live-search.js') }}" defer></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}?v=20261028_2">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script>
+    window.IS_USER_LOGGED_IN = {{ 'true' if is_logged_in else 'false' }};
+    window.serverInitialProducts = {{ (products or []) | tojson }};
+  </script>
+  <script src="{{ url_for('static', filename='js/products.js') }}?v=20261028_2" defer></script>
+  <script src="{{ url_for('static', filename='js/cart-helpers.js') }}?v=20261028_2" defer></script>
+  <script src="{{ url_for('static', filename='js/product-modal.js') }}?v=20261028_2" defer></script>
+  <script src="{{ url_for('static', filename='js/command-palette.js') }}?v=20261028_2" defer></script>
+  <script src="{{ url_for('static', filename='js/wishlist.js') }}?v=20261028_2" defer></script>
+  <script src="{{ url_for('static', filename='js/live-search.js') }}?v=20261028_2" defer></script>
 </head>
 
 <body>
@@ -153,7 +157,7 @@
   <div class="container">
     <div class="hero-slider">
       <div class="slide active">
-        <img src="/static/slider/Vegetables.webp" onerror="this.onerror=null; this.src='/static/slider/Vegetables.png'" alt="Vegetables" loading="eager" fetchpriority="high" decoding="async">
+        <img src="/static/slider/Vegetables.webp?v=20261028_2" onerror="this.onerror=null; this.src='/static/slider/Vegetables.png?v=20261028_2'" alt="Vegetables" loading="eager" fetchpriority="high" decoding="async">
         <div class="slide-content">
           <span class="slide-badge"><i class="fas fa-bolt"></i> 10-Min Farm Fresh</span>
           <h2>Fresh veggies, great deals!</h2>
@@ -162,7 +166,7 @@
         </div>
       </div>
       <div class="slide">
-        <img src="/static/slider/dairy_and_breakfast.webp" onerror="this.onerror=null; this.src='/static/slider/dairy_and_breakfast.png'" alt="Dairy and Breakfast" loading="lazy" decoding="async">
+        <img src="/static/slider/dairy_and_breakfast.webp?v=20261028_2" onerror="this.onerror=null; this.src='/static/slider/dairy_and_breakfast.png?v=20261028_2'" alt="Dairy and Breakfast" loading="lazy" decoding="async">
         <div class="slide-content">
           <span class="slide-badge"><i class="fas fa-sun"></i> Fresh Breakfast</span>
           <h2>Fresh dairy, perfect breakfasts!</h2>
@@ -171,7 +175,7 @@
         </div>
       </div>
       <div class="slide">
-        <img src="/static/slider/snacks.webp" onerror="this.onerror=null; this.src='/static/slider/snacks.png'" alt="Snacks" loading="lazy" decoding="async">
+        <img src="/static/slider/snacks.webp?v=20261028_2" onerror="this.onerror=null; this.src='/static/slider/snacks.png?v=20261028_2'" alt="Snacks" loading="lazy" decoding="async">
         <div class="slide-content">
           <span class="slide-badge"><i class="fas fa-fire"></i> Cravings & Munchies</span>
           <h2>Delicious snacks & munchies!</h2>
@@ -180,7 +184,7 @@
         </div>
       </div>
       <div class="slide">
-        <img src="/static/slider/babycare.webp" onerror="this.onerror=null; this.src='/static/slider/babycare.png'" alt="Babycare" loading="lazy" decoding="async">
+        <img src="/static/slider/babycare.webp?v=20261028_2" onerror="this.onerror=null; this.src='/static/slider/babycare.png?v=20261028_2'" alt="Babycare" loading="lazy" decoding="async">
         <div class="slide-content">
           <span class="slide-badge"><i class="fas fa-heart"></i> Gentle Baby Care</span>
           <h2>Gentle care for your little one!</h2>
@@ -189,7 +193,7 @@
         </div>
       </div>
       <div class="slide">
-        <img src="/static/slider/grocery.webp" onerror="this.onerror=null; this.src='/static/slider/grocery.png'" alt="Grocery" loading="lazy" decoding="async">
+        <img src="/static/slider/grocery.webp?v=20261028_2" onerror="this.onerror=null; this.src='/static/slider/grocery.png?v=20261028_2'" alt="Grocery" loading="lazy" decoding="async">
         <div class="slide-content">
           <span class="slide-badge"><i class="fas fa-mortar-pestle"></i> Artisanal Pantry</span>
           <h2>Gourmet Groceries & Pantry Essentials</h2>
@@ -198,7 +202,7 @@
         </div>
       </div>
       <div class="slide">
-        <img src="/static/slider/beverages.webp" onerror="this.onerror=null; this.src='/static/slider/beverages.png'" alt="Beverages" loading="lazy" decoding="async">
+        <img src="/static/slider/beverages.webp?v=20261028_2" onerror="this.onerror=null; this.src='/static/slider/beverages.png?v=20261028_2'" alt="Beverages" loading="lazy" decoding="async">
         <div class="slide-content">
           <span class="slide-badge"><i class="fas fa-glass-whiskey"></i> Chilled Refreshments</span>
           <h2>Refreshing Beverages & Craft Sodas</h2>
@@ -207,7 +211,7 @@
         </div>
       </div>
       <div class="slide">
-        <img src="/static/slider/frozen_foods.webp" onerror="this.onerror=null; this.src='/static/slider/frozen_foods.png'" alt="Frozen Foods" loading="lazy" decoding="async">
+        <img src="/static/slider/frozen_foods.webp?v=20261028_2" onerror="this.onerror=null; this.src='/static/slider/frozen_foods.png?v=20261028_2'" alt="Frozen Foods" loading="lazy" decoding="async">
         <div class="slide-content">
           <span class="slide-badge"><i class="fas fa-ice-cream"></i> Gourmet Desserts</span>
           <h2>Premium Gelatos & Frozen Treats</h2>
@@ -237,7 +241,7 @@
       <!-- Fruits & Vegetables -->
       <a href="{{ url_for('vegetables') }}" class="category-card">
         <div class="image-container">
-          <img src="/static/image/vegetables.jpg" alt="Fruits & Vegetables" loading="lazy" decoding="async">
+          <img src="/static/image/vegetables.jpg?v=20261028_2" alt="Fruits & Vegetables" loading="lazy" decoding="async" onerror="this.onerror=null; this.src='/static/product-placeholder.svg'">
         </div>
         <h3>Fruits & Vegetables</h3>
       </a>
@@ -245,35 +249,31 @@
       <!-- Dairy & Breakfast -->
       <a href="{{ url_for('dairy_breakfast') }}" class="category-card">
         <div class="image-container">
-          <img src="/static/image/dairy.jpg" alt="Dairy & Breakfast" loading="lazy" decoding="async">
+          <img src="/static/image/dairy.jpg?v=20261028_2" alt="Dairy & Breakfast" loading="lazy" decoding="async" onerror="this.onerror=null; this.src='/static/product-placeholder.svg'">
         </div>
         <h3>Dairy & Breakfast</h3>
       </a>
 
-            <!-- Snacks -->
+      <!-- Snacks -->
       <a href="{{ url_for('snacks') }}" class="category-card">
         <div class="image-container">
-          <img src="/static/image/snaks.jpeg" alt="Snacks" loading="lazy" decoding="async">
+          <img src="/static/image/snaks.jpeg?v=20261028_2" alt="Snacks" loading="lazy" decoding="async" onerror="this.onerror=null; this.src='/static/product-placeholder.svg'">
         </div>
         <h3>Snacks</h3>
       </a>
 
-
       <!-- Baby Care -->
       <a href="{{ url_for('baby_care') }}" class="category-card">
         <div class="image-container">
-          <img src="/static/image/baby.png" alt="Baby Care" loading="lazy" decoding="async">
+          <img src="/static/image/baby.png?v=20261028_2" alt="Baby Care" loading="lazy" decoding="async" onerror="this.onerror=null; this.src='/static/product-placeholder.svg'">
         </div>
         <h3>Baby Care</h3>
       </a>
 
-
-
-
       <!-- Personal Care -->
       <a href="{{ url_for('personal_care') }}" class="category-card">
         <div class="image-container">
-          <img src="/static/image/personalcare.jpg" alt="Personal Care" loading="lazy" decoding="async">
+          <img src="/static/image/personalcare.jpg?v=20261028_2" alt="Personal Care" loading="lazy" decoding="async" onerror="this.onerror=null; this.src='/static/product-placeholder.svg'">
         </div>
         <h3>Personal Care</h3>
       </a>
@@ -281,25 +281,23 @@
       <!-- Household Items -->
       <a href="{{ url_for('household_items') }}" class="category-card">
         <div class="image-container">
-          <img src="/static/image/household.jpeg" alt="Household Items" loading="lazy" decoding="async">
+          <img src="/static/image/household.jpeg?v=20261028_2" alt="Household Items" loading="lazy" decoding="async" onerror="this.onerror=null; this.src='/static/product-placeholder.svg'">
         </div>
         <h3>Household Items</h3>
       </a>
 
-
-
       <!-- Home & Kitchen -->
       <a href="{{ url_for('home_kitchen') }}" class="category-card">
         <div class="image-container">
-          <img src="/static/image/kitchen.jpeg" alt="Home & Kitchen" loading="lazy" decoding="async">
+          <img src="/static/image/kitchen.jpeg?v=20261028_2" alt="Home & Kitchen" loading="lazy" decoding="async" onerror="this.onerror=null; this.src='/static/product-placeholder.svg'">
         </div>
         <h3>Home & Kitchen</h3>
       </a>
 
-            <!-- Electronics -->
+      <!-- Grocery -->
       <a href="{{ url_for('grocery') }}" class="category-card">
         <div class="image-container">
-          <img src="/static/image/grocery.jpeg" alt="Grocery" loading="lazy" decoding="async">
+          <img src="/static/image/grocery.jpeg?v=20261028_2" alt="Grocery" loading="lazy" decoding="async" onerror="this.onerror=null; this.src='/static/product-placeholder.svg'">
         </div>
         <h3>Grocery</h3>
       </a>
@@ -307,7 +305,7 @@
       <!-- Beverages -->
       <a href="{{ url_for('beverages') }}" class="category-card">
         <div class="image-container">
-          <img src="/static/image/beverages.jpg" alt="Beverages" loading="lazy" decoding="async">
+          <img src="/static/image/beverages.jpg?v=20261028_2" alt="Beverages" loading="lazy" decoding="async" onerror="this.onerror=null; this.src='/static/product-placeholder.svg'">
         </div>
         <h3>Beverages</h3>
       </a>
@@ -315,7 +313,7 @@
       <!-- Frozen Foods -->
       <a href="{{ url_for('frozen_foods') }}" class="category-card">
         <div class="image-container">
-          <img src="/static/image/frozen_foods.jpg" alt="Frozen Foods" loading="lazy" decoding="async">
+          <img src="/static/image/frozen_foods.jpg?v=20261028_2" alt="Frozen Foods" loading="lazy" decoding="async" onerror="this.onerror=null; this.src='/static/product-placeholder.svg'">
         </div>
         <h3>Frozen Foods</h3>
       </a>
@@ -616,10 +614,29 @@ function initializeCart() {
 function renderPopularProducts() {
     const grid = document.getElementById('popular-products-grid');
     if (!grid) return;
-    grid.innerHTML = '';
     
-    const dbProducts = window.productsDB || [];
-    if (dbProducts.length === 0) return;
+    const defaultPlaceholder = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200' width='200' height='200'><rect width='200' height='200' fill='%23ffffff'/><circle cx='100' cy='100' r='50' fill='%23ecfdf5'/><path d='M80 90h40l-5 35H85l-5-35zm15-15a15 15 0 0 1 15 15h-30a15 15 0 0 1 15-15z' fill='none' stroke='%2310B981' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/><text x='100' y='145' font-family='sans-serif' font-size='10' fill='%23059669' text-anchor='middle' font-weight='700'>DAILYDROP</text></svg>";
+
+    const rawList = (window.productsDB && window.productsDB.length > 0)
+        ? window.productsDB
+        : (window.serverInitialProducts && window.serverInitialProducts.length > 0
+            ? window.serverInitialProducts
+            : []);
+
+    if (rawList.length === 0) return;
+
+    const dbProducts = rawList.map(p => ({
+        id: p.id || p.product_id,
+        title: p.title || p.name || 'Product',
+        name: p.name || p.title || 'Product',
+        category: p.category || 'Daily Essential',
+        subcategory: p.subcategory || '',
+        price: parseFloat(p.price || 0),
+        image: p.image || p.image_path || defaultPlaceholder,
+        description: p.description || ''
+    }));
+
+    grid.innerHTML = '';
 
     // 16 curated high-frequency daily staple essentials across diverse aisles
     const curatedStaples = [
@@ -676,7 +693,6 @@ function renderPopularProducts() {
         const pId = product.id || product.product_id;
         const pTitle = product.title || product.name || 'Product';
         const safeTitle = pTitle.replace(/'/g, "\\'");
-        const defaultPlaceholder = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200' width='200' height='200'><rect width='200' height='200' fill='%23ffffff'/><circle cx='100' cy='100' r='50' fill='%23ecfdf5'/><path d='M80 90h40l-5 35H85l-5-35zm15-15a15 15 0 0 1 15 15h-30a15 15 0 0 1 15-15z' fill='none' stroke='%2310B981' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/><text x='100' y='145' font-family='sans-serif' font-size='10' fill='%23059669' text-anchor='middle' font-weight='700'>DAILYDROP</text></svg>";
         const pImg = product.image || product.image_path || defaultPlaceholder;
         const pCat = product.category || '';
         const pPrice = parseFloat(product.price || 0).toFixed(2);
@@ -720,11 +736,13 @@ async function syncCatalogWithServer() {
         const res = await fetch('/api/v1/products/list');
         if (res.ok) {
             const data = await res.json();
-            if (data.success && Array.isArray(data.products) && data.products.length > 0) {
+            const prods = (data && (data.products || (Array.isArray(data) ? data : []))) || [];
+            if (prods.length > 0) {
                 const defaultPlaceholder = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200' width='200' height='200'><rect width='200' height='200' fill='%23ffffff'/><circle cx='100' cy='100' r='50' fill='%23ecfdf5'/><path d='M80 90h40l-5 35H85l-5-35zm15-15a15 15 0 0 1 15 15h-30a15 15 0 0 1 15-15z' fill='none' stroke='%2310B981' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/><text x='100' y='145' font-family='sans-serif' font-size='10' fill='%23059669' text-anchor='middle' font-weight='700'>DAILYDROP</text></svg>";
-                window.productsDB = data.products.map(p => ({
+                window.productsDB = prods.map(p => ({
                     id: p.product_id || p.id,
                     title: p.name || p.title,
+                    name: p.name || p.title,
                     category: p.category,
                     subcategory: p.subcategory || '',
                     price: parseFloat(p.price || 0),
@@ -732,6 +750,7 @@ async function syncCatalogWithServer() {
                     description: p.description || ''
                 }));
                 document.dispatchEvent(new CustomEvent('productsSynced', { detail: window.productsDB }));
+                renderPopularProducts();
             }
         }
     } catch (e) {
@@ -751,5 +770,7 @@ document.addEventListener('productsSynced', renderPopularProducts);
 
     if (typeof updateCartCount === 'function') updateCartCount();
   </script>
+
+  {% include 'includes/product_modal.html' %}
 </body>
 </html>

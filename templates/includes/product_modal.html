@@ -1,0 +1,94 @@
+<!-- DailyDrop Universal Product Modal with Graphical Explanation -->
+<div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content glass-modal-content">
+      <div class="modal-header border-0 pb-1">
+        <div class="d-flex align-items-center gap-2">
+          <span class="badge bg-emerald-glow" id="modalCategoryBadge"><i class="fas fa-tag me-1"></i> Category</span>
+          <span class="badge bg-express-delivery"><i class="fas fa-bolt me-1"></i> 10-Min Delivery</span>
+        </div>
+        <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4 pt-2">
+        <div class="row g-4 align-items-start">
+          
+          <!-- Left Column: Product Image & Badges -->
+          <div class="col-lg-4 col-md-5 text-center">
+            <div class="product-modal-img-wrap mb-3">
+              <img id="modalImage" src="/static/product-placeholder.svg" alt="Product Image" class="img-fluid rounded-4 shadow-lg product-modal-img" onerror="this.onerror=null; this.src='/static/product-placeholder.svg';" />
+            </div>
+            <div class="badge-list d-flex flex-wrap justify-content-center gap-2 mb-2" id="modalBadgesContainer">
+              <!-- Badges injected dynamically -->
+            </div>
+          </div>
+
+          <!-- Middle Column: Product Details & Cart Actions -->
+          <div class="col-lg-4 col-md-7 border-lg-end border-glass-divider">
+            <h3 id="modalTitle" class="modal-product-title mb-2">Product Title</h3>
+            
+            <div class="modal-pricing-row d-flex align-items-baseline gap-2 mb-3">
+              <span id="modalPrice" class="modal-price-val">Rs. 0</span>
+              <span class="modal-strike-val" id="modalStrikePrice">Rs. 0</span>
+              <span class="badge modal-stock-badge"><i class="fas fa-check-circle me-1"></i> In Stock</span>
+            </div>
+            
+            <p id="modalDescription" class="modal-desc text-secondary mb-3">
+              Premium quality product carefully sourced, inspected, and delivered fresh to your doorstep.
+            </p>
+
+            <!-- Quick Highlights Spec Table -->
+            <div class="specs-box p-3 rounded-3 mb-3" id="modalHighlightsContainer">
+              <!-- Injected highlights -->
+            </div>
+
+            <!-- Quantity Selector & Add to Cart -->
+            <div class="modal-cart-actions d-flex align-items-center gap-3">
+              <div class="quantity-picker d-flex align-items-center rounded-3 bg-dark-input">
+                <button type="button" class="btn btn-sm text-white px-3" onclick="updateModalQuantity(-1)" aria-label="Decrease quantity"><i class="fas fa-minus"></i></button>
+                <span id="modalQuantity" class="fw-bold px-2 text-white">1</span>
+                <button type="button" class="btn btn-sm text-white px-3" onclick="updateModalQuantity(1)" aria-label="Increase quantity"><i class="fas fa-plus"></i></button>
+              </div>
+              <button type="button" class="btn btn-emerald-action flex-grow-1 py-2 fw-bold" onclick="addModalItemToCart()">
+                <i class="fas fa-shopping-basket me-2"></i> Add to Cart
+              </button>
+            </div>
+          </div>
+
+          <!-- Right Column: Interactive Graphical Explanation (Radar Matrix + Metric Breakdown) -->
+          <div class="col-lg-4 col-md-12">
+            <div class="chart-card-box rounded-4 text-center h-100 d-flex flex-column justify-content-between p-3" style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px;">
+              <div>
+                <div class="d-flex align-items-center justify-content-between mb-2 pb-2" style="border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+                  <div class="text-start">
+                    <span class="matrix-subtitle" style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px; color: #38BDF8;"><i class="fas fa-chart-pie me-1"></i> Graphical Analysis</span>
+                    <h6 id="chartBoxTitle" class="matrix-main-title mb-0" style="font-weight: 700; color: #FFFFFF;">Quality & Nutritional Index</h6>
+                  </div>
+                  <span class="live-matrix-badge">
+                    <span class="live-pulse-dot"></span> LIVE
+                  </span>
+                </div>
+              </div>
+              
+              <!-- Radar Chart Canvas -->
+              <div class="chart-container-wrapper position-relative my-2" style="height: 200px; min-height: 200px; max-height: 210px; width: 100%; display: flex; align-items: center; justify-content: center;" id="chartContainerWrap">
+                <canvas id="productMetricsChart" style="max-height: 200px; width: 100% !important;"></canvas>
+              </div>
+
+              <!-- Instant Visual Metric Progress Bars -->
+              <div id="modalMetricBars" class="w-100 text-start px-1 my-1">
+                <!-- Injected metric progress bars -->
+              </div>
+              
+              <div class="matrix-footer-tag text-center pt-2 mt-1" style="border-top: 1px solid rgba(255, 255, 255, 0.06);">
+                <span class="matrix-footnote" style="font-size: 0.75rem; color: #94A3B8;">
+                  <i class="fas fa-shield-alt text-success me-1"></i> Interactive score based on lab testing & specs.
+                </span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
