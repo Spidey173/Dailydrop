@@ -625,7 +625,7 @@
         <div class="order-card" id="order-card-{{ order.order_id }}">
             <div class="order-card-header">
                 <div class="order-meta-info">
-                    <h3>Order #{{ order.user_order_number|default(loop.revindex) }}</h3>
+                    <h3>Order #{{ order.user_order_number|default(loop.revindex) }} <span style="font-size: 0.85rem; font-weight: 500; color: var(--text-muted);">(Ref: #ORD-{{ order.order_id }})</span></h3>
                     <div class="order-date-badge">
                         <i class="far fa-calendar-alt"></i>
                         Ordered on {{ order.order_date.strftime('%d %b, %I:%M %p') if order.order_date.strftime is defined else order.order_date }}
