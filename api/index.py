@@ -13,11 +13,12 @@ def _init_serverless_app():
     # Secure serverless initialization: DATABASE_URL is injected via Vercel Environment Variables
     import hashlib
     import secrets
+    from config import INSECURE_SECRET_KEYS, Config, ProductionConfig
 
     current_key = os.getenv('SECRET_KEY', '')
-    if not current_key or len(current_key) < 16:
-        # If SECRET_KEY is not explicitly defined in Vercel settings, derive a strong,
-        # deployment-specific persistent key from the deployment's private DATABASE_URL
+    if not current_key or len(current_key) < 16 or current_key in INSECURE_SECRET_KEYS:
+        # If SECRET_KEY is not explicitly defined in Vercel settings (or is an insecure placeholder),
+        # derive a strong, deployment-specific persistent key from the deployment's private DATABASE_URL
         # so all serverless lambdas share the same key without dropping sessions or exposing secrets.
         db_url = os.getenv('DATABASE_URL', '')
         if db_url:
@@ -25,7 +26,6 @@ def _init_serverless_app():
         else:
             os.environ['SECRET_KEY'] = secrets.token_hex(32)
     
-    from config import Config, ProductionConfig
     if os.getenv('SECRET_KEY'):
         Config.SECRET_KEY = os.environ['SECRET_KEY']
         ProductionConfig.SECRET_KEY = os.environ['SECRET_KEY']
