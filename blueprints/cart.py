@@ -65,14 +65,53 @@ def api_create_order() -> Tuple[Any, int]:
     currency = data.get('currency', 'INR')
     notes = data.get('notes', {})
 
-    if 'amount' in data:
-        # Direct amount provided in paise
+    if products:
+        # DailyDrop cart products: Authoritative calculation strictly overrides client payloads
+        valid, err_msg, subtotal, fee, final_total = PaymentService.calculate_authoritative_total(products)
+        if not valid:
+            if idempotency_key:
+                IdempotencyService.release(idempotency_key)
+            return jsonify({'success': False, 'error': err_msg, 'message': err_msg}), 400
+
+        amount_in_paise = CurrencyService.to_paise(final_total)
+        if amount_in_paise < 100:
+            if idempotency_key:
+                IdempotencyService.release(idempotency_key)
+            return jsonify({'success': False, 'error': 'Amount too small', 'message': 'Amount must be at least 100 paise'}), 400
+
+        # If client also supplied an amount, verify it matches authoritative total to reject tampering
+        if 'amount' in data:
+            try:
+                client_paise = int(data['amount'])
+                if client_paise != amount_in_paise:
+                    if idempotency_key:
+                        IdempotencyService.release(idempotency_key)
+                    return jsonify({
+                        'success': False,
+                        'error': 'Price tampering detected',
+                        'message': f'Client amount ({client_paise} paise) does not match authoritative total ({amount_in_paise} paise).'
+                    }), 400
+            except (ValueError, TypeError):
+                if idempotency_key:
+                    IdempotencyService.release(idempotency_key)
+                return jsonify({'success': False, 'error': 'Invalid amount', 'message': 'Amount must be an integer representing paise'}), 400
+
+        user_prefix = session.get('user_id', 'anon')
+        receipt = data.get('receipt', f"rcpt_u{user_prefix}_{int(time.time())}")
+        notes.update({'user_id': str(user_prefix), 'phone': data.get('phone_number', '')})
+
+    elif 'amount' in data:
+        # Direct amount provided in paise (for standalone charges without cart items)
         try:
             amount_in_paise = int(data['amount'])
         except (ValueError, TypeError):
+            if idempotency_key:
+                IdempotencyService.release(idempotency_key)
             return jsonify({'success': False, 'error': 'Invalid amount', 'message': 'Amount must be an integer representing paise'}), 400
 
         if amount_in_paise < 100:
+            if idempotency_key:
+                IdempotencyService.release(idempotency_key)
             return jsonify({'success': False, 'error': 'Amount too small', 'message': 'Amount must be at least 100 paise'}), 400
 
         receipt = data.get('receipt', f"rcpt_{int(time.time())}")
@@ -80,21 +119,9 @@ def api_create_order() -> Tuple[Any, int]:
         fee = 0.0
         final_total = subtotal
 
-    elif products:
-        # DailyDrop cart products calculation
-        valid, err_msg, subtotal, fee, final_total = PaymentService.calculate_authoritative_total(products)
-        if not valid:
-            return jsonify({'success': False, 'error': err_msg, 'message': err_msg}), 400
-
-        amount_in_paise = CurrencyService.to_paise(final_total)
-        if amount_in_paise < 100:
-            return jsonify({'success': False, 'error': 'Amount too small', 'message': 'Amount must be at least 100 paise'}), 400
-
-        user_prefix = session.get('user_id', 'anon')
-        receipt = data.get('receipt', f"rcpt_u{user_prefix}_{int(time.time())}")
-        notes.update({'user_id': str(user_prefix), 'phone': data.get('phone_number', '')})
-
     else:
+        if idempotency_key:
+            IdempotencyService.release(idempotency_key)
         return jsonify({'success': False, 'error': 'Missing parameters', 'message': 'Either amount (in paise) or products list must be provided'}), 400
 
     # Call PaymentService to create the order with Razorpay
@@ -295,6 +322,21 @@ def api_verify_payment() -> Tuple[Any, int]:
         if idempotency_key:
             IdempotencyService.release(idempotency_key)
         return jsonify({'success': False, 'error': err_msg, 'message': err_msg}), 400
+
+    # Ensure authorized pending amount matches authoritative order total
+    pending_total = float(pending.get('total_amount', 0.0))
+    if abs(pending_total - final_total) > 0.01:
+        logger.error(
+            f"Payment verification rejected: pending_orders amount (₹{pending_total:.2f}) "
+            f"does not match authoritative catalog total (₹{final_total:.2f}) for order {razorpay_order_id}"
+        )
+        if idempotency_key:
+            IdempotencyService.release(idempotency_key)
+        return jsonify({
+            'success': False,
+            'error': 'Payment amount mismatch',
+            'message': 'Authorized payment amount does not match authoritative order total. Transaction rejected.'
+        }), 400
 
     full_name = pending.get('full_name') or data.get('full_name', '') or session.get('name', 'Customer')
     phone_number = pending.get('phone_number') or data.get('phone_number', '')

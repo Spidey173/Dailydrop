@@ -1,7 +1,7 @@
 # DailyDrop 🛒 — Full-Stack Quick-Commerce Web Application
 
 [![CI Pipeline](https://github.com/Spidey173/Dailydrop/actions/workflows/ci.yml/badge.svg)](https://github.com/Spidey173/Dailydrop/actions)
-[![Tests](https://img.shields.io/badge/Pytest-74%20Passed-brightgreen?style=flat-square&logo=pytest)](tests/)
+[![Tests](https://img.shields.io/badge/Pytest-76%20Passed-brightgreen?style=flat-square&logo=pytest)](tests/)
 [![Backend](https://img.shields.io/badge/Backend-Python%20%7C%20Flask-blue?style=flat-square&logo=python)](app.py)
 [![Database](https://img.shields.io/badge/Database-PostgreSQL%20(Neon)-336791?style=flat-square&logo=postgresql&logoColor=white)](database.py)
 [![Cache](https://img.shields.io/badge/Cache-Redis%20(Fallback%20Safe)-DC382D?style=flat-square&logo=redis&logoColor=white)](services/redis_service.py)
@@ -15,7 +15,7 @@
 
 | 📦 Catalog Scale | 🧪 Test Suite | 🛡️ Concurrency & Integrity | ⚡ Live Search | 🌐 Deployment |
 | :---: | :---: | :---: | :---: | :---: |
-| **200+ Products across 10 Categories** | **74 / 74 Pytest Tests Passing** | **Server-Authoritative Pricing & Atomic Transactions** | **Sub-Second Client-Side Filtering** | **Vercel Serverless WSGI + Neon Cloud DB** |
+| **200+ Products across 10 Categories** | **76 / 76 Pytest Tests Passing** | **Server-Authoritative Pricing & Atomic Transactions** | **Sub-Second Client-Side Filtering** | **Vercel Serverless WSGI + Neon Cloud DB** |
 
 ---
 
@@ -93,7 +93,7 @@ Ready-to-use accounts for immediate testing:
 * **Security & Auth**: Flask-WTF CSRF Tokens, Distributed Flask-Limiter, Werkzeug Scrypt Password Hashing, Role-Based Route Guards (`@admin_required`), Defensive Security Headers
 * **Resilience**: PostgreSQL `SAVEPOINT` transaction failure isolation, branded glassmorphic 404/500 Jinja2 error templates
 * **Frontend**: HTML5, Vanilla CSS3, JavaScript (ES6+), Bootstrap 5
-* **Testing & CI**: Pytest (74 automated unit, integration, concurrency & security regression tests), GitHub Actions CI (matrix across Python 3.10, 3.11, 3.12), Flake8 Linting
+* **Testing & CI**: Pytest (76 automated unit, integration, concurrency & security regression tests), GitHub Actions CI (matrix across Python 3.10, 3.11, 3.12), Flake8 Linting
 * **Deployment**: Vercel Serverless WSGI (demo storefront) / Docker & Procfile compatible (production worker PaaS)
 
 ---
@@ -136,14 +136,14 @@ Daily-Drop/
 │   └── runner.py           # Idempotent migration runner (python -m migrations.runner)
 ├── static/                 # Stylesheets, UI icons, and product images
 ├── templates/              # Jinja2 HTML templates, error templates (404.html, 500.html) & CSRF meta
-└── tests/                  # 74 automated Pytest tests (unit, integration, security, PostgreSQL toggle)
+└── tests/                  # 76 automated Pytest tests (unit, integration, security, PostgreSQL toggle)
 ```
 
 ---
 
 ## 🧪 Reproducible Testing & Dependency Guide
 
-The project includes **74 automated tests** covering authentication, cart calculations, forged price rejection, unknown product blocking, atomic checkout, stock race conditions, payment signature verification, webhook idempotency, order state machine validation, admin image persistence, and session security.
+The project includes **76 automated tests** covering authentication, cart calculations, forged price rejection, unknown product blocking, atomic checkout, stock race conditions, payment signature verification, webhook idempotency, order state machine validation, admin image persistence, and session security.
 
 ### One-Command Test Execution
 ```bash
@@ -160,11 +160,11 @@ pytest -v
 
 To balance fast, deterministic, zero-cost CI checks with production relational guarantees, DailyDrop explicitly separates its testing into two tiers:
 
-#### Tier 1: Fast Deterministic CI Suite (GitHub Actions — 74 Automated Pytests)
+#### Tier 1: Fast Deterministic CI Suite (GitHub Actions — 76 Automated Pytests)
 * **Does CI actually run PostgreSQL locking tests? No.**
   - The GitHub Actions workflow (`.github/workflows/ci.yml`) runs on `ubuntu-latest` and provisions an ephemeral Redis service, but **does not provision a PostgreSQL service container**.
   - While `ci.yml` passes `DATABASE_URL: ${{ secrets.DATABASE_URL }}` as an environment secret, **Pytest in CI intentionally bypasses external database connections**. The fixture in `conftest.py` redirects the application's connection pool to an in-memory SQLite fixture (`_SHARED_SQLITE_CONN`).
-  - **Why CI uses SQLite simulation**: This keeps the CI pipeline hermetic, fully offline, and lightning-fast (~1.5–2s for all 74 tests across Python 3.10, 3.11, and 3.12) with zero risk of intermittent network failures or idle cloud database costs.
+  - **Why CI uses SQLite simulation**: This keeps the CI pipeline hermetic, fully offline, and lightning-fast (~1.5–2s for all 76 tests across Python 3.10, 3.11, and 3.12) with zero risk of intermittent network failures or idle cloud database costs.
   - **Simulated Concurrency Behavior**: Because SQLite operates with database-level locks rather than PostgreSQL row-level locks, `conftest.py` translates queries and strips `FOR UPDATE` and `SKIP LOCKED` clauses. Concurrency safety in CI is verified via multi-threaded race simulation against conditional SQL updates (`UPDATE products SET stock = stock - %s WHERE product_id = %s AND stock >= %s`).
 
 #### Tier 2: Native PostgreSQL Concurrency & Row-Locking Verification
@@ -248,7 +248,7 @@ To provide a zero-idle-cost, interactive portfolio demo without requiring paid m
 
 > *"DailyDrop is a full-stack quick-commerce application built with Flask and PostgreSQL. Rather than placing business logic inside route functions, I designed it with Flask Blueprints and a dedicated Service layer.*  
 >  
-> *The central engineering focus was **server-authoritative checkout and payment integrity**: cart prices are recalculated strictly against database records, inventory decrements happen atomically within a single transaction to prevent overselling, and payment webhooks use cryptographic HMAC validation with an order state machine. The application includes 74 automated Pytest tests, versioned database migrations, and health check observability endpoints."*
+> *The central engineering focus was **server-authoritative checkout and payment integrity**: cart prices are recalculated strictly against database records, inventory decrements happen atomically within a single transaction to prevent overselling, and payment webhooks use cryptographic HMAC validation with an order state machine. The application includes 76 automated Pytest tests, versioned database migrations, and health check observability endpoints."*
 
 ---
 

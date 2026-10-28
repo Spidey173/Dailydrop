@@ -1,22 +1,26 @@
 #!/usr/bin/env bash
 # =============================================================================
 # DailyDrop Automated Test Runner
-# Guarantees 100% deterministic, offline test execution across all 74 tests.
+# Guarantees 100% deterministic, offline test execution across all tests.
 # =============================================================================
 set -e
 
 echo "🛒 DailyDrop Test Suite Runner"
 echo "==============================================="
-echo "Python: $(python3 --version 2>&1)"
 
-# Check if pytest is available
-if ! command -v pytest &> /dev/null && ! python3 -m pytest --version &> /dev/null; then
-    echo "⚠️  pytest not detected. Installing test dependencies from requirements.txt..."
-    pip install -r requirements.txt
+# Prefer local virtual environment if present
+if [ -d "venv" ] && [ -f "venv/bin/pytest" ]; then
+    PYTHON_BIN="venv/bin/python"
+    PYTEST_BIN="venv/bin/pytest"
+else
+    PYTHON_BIN="python3"
+    PYTEST_BIN="pytest"
 fi
 
-echo "Running 74 automated tests (Offline In-Memory SQLite + Mocked Redis)..."
-python3 -m pytest -v --color=yes
+echo "Python: $($PYTHON_BIN --version 2>&1)"
+
+echo "Running 76 automated tests (Offline In-Memory SQLite + Mocked Redis)..."
+$PYTHON_BIN -m pytest -v --color=yes
 
 echo "==============================================="
 echo "✅ All tests passed successfully!"

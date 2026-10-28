@@ -216,8 +216,8 @@ class RedisService:
             # -1: Key does not exist in Redis yet
             if result == -1:
                 if fallback_db_stock is not None:
-                    # Hydrate key into Redis and retry decrement
-                    client.set(key, int(fallback_db_stock), ex=86400)
+                    # Hydrate key atomically using NX to prevent overwriting concurrent decrements
+                    client.set(key, int(fallback_db_stock), nx=True, ex=86400)
                     result = cls._decr_script(keys=[key], args=[quantity])
                 else:
                     return True, "Cache miss; deferred to DB", -1

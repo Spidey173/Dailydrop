@@ -145,7 +145,7 @@ def test_api_verify_payment_validation():
             phone_number='9876543210',
             address='123 Test St',
             products=[{"name": "Tea", "price": 50.0, "quantity": 1}],
-            total_amount=50.0
+            total_amount=80.0
         )
 
         resp = client.post('/api/verify-payment', json={

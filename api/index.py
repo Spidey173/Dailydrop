@@ -11,17 +11,18 @@ from flask import Flask, render_template_string, jsonify
 
 def _init_serverless_app():
     # Secure serverless initialization: DATABASE_URL is injected via Vercel Environment Variables
+    import secrets
     current_key = os.getenv('SECRET_KEY', '')
-    if not current_key or len(current_key) < 16:
-        os.environ['SECRET_KEY'] = 'c8e31295b28a9dc384917a26f8be220f8c3e80931d87192750e39b9868725fa1'
+    target_env = os.getenv('FLASK_ENV', 'production').lower()
 
-    from config import INSECURE_SECRET_KEYS, Config, ProductionConfig
-    if os.getenv('SECRET_KEY') in INSECURE_SECRET_KEYS:
-        secure_key = 'c8e31295b28a9dc384917a26f8be220f8c3e80931d87192750e39b9868725fa1'
-        os.environ['SECRET_KEY'] = secure_key
+    # In development/preview serverless runs, auto-generate an ephemeral secret if missing
+    if (not current_key or len(current_key) < 16) and target_env != 'production':
+        os.environ['SECRET_KEY'] = secrets.token_hex(32)
     
-    Config.SECRET_KEY = os.environ['SECRET_KEY']
-    ProductionConfig.SECRET_KEY = os.environ['SECRET_KEY']
+    from config import Config, ProductionConfig
+    if os.getenv('SECRET_KEY'):
+        Config.SECRET_KEY = os.environ['SECRET_KEY']
+        ProductionConfig.SECRET_KEY = os.environ['SECRET_KEY']
 
     os.environ['DISABLE_FILE_UPLOADS'] = 'true'
     os.environ['VERCEL'] = '1'

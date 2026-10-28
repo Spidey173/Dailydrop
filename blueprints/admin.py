@@ -164,12 +164,11 @@ def api_update_product_stock(product_id: int):
 
 import io
 import base64
-from PIL import Image, ImageOps
 
 def process_and_persist_image(file_storage) -> str:
     """
     Process an uploaded image file, optimize and downsample it for web delivery,
-    and convert to a compact Base64 Data URL (WebP) for 100% permanent storage
+    and convert to a compact Base64 Data URL (WebP) for permanent storage
     in PostgreSQL that persists across all environments, deployments, and restarts.
     Also saves a local backup copy in static/uploads if running locally.
     """
@@ -187,30 +186,38 @@ def process_and_persist_image(file_storage) -> str:
         if not file_bytes:
             return ""
 
-        # Open with PIL for optimization & compression
-        img = Image.open(io.BytesIO(file_bytes))
-        img = ImageOps.exif_transpose(img)
+        # Try optimizing with PIL if installed
+        try:
+            from PIL import Image, ImageOps
+            img = Image.open(io.BytesIO(file_bytes))
+            img = ImageOps.exif_transpose(img)
 
-        # Downsample to max 600x600 for optimal product display
-        img.thumbnail((600, 600), Image.Resampling.LANCZOS)
+            # Downsample to max 600x600 for optimal product display
+            img.thumbnail((600, 600), Image.Resampling.LANCZOS)
 
-        buffer = io.BytesIO()
-        if img.mode in ('RGBA', 'LA') or (img.mode == 'P' and 'transparency' in img.info):
-            img.save(buffer, format='WEBP', quality=82, method=6)
-        else:
-            img = img.convert('RGB')
-            img.save(buffer, format='WEBP', quality=82, method=6)
+            buffer = io.BytesIO()
+            if img.mode in ('RGBA', 'LA') or (img.mode == 'P' and 'transparency' in img.info):
+                img.save(buffer, format='WEBP', quality=82, method=6)
+            else:
+                img = img.convert('RGB')
+                img.save(buffer, format='WEBP', quality=82, method=6)
 
-        compressed_bytes = buffer.getvalue()
-        b64_str = base64.b64encode(compressed_bytes).decode('utf-8')
-        data_url = f"data:image/webp;base64,{b64_str}"
+            compressed_bytes = buffer.getvalue()
+            b64_str = base64.b64encode(compressed_bytes).decode('utf-8')
+            data_url = f"data:image/webp;base64,{b64_str}"
+        except ImportError:
+            # Safe fallback if Pillow is not installed in the runtime environment
+            b64_str = base64.b64encode(file_bytes).decode('utf-8')
+            mime = 'image/jpeg' if ext in ('.jpg', '.jpeg') else f'image/{ext.lstrip(".")}'
+            data_url = f"data:{mime};base64,{b64_str}"
+            compressed_bytes = file_bytes
 
         # If on local disk and uploads permitted, also save a local backup copy
         if not current_app.config.get('DISABLE_FILE_UPLOADS', False) and os.getenv('VERCEL') != '1':
             try:
                 clean_base = secure_filename(os.path.splitext(raw_filename)[0]) or 'uploaded_image'
                 timestamp = int(datetime.now().timestamp())
-                filename = f"{timestamp}_{clean_base}.webp"
+                filename = f"{timestamp}_{clean_base}.webp" if data_url.startswith("data:image/webp") else f"{timestamp}_{clean_base}{ext}"
                 uploads_dir = os.path.join(current_app.static_folder or 'static', 'uploads')
                 os.makedirs(uploads_dir, exist_ok=True)
                 with open(os.path.join(uploads_dir, filename), 'wb') as f:

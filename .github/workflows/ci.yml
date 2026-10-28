@@ -48,7 +48,7 @@ jobs:
           # Exit-zero treats all errors as warnings
           flake8 . --count --exit-zero --max-complexity=15 --max-line-length=140 --statistics --exclude=venv,.venv,docs
 
-      - name: Run Pytest Suite (74 Offline Tests)
+      - name: Run Pytest Suite (76 Offline Tests)
         env:
           FLASK_ENV: testing
           # Note: Pytest executes against the deterministic in-memory SQLite fixture (74 tests in ~2s).

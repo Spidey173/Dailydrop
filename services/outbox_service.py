@@ -54,7 +54,7 @@ class OutboxService:
 
     @staticmethod
     def fetch_pending_events(limit: int = 50) -> List[Dict[str, Any]]:
-        """Fetch unhandled outbox events ready for dispatch."""
+        """Fetch unhandled outbox events ready for dispatch (read-only inspection)."""
         from database import get_db_connection
         from psycopg2.extras import RealDictCursor
 
@@ -97,6 +97,70 @@ class OutboxService:
                     return events
         except Exception as e:
             logger.error(f"Error fetching pending outbox events: {e}")
+            return []
+
+    @classmethod
+    def claim_pending_events(cls, limit: int = 50) -> List[Dict[str, Any]]:
+        """
+        Atomically claim pending outbox events for execution by transitioning status
+        to 'IN_PROGRESS' within the SAME database transaction before row locks are released.
+        Guarantees that multiple concurrent workers never process the same event twice.
+        """
+        from database import get_db_connection
+        from psycopg2.extras import RealDictCursor
+
+        try:
+            with get_db_connection() as conn:
+                with conn.cursor(cursor_factory=RealDictCursor) as cursor:
+                    try:
+                        cursor.execute(
+                            '''
+                            SELECT * FROM outbox_events
+                            WHERE status = 'PENDING'
+                            ORDER BY created_at ASC
+                            LIMIT %s
+                            FOR UPDATE SKIP LOCKED
+                            ''',
+                            (limit,)
+                        )
+                    except Exception:
+                        conn.rollback()
+                        cursor.execute(
+                            '''
+                            SELECT * FROM outbox_events
+                            WHERE status = 'PENDING'
+                            ORDER BY created_at ASC
+                            LIMIT %s
+                            ''',
+                            (limit,)
+                        )
+                    rows = cursor.fetchall()
+                    if not rows:
+                        return []
+
+                    event_ids = [r['event_id'] if isinstance(r, dict) else r[1] for r in rows]
+                    format_strings = ','.join(['%s'] * len(event_ids))
+                    cursor.execute(
+                        f'''
+                        UPDATE outbox_events
+                        SET status = 'IN_PROGRESS'
+                        WHERE event_id IN ({format_strings})
+                        ''',
+                        tuple(event_ids)
+                    )
+
+                    events = []
+                    for row in rows:
+                        ev = dict(row)
+                        if isinstance(ev.get('payload'), str):
+                            try:
+                                ev['payload'] = json.loads(ev['payload'])
+                            except Exception:
+                                pass
+                        events.append(ev)
+                    return events
+        except Exception as e:
+            logger.error(f"Error claiming outbox events: {e}")
             return []
 
     @staticmethod
@@ -144,10 +208,10 @@ class OutboxService:
     @classmethod
     def relay_events(cls, limit: int = 50) -> int:
         """
-        Poll pending events and relay them to asynchronous worker tasks.
+        Poll pending events and relay them to asynchronous worker tasks with atomic claims.
         Returns number of events processed.
         """
-        events = cls.fetch_pending_events(limit=limit)
+        events = cls.claim_pending_events(limit=limit)
         if not events:
             return 0
 

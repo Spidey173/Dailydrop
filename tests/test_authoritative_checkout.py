@@ -419,3 +419,71 @@ def test_log_sanitizer_redacts_credentials():
     formatted = formatter.format(record)
     assert "MySecretPassword123" not in formatted
     assert "[REDACTED]" in formatted
+
+
+# ==================== 10. Payment Price Tampering Prevention ====================
+
+def test_api_create_order_rejects_client_amount_tampering(auth_client):
+    """Verify /api/create-order rejects client attempting to pass forged amount for products."""
+    prod_id = add_product(
+        name="Security Tamper Mangoes",
+        price=300.00,
+        category="Fruits & Vegetables",
+        stock=20
+    )
+    assert prod_id is not None
+
+    # Cart total = 300 + 30 (delivery) = 330.00 = 33000 paise
+    # Attacker attempts to forge amount = 100 paise (₹1.00)
+    forged_payload = {
+        'products': [{'product_id': prod_id, 'name': 'Security Tamper Mangoes', 'quantity': 1}],
+        'amount': 100
+    }
+    resp = auth_client.post('/api/create-order', json=forged_payload)
+    assert resp.status_code == 400
+    data = resp.get_json()
+    assert data['success'] is False
+    assert 'tampering' in data.get('error', '').lower() or 'tampering' in data.get('message', '').lower()
+
+
+def test_api_verify_payment_rejects_tampered_pending_amount(test_app, auth_client):
+    """Verify /api/verify-payment rejects payment if pending amount diverges from catalog total."""
+    key_secret = Config.RAZORPAY_KEY_SECRET or "test_secret_tamper_123"
+    Config.RAZORPAY_KEY_SECRET = key_secret
+
+    prod_id = add_product(
+        name="Security Tamper Oil",
+        price=450.00,
+        category="Grocery",
+        stock=20
+    )
+    assert prod_id is not None
+
+    order_id = 'order_tamper_attack_101'
+    pay_id = 'pay_tamper_attack_101'
+    valid_sig = hmac.new(
+        key_secret.encode('utf-8'),
+        f"{order_id}|{pay_id}".encode('utf-8'),
+        hashlib.sha256
+    ).hexdigest()
+
+    # Seed pending order where attacker somehow recorded 100.00 instead of 480.00 (450 + 30 fee)
+    save_pending_order(
+        razorpay_order_id=order_id,
+        user_id=1,
+        full_name='Tamper Attacker',
+        phone_number='9876543210',
+        address='456 Exploitation St',
+        products=[{"product_id": prod_id, "name": "Security Tamper Oil", "quantity": 1}],
+        total_amount=100.0  # Tampered: only paid 100 instead of 480
+    )
+
+    resp = auth_client.post('/api/verify-payment', json={
+        'razorpay_order_id': order_id,
+        'razorpay_payment_id': pay_id,
+        'razorpay_signature': valid_sig
+    })
+    assert resp.status_code == 400
+    data = resp.get_json()
+    assert data['success'] is False
+    assert 'mismatch' in (data.get('error', '') or data.get('message', '')).lower()
