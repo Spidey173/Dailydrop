@@ -160,10 +160,12 @@ class SQLiteConnectionWrapper:
         return SQLiteCursorWrapper(self._conn.cursor())
 
     def commit(self):
-        self._conn.commit()
+        with _SQLITE_LOCK:
+            self._conn.commit()
 
     def rollback(self):
-        self._conn.rollback()
+        with _SQLITE_LOCK:
+            self._conn.rollback()
 
     @property
     def closed(self):
@@ -375,14 +377,15 @@ if not USE_REAL_POSTGRES:
 
     @contextmanager
     def _sqlite_get_db_connection():
-        """Context manager yielding SQLiteConnectionWrapper."""
-        wrapper = SQLiteConnectionWrapper(_SHARED_SQLITE_CONN)
-        try:
-            yield wrapper
-            wrapper.commit()
-        except Exception as e:
-            wrapper.rollback()
-            raise e
+        """Context manager yielding SQLiteConnectionWrapper with re-entrant thread safety."""
+        with _SQLITE_LOCK:
+            wrapper = SQLiteConnectionWrapper(_SHARED_SQLITE_CONN)
+            try:
+                yield wrapper
+                wrapper.commit()
+            except Exception as e:
+                wrapper.rollback()
+                raise e
 
 
     # Immediately patch database module at conftest load time so app imports never hit Neon
@@ -427,67 +430,77 @@ class MockRedisClient:
     """
     In-memory Redis mock supporting string operations, TTLs, and atomic Lua scripts.
     Eliminates external Redis daemon dependency during CI/CD and offline test suites.
+    Thread-safe to prevent race conditions during concurrent test simulations.
     """
     def __init__(self):
         self._store = {}
         self._ttls = {}
+        self._lock = threading.RLock()
 
     def ping(self):
         return True
 
     def get(self, key):
-        return self._store.get(str(key))
+        with self._lock:
+            return self._store.get(str(key))
 
     def set(self, key, value, ex=None, nx=False):
-        key_str = str(key)
-        if nx and key_str in self._store:
-            return None
-        self._store[key_str] = str(value)
-        return True
+        with self._lock:
+            key_str = str(key)
+            if nx and key_str in self._store:
+                return None
+            self._store[key_str] = str(value)
+            return True
 
     def delete(self, *keys):
-        count = 0
-        for k in keys:
-            if str(k) in self._store:
-                del self._store[str(k)]
-                count += 1
-        return count
+        with self._lock:
+            count = 0
+            for k in keys:
+                if str(k) in self._store:
+                    del self._store[str(k)]
+                    count += 1
+            return count
 
     def keys(self, pattern='*'):
         import fnmatch
-        return [k for k in self._store.keys() if fnmatch.fnmatch(k, pattern)]
+        with self._lock:
+            return [k for k in self._store.keys() if fnmatch.fnmatch(k, pattern)]
 
     def scan(self, cursor=0, match=None, count=10):
         import fnmatch
-        matched = [k for k in self._store.keys() if (not match or fnmatch.fnmatch(k, match))]
-        return 0, matched
+        with self._lock:
+            matched = [k for k in self._store.keys() if (not match or fnmatch.fnmatch(k, match))]
+            return 0, matched
 
     def register_script(self, script_str):
         if 'decrby' in script_str:
             def decr(keys, args):
-                k = str(keys[0])
-                qty = int(args[0])
-                if k not in self._store:
-                    return -1
-                cur = int(self._store[k])
-                if cur >= qty:
-                    self._store[k] = str(cur - qty)
-                    return 1
-                return 0
+                with self._lock:
+                    k = str(keys[0])
+                    qty = int(args[0])
+                    if k not in self._store:
+                        return -1
+                    cur = int(self._store[k])
+                    if cur >= qty:
+                        self._store[k] = str(cur - qty)
+                        return 1
+                    return 0
             return decr
         elif 'incrby' in script_str:
             def incr(keys, args):
-                k = str(keys[0])
-                qty = int(args[0])
-                if k in self._store:
-                    self._store[k] = str(int(self._store[k]) + qty)
-                    return 1
-                return 0
+                with self._lock:
+                    k = str(keys[0])
+                    qty = int(args[0])
+                    if k in self._store:
+                        self._store[k] = str(int(self._store[k]) + qty)
+                        return 1
+                    return 0
             return incr
         return lambda keys, args: 1
 
     def flushall(self):
-        self._store.clear()
+        with self._lock:
+            self._store.clear()
 
     def close(self):
         pass
