@@ -18,7 +18,7 @@
 | **Problem** | High-concurrency checkout spikes cause negative stock counts (overselling), while forged client cart payloads risk price and discount tampering. |
 | **Architecture** | **Server-authoritative cart reconciliation**, atomic conditional SQL decrements inside ACID transactions, cryptographic Razorpay HMAC-SHA256 signature verification FSM, and adaptive Neon PostgreSQL connection pooling. |
 | **Evidence & Benchmarks** | **76 automated Pytests** passing in CI across Python 3.10–3.12, sub-second search filtering across 200+ grocery SKUs, and zero overselling under multi-threaded concurrency simulation. |
-| **Scope & Boundaries** | **Seeded Data**: 200+ grocery SKUs across 10 categories; 3 PostgreSQL schemas (`core`, `auth_mgmt`, `audit_logs`). **Live Deployment**: Hosted on Vercel Serverless with cloud Neon PostgreSQL; simulated 10-minute order dispatch lifecycle. |
+| **Scope & Boundaries** | **Synthetic Data**: Seeded synthetic catalog of 200+ grocery SKUs across 10 categories; 3 PostgreSQL schemas (`core`, `auth_mgmt`, `audit_logs`). **Local Benchmark Environment**: Atomic conditional SQL decrements tested under simulated race conditions in local test harness. **Live Cloud Deployment**: Hosted on Vercel Serverless with cloud Neon PostgreSQL; simulated 10-minute order dispatch lifecycle. |
 | **Verified Test Suite** | **76 / 76 Pytests passing** (unit, integration, concurrency, payment FSM, security). |
 
 ---
