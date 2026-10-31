@@ -23,19 +23,7 @@
 
 ---
 
-## 🏗️ Architecture Slice: Concurrency & Order Lifecycle
-
-```text
-┌─────────────────┐       ┌────────────────────────┐       ┌────────────────────────┐       ┌─────────────────┐
-│   Client Cart   │ ────► │ Server Price Recompute │ ────► │ Atomic SQL Decrement   │ ────► │ Razorpay Auth   │ ────► Order Confirmed
-│ (Items, Quant)  │       │ (DB Price Overwrite)   │       │ (WHERE stock >= qty)   │       │ (HMAC-SHA256)   │       (Simulated 10m Dispatch)
-└─────────────────┘       └────────────────────────┘       └───────────┬────────────┘       └─────────────────┘
-                                                                       │ (Insufficient Stock)
-                                                                       ▼
-                                                           [ Transaction Rollback ]
-```
-
-* **Guarantee**: Zero overselling verified across 76 automated Pytests under simulated concurrent checkout spikes. Uses atomic conditional SQL decrements (`WHERE stock >= requested`) inside transactions, triggering immediate `conn.rollback()` on stock deficits.
+[![Architecture diagram of spidey173/dailydrop](https://gitdiagram.com/spidey173/dailydrop/diagram.png)](https://gitdiagram.com/spidey173/dailydrop?utm_source=readme&utm_medium=picture)
 
 ---
 
