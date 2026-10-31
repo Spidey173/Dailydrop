@@ -23,7 +23,7 @@
 
 ---
 
-[![Architecture diagram](https://gitdiagram.com/diagram-badge.svg)](https://gitdiagram.com/spidey173/dailydrop?utm_source=readme&utm_medium=badge)
+[![Architecture diagram of spidey173/dailydrop](https://gitdiagram.com/spidey173/dailydrop/diagram.png)](https://gitdiagram.com/spidey173/dailydrop?utm_source=readme&utm_medium=picture)
 
 ---
 
