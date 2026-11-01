@@ -1,7 +1,7 @@
 -- =============================================================================
 -- DailyDrop SQL Analytics Suite: 04. Market Basket Analysis & Product Affinities
 -- Identifies items frequently co-purchased together in the same cart transaction.
--- Calculates pair frequency and support percentage for cross-selling recommendations.
+-- Target Engine: Neon PostgreSQL
 -- =============================================================================
 
 WITH order_pairs AS (
@@ -9,14 +9,16 @@ WITH order_pairs AS (
         oi1.order_id,
         oi1.product_id AS product_a_id,
         oi1.product_name AS product_a_name,
-        oi1.category AS category_a,
+        p1.category AS category_a,
         oi2.product_id AS product_b_id,
         oi2.product_name AS product_b_name,
-        oi2.category AS category_b
+        p2.category AS category_b
     FROM order_items oi1
+    JOIN products p1 ON oi1.product_id = p1.product_id
     JOIN order_items oi2 
         ON oi1.order_id = oi2.order_id 
-        AND oi1.product_id < oi2.product_id  -- Ensure unique pairs without self-pairing or duplicates
+        AND oi1.product_id < oi2.product_id
+    JOIN products p2 ON oi2.product_id = p2.product_id
 ),
 total_orders_count AS (
     SELECT COUNT(DISTINCT order_id) AS total_orders FROM orders WHERE status = 'Delivered'

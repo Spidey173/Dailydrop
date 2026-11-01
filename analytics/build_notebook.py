@@ -281,3 +281,4 @@ with open(notebook_path, 'w', encoding='utf-8') as f:
     json.dump(notebook_content, f, indent=2)
 
 print(f"✅ Generated portfolio notebook at: {notebook_path}")
+

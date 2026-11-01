@@ -3,7 +3,7 @@
 **Company:** DailyDrop (10-Minute Micro-Fulfillment & Grocery Delivery)  
 **Author:** Senior Data Analytics Lead  
 **Analysis Period:** November 2025 – October 2026 (12 Months, Full Fiscal Cycle)  
-**Primary Tech Stack:** Python 3, In-Memory OLAP Engine (SQLite3), Advanced SQL (CTEs, Window Functions, Self-Joins), Pandas, Seaborn, Matplotlib, Plotly  
+**Primary Tech Stack:** Python 3, Neon PostgreSQL Cloud OLAP Engine, Advanced SQL (CTEs, Window Functions, Self-Joins), Pandas, Seaborn, Matplotlib, Plotly  
 
 ---
 
@@ -180,3 +180,4 @@ If discussing this project in a Data Analyst / BI Engineer / Data Scientist inte
 - [**CLI Query Execution Engine (Python)**](file:///Users/spidey./Downloads/Spidey/Dailydrop/analytics/run_analytics.py)
 - [**Advanced SQL Suite (6 Modules)**](file:///Users/spidey./Downloads/Spidey/Dailydrop/analytics/sql/)
 - [**Data Assets (CSV)**](file:///Users/spidey./Downloads/Spidey/Dailydrop/analytics/data/)
+

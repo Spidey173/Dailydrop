@@ -2,21 +2,22 @@
 -- DailyDrop SQL Analytics Suite: 06. ABC Inventory Classification (Pareto 80/20 Rule)
 -- Classifies catalog SKUs into Class A (Top 80% revenue), Class B (Next 15%),
 -- and Class C (Tail 5%) for inventory optimization and stockout prevention.
+-- Target Engine: Neon PostgreSQL
 -- =============================================================================
 
 WITH product_sales AS (
     SELECT 
         oi.product_id,
         oi.product_name,
-        oi.category,
+        p.category,
         SUM(oi.quantity) AS units_sold,
-        SUM(oi.line_subtotal) AS total_revenue,
-        SUM(oi.gross_profit) AS total_gross_profit,
-        ROUND(AVG(oi.unit_price), 2) AS selling_price
+        SUM(oi.subtotal) AS total_revenue,
+        ROUND(AVG(oi.price), 2) AS selling_price
     FROM order_items oi
     JOIN orders o ON oi.order_id = o.order_id
+    JOIN products p ON oi.product_id = p.product_id
     WHERE o.status = 'Delivered'
-    GROUP BY oi.product_id, oi.product_name, oi.category
+    GROUP BY oi.product_id, oi.product_name, p.category
 ),
 ranked_products AS (
     SELECT 
@@ -25,7 +26,6 @@ ranked_products AS (
         category,
         units_sold,
         total_revenue,
-        total_gross_profit,
         selling_price,
         SUM(total_revenue) OVER () AS overall_catalog_revenue,
         SUM(total_revenue) OVER (ORDER BY total_revenue DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS cumulative_revenue,
@@ -41,7 +41,6 @@ abc_classification AS (
         sales_rank,
         units_sold,
         total_revenue,
-        total_gross_profit,
         ROUND((total_revenue * 100.0) / overall_catalog_revenue, 2) AS revenue_share_pct,
         ROUND((cumulative_revenue * 100.0) / overall_catalog_revenue, 2) AS cumulative_revenue_pct,
         ROUND((sales_rank * 100.0) / total_skus, 2) AS cumulative_sku_pct,
@@ -58,7 +57,6 @@ SELECT
     category,
     units_sold,
     total_revenue,
-    total_gross_profit,
     revenue_share_pct,
     cumulative_revenue_pct,
     abc_class

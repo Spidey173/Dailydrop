@@ -1,42 +1,42 @@
 -- =============================================================================
 -- DailyDrop SQL Analytics Suite: 03. Customer Cohort Retention Analysis
 -- Tracks repeat purchasing behavior by acquisition cohort month across time.
+-- Target Engine: Neon PostgreSQL
 -- =============================================================================
 
 WITH customer_first_purchase AS (
     SELECT 
-        customer_id,
-        MIN(SUBSTR(order_date, 1, 7)) AS cohort_month
+        user_id,
+        MIN(TO_CHAR(order_date, 'YYYY-MM')) AS cohort_month
     FROM orders
     WHERE status = 'Delivered'
-    GROUP BY customer_id
+    GROUP BY user_id
 ),
 cohort_size AS (
     SELECT 
         cohort_month,
-        COUNT(DISTINCT customer_id) AS cohort_customer_count
+        COUNT(DISTINCT user_id) AS cohort_customer_count
     FROM customer_first_purchase
     GROUP BY cohort_month
 ),
 customer_orders_by_month AS (
     SELECT DISTINCT
-        o.customer_id,
+        o.user_id,
         fp.cohort_month,
-        SUBSTR(o.order_date, 1, 7) AS order_month
+        TO_CHAR(o.order_date, 'YYYY-MM') AS order_month
     FROM orders o
-    JOIN customer_first_purchase fp ON o.customer_id = fp.customer_id
+    JOIN customer_first_purchase fp ON o.user_id = fp.user_id
     WHERE o.status = 'Delivered'
 ),
 cohort_progression AS (
     SELECT 
         com.cohort_month,
         com.order_month,
-        -- Calculate month offset (Month 0, Month 1, Month 2...)
         (
             (CAST(SUBSTR(com.order_month, 1, 4) AS INTEGER) - CAST(SUBSTR(com.cohort_month, 1, 4) AS INTEGER)) * 12 +
             (CAST(SUBSTR(com.order_month, 6, 2) AS INTEGER) - CAST(SUBSTR(com.cohort_month, 6, 2) AS INTEGER))
         ) AS month_number,
-        COUNT(DISTINCT com.customer_id) AS active_customers
+        COUNT(DISTINCT com.user_id) AS active_customers
     FROM customer_orders_by_month com
     GROUP BY com.cohort_month, com.order_month
 )

@@ -1,18 +1,18 @@
 # 📊 DailyDrop Quick-Commerce Data Analytics & BI Suite
 
-Welcome to the **DailyDrop Data Analytics Suite** — an end-to-end, enterprise-grade e-commerce analytics ecosystem demonstrating advanced SQL, in-memory OLAP data processing, customer segmentation (RFM), cohort retention, logistics SLA optimization, and inventory Pareto stratification.
+Welcome to the **DailyDrop Data Analytics Suite** — an end-to-end, enterprise-grade e-commerce analytics ecosystem demonstrating advanced SQL, cloud OLAP data processing on Neon PostgreSQL, customer segmentation (RFM), cohort retention, logistics SLA optimization, and inventory Pareto stratification.
 
 ---
 
 ## 🚀 Quick Start (Zero Setup Required)
 
-Everything is powered by Python's built-in standard library (`sqlite3`) and standard data science tools:
+Everything is powered directly by your **Neon PostgreSQL** production database and standard data science tools:
 
 ### 1. Run the Full Analytics Engine & Generate Reports
 ```bash
 python3 analytics/run_analytics.py
 ```
-*This executes all 6 advanced SQL modules in-memory, prints formatted ASCII tables to the terminal, and exports a comprehensive Markdown report to [`analytics/ANALYSIS_RESULTS.md`](./ANALYSIS_RESULTS.md).*
+*This executes all 6 advanced SQL modules directly against your live **Neon PostgreSQL** database, prints formatted ASCII tables to the terminal, and exports a comprehensive Markdown report to [`analytics/ANALYSIS_RESULTS.md`](./ANALYSIS_RESULTS.md).*
 
 ### 2. (Optional) Re-generate the 12-Month E-Commerce Dataset
 ```bash
@@ -36,7 +36,7 @@ analytics/
 ├── ANALYSIS_RESULTS.md             # 📈 Generated markdown reports from all 6 analytical SQL queries
 ├── requirements-analytics.txt      # 📦 Python data science dependencies (pandas, matplotlib, seaborn, etc.)
 ├── generate_analytics_data.py      # ⚙️ Real-world synthetic transaction generator (12 months, 5 cities)
-├── run_analytics.py                # 🚀 In-memory SQLite analytics engine & markdown table reporter
+├── run_analytics.py                # 🚀 Neon PostgreSQL analytics engine & markdown table reporter
 ├── build_notebook.py               # 🛠️ Programmatic Jupyter Notebook builder
 ├── data/                           # 📂 Extracted CSV datasets for data warehousing
 │   ├── products.csv                # 241 SKUs across 10 categories with cost and margins
@@ -72,3 +72,4 @@ analytics/
 ## 📖 In-Depth Documentation
 
 For the full analytical narrative, business recommendations, and data analyst interview answers, see [**CASE_STUDY.md**](./CASE_STUDY.md).
+
