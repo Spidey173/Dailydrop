@@ -770,6 +770,98 @@ def get_unified_analytics(days: int = 30) -> Dict[str, Any]:
                     except Exception:
                         continue
 
+                city_sla = []
+                try:
+                    cursor.execute("""
+                        SELECT 
+                            COALESCE(city, 'Bangalore') as city,
+                            COUNT(order_id) as orders,
+                            ROUND(AVG(total_amount), 2) as aov,
+                            ROUND(AVG(COALESCE(delivery_duration_minutes, 7.2)), 2) as avg_duration,
+                            ROUND((SUM(CASE WHEN COALESCE(delivery_duration_minutes, 7.2) <= 10.0 THEN 1.0 ELSE 0.0 END) / COUNT(order_id)) * 100.0, 1) as sla_pct
+                        FROM orders
+                        WHERE status = 'Delivered'
+                        GROUP BY COALESCE(city, 'Bangalore')
+                        ORDER BY orders DESC;
+                    """)
+                    city_sla = [dict(r) for r in cursor.fetchall()]
+                except Exception:
+                    pass
+
+                rfm_summary = []
+                try:
+                    cursor.execute("""
+                        WITH customer_aggregates AS (
+                            SELECT 
+                                o.user_id,
+                                COUNT(o.order_id) AS total_orders,
+                                SUM(o.total_amount) AS total_spend,
+                                EXTRACT(DAY FROM ('2026-11-01'::timestamp - MAX(o.order_date)))::integer AS recency_days
+                            FROM orders o
+                            WHERE o.status = 'Delivered'
+                            GROUP BY o.user_id
+                        ),
+                        rfm_scores AS (
+                            SELECT 
+                                user_id,
+                                NTILE(5) OVER (ORDER BY recency_days DESC) AS r_score,
+                                NTILE(5) OVER (ORDER BY total_orders ASC) AS f_score,
+                                NTILE(5) OVER (ORDER BY total_spend ASC) AS m_score
+                            FROM customer_aggregates
+                        )
+                        SELECT 
+                            CASE 
+                                WHEN r_score >= 4 AND f_score >= 4 AND m_score >= 4 THEN 'Champions (VIP)'
+                                WHEN r_score >= 3 AND f_score >= 3 THEN 'Loyal Customers'
+                                WHEN r_score >= 4 AND f_score <= 2 THEN 'Recent / Promising'
+                                WHEN r_score <= 2 AND f_score >= 3 THEN 'At Risk (High Value Churn)'
+                                WHEN r_score <= 2 AND f_score <= 2 THEN 'Hibernating / Lost'
+                                ELSE 'Needs Attention'
+                            END AS segment,
+                            COUNT(*) as count
+                        FROM rfm_scores
+                        GROUP BY 1
+                        ORDER BY count DESC;
+                    """)
+                    rfm_summary = [dict(r) for r in cursor.fetchall()]
+                except Exception:
+                    pass
+
+                abc_summary = []
+                try:
+                    cursor.execute("""
+                        WITH product_sales AS (
+                            SELECT 
+                                oi.product_id,
+                                SUM(oi.subtotal) AS total_revenue
+                            FROM order_items oi
+                            JOIN orders o ON oi.order_id = o.order_id
+                            WHERE o.status = 'Delivered'
+                            GROUP BY oi.product_id
+                        ),
+                        ranked AS (
+                            SELECT 
+                                product_id,
+                                total_revenue,
+                                SUM(total_revenue) OVER () as overall,
+                                SUM(total_revenue) OVER (ORDER BY total_revenue DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) as cum
+                            FROM product_sales
+                        )
+                        SELECT 
+                            CASE 
+                                WHEN (cum * 100.0) / overall <= 80.0 THEN 'Class A (80% GMV)'
+                                WHEN (cum * 100.0) / overall <= 95.0 THEN 'Class B (15% GMV)'
+                                ELSE 'Class C (5% GMV)'
+                            END as abc_class,
+                            COUNT(*) as count,
+                            ROUND(SUM(total_revenue), 2) as revenue
+                        FROM ranked
+                        GROUP BY 1;
+                    """)
+                    abc_summary = [dict(r) for r in cursor.fetchall()]
+                except Exception:
+                    pass
+
                 analytics_result = {
                     'stats': {
                         'total_orders': total_orders,
@@ -786,7 +878,10 @@ def get_unified_analytics(days: int = 30) -> Dict[str, Any]:
                         'max_date': end_date.strftime('%Y-%m-%d')
                     },
                     'categories': category_totals,
-                    'hourly': hour_counts
+                    'hourly': hour_counts,
+                    'city_sla': city_sla,
+                    'rfm_summary': rfm_summary,
+                    'abc_summary': abc_summary
                 }
 
                 _ANALYTICS_CACHE[cache_key] = (now, analytics_result)
@@ -866,7 +961,10 @@ def get_unified_analytics(days: int = 30) -> Dict[str, Any]:
                             'max_date': end_date.strftime('%Y-%m-%d')
                         },
                         'categories': category_totals,
-                        'hourly': hour_counts
+                        'hourly': hour_counts,
+                        'city_sla': [],
+                        'rfm_summary': [],
+                        'abc_summary': []
                     }
                     _ANALYTICS_CACHE[cache_key] = (now, analytics_result)
                     return analytics_result

@@ -37,7 +37,10 @@ def admin_dashboard():
         sales_info=analytics.get('sales', {}),
         contact_messages=contact_messages,
         category_revenue=analytics.get('categories', {}),
-        hourly_distribution=analytics.get('hourly', {})
+        hourly_distribution=analytics.get('hourly', {}),
+        city_sla=analytics.get('city_sla', []),
+        rfm_summary=analytics.get('rfm_summary', []),
+        abc_summary=analytics.get('abc_summary', [])
     )
 
 
@@ -67,6 +70,9 @@ def api_admin_analytics():
         'sales_info': analytics.get('sales', {}),
         'category_revenue': analytics.get('categories', {}),
         'hourly_distribution': analytics.get('hourly', {}),
+        'city_sla': analytics.get('city_sla', []),
+        'rfm_summary': analytics.get('rfm_summary', []),
+        'abc_summary': analytics.get('abc_summary', []),
         'low_stock_count': len(low_stock),
         'critical_stock_count': len(critical_stock)
     }), 200
