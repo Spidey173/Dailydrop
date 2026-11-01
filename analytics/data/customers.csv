@@ -1,0 +1,251 @@
+customer_id,name,email,phone,city,postal_code,state,address,signup_date,signup_month,persona
+1,Kavita Sharma,kavita.sharma623@gmail.com,9975579548,Bangalore,560001,Karnataka,"Flat #330, Tower C, Bangalore - 560001",2026-09-29 00:00:00,2026-09,Occasional
+2,Prisha Singh,prisha.singh69@gmail.com,9786149359,Bangalore,560034,Karnataka,"Flat #276, Tower D, Bangalore - 560034",2026-09-12 00:00:00,2026-09,Occasional
+3,Suresh Nair,suresh.nair141@gmail.com,7073791320,Pune,411001,Maharashtra,"Flat #439, Tower C, Pune - 411001",2026-06-21 00:00:00,2026-06,Impulse & Snacks
+4,Aadhya Pillai,aadhya.pillai783@gmail.com,7036998038,Mumbai,400050,Maharashtra,"Flat #918, Tower C, Mumbai - 400050",2026-05-24 00:00:00,2026-05,Family Pantry
+5,Ayaan Singh,ayaan.singh240@gmail.com,9855377076,Bangalore,560001,Karnataka,"Flat #1305, Tower B, Bangalore - 560001",2026-07-10 00:00:00,2026-07,Daily Essentials
+6,Vihaan Singh,vihaan.singh79@gmail.com,9854349361,Bangalore,560034,Karnataka,"Flat #1153, Tower B, Bangalore - 560034",2026-03-29 00:00:00,2026-03,Family Pantry
+7,Suresh Nair,suresh.nair750@gmail.com,8887337818,Hyderabad,500081,Telangana,"Flat #598, Tower D, Hyderabad - 500081",2026-09-10 00:00:00,2026-09,Daily Essentials
+8,Reyansh Rao,reyansh.rao372@gmail.com,9165177213,Hyderabad,500081,Telangana,"Flat #211, Tower A, Hyderabad - 500081",2025-12-22 00:00:00,2025-12,Impulse & Snacks
+9,Reyansh Singh,reyansh.singh206@gmail.com,9781979055,Hyderabad,500081,Telangana,"Flat #388, Tower D, Hyderabad - 500081",2026-02-20 00:00:00,2026-02,Family Pantry
+10,Arjun Kulkarni,arjun.kulkarni837@gmail.com,8823141087,Bangalore,560001,Karnataka,"Flat #1208, Tower A, Bangalore - 560001",2026-10-23 00:00:00,2026-10,Occasional
+11,Saanvi Iyer,saanvi.iyer426@gmail.com,9174606833,Mumbai,400001,Maharashtra,"Flat #922, Tower A, Mumbai - 400001",2026-02-11 00:00:00,2026-02,Daily Essentials
+12,Vikram Kumar,vikram.kumar958@gmail.com,9148285503,Delhi NCR,122001,Haryana,"Flat #1239, Tower D, Delhi NCR - 122001",2026-02-07 00:00:00,2026-02,Daily Essentials
+13,Vihaan Agarwal,vihaan.agarwal763@gmail.com,8818181586,Delhi NCR,110001,Delhi,"Flat #218, Tower A, Delhi NCR - 110001",2026-07-08 00:00:00,2026-07,Family Pantry
+14,Kavita Iyer,kavita.iyer68@gmail.com,8820752378,Bangalore,560102,Karnataka,"Flat #241, Tower A, Bangalore - 560102",2026-08-04 00:00:00,2026-08,Daily Essentials
+15,Ayaan Agarwal,ayaan.agarwal262@gmail.com,8889795010,Bangalore,560001,Karnataka,"Flat #1369, Tower A, Bangalore - 560001",2026-05-18 00:00:00,2026-05,Family Pantry
+16,Kavita Chopra,kavita.chopra967@gmail.com,9937415205,Delhi NCR,110001,Delhi,"Flat #589, Tower C, Delhi NCR - 110001",2026-05-10 00:00:00,2026-05,Impulse & Snacks
+17,Prisha Kulkarni,prisha.kulkarni333@gmail.com,9811250299,Hyderabad,500081,Telangana,"Flat #1373, Tower A, Hyderabad - 500081",2025-12-29 00:00:00,2025-12,Daily Essentials
+18,Anushka Nair,anushka.nair965@gmail.com,9919233013,Mumbai,400001,Maharashtra,"Flat #857, Tower C, Mumbai - 400001",2026-02-08 00:00:00,2026-02,Occasional
+19,Prisha Banerjee,prisha.banerjee836@gmail.com,7080993218,Bangalore,560001,Karnataka,"Flat #1236, Tower C, Bangalore - 560001",2026-10-13 00:00:00,2026-10,Daily Essentials
+20,Krishna Kumar,krishna.kumar128@gmail.com,9884252420,Bangalore,560102,Karnataka,"Flat #658, Tower C, Bangalore - 560102",2026-07-15 00:00:00,2026-07,Impulse & Snacks
+21,Aadhya Kumar,aadhya.kumar527@gmail.com,9143704923,Bangalore,560001,Karnataka,"Flat #290, Tower D, Bangalore - 560001",2026-09-16 00:00:00,2026-09,Daily Essentials
+22,Sneha Nair,sneha.nair662@gmail.com,9931687165,Hyderabad,500081,Telangana,"Flat #1230, Tower D, Hyderabad - 500081",2026-07-01 00:00:00,2026-07,Daily Essentials
+23,Ishaan Pillai,ishaan.pillai46@gmail.com,9988183110,Pune,411001,Maharashtra,"Flat #404, Tower D, Pune - 411001",2026-01-26 00:00:00,2026-01,Daily Essentials
+24,Aditya Joshi,aditya.joshi225@gmail.com,7043491314,Bangalore,560034,Karnataka,"Flat #825, Tower D, Bangalore - 560034",2026-10-24 00:00:00,2026-10,Impulse & Snacks
+25,Saanvi Iyer,saanvi.iyer829@gmail.com,9765337219,Bangalore,560001,Karnataka,"Flat #468, Tower C, Bangalore - 560001",2026-09-03 00:00:00,2026-09,Family Pantry
+26,Saanvi Kumar,saanvi.kumar173@gmail.com,7024508349,Delhi NCR,122001,Haryana,"Flat #180, Tower D, Delhi NCR - 122001",2026-03-08 00:00:00,2026-03,Occasional
+27,Sunita Joshi,sunita.joshi322@gmail.com,9739920292,Bangalore,560001,Karnataka,"Flat #496, Tower D, Bangalore - 560001",2026-04-16 00:00:00,2026-04,Occasional
+28,Khushi Joshi,khushi.joshi666@gmail.com,8863643924,Pune,411001,Maharashtra,"Flat #779, Tower A, Pune - 411001",2026-01-20 00:00:00,2026-01,Occasional
+29,Ananya Agarwal,ananya.agarwal995@gmail.com,9915134794,Bangalore,560034,Karnataka,"Flat #1322, Tower D, Bangalore - 560034",2026-04-23 00:00:00,2026-04,Impulse & Snacks
+30,Priya Banerjee,priya.banerjee533@gmail.com,9861700055,Mumbai,400001,Maharashtra,"Flat #622, Tower A, Mumbai - 400001",2026-08-14 00:00:00,2026-08,Daily Essentials
+31,Suresh Gupta,suresh.gupta382@gmail.com,9119391725,Delhi NCR,110001,Delhi,"Flat #1377, Tower C, Delhi NCR - 110001",2026-08-01 00:00:00,2026-08,Daily Essentials
+32,Prisha Menon,prisha.menon326@gmail.com,7064813568,Delhi NCR,110001,Delhi,"Flat #925, Tower C, Delhi NCR - 110001",2026-06-29 00:00:00,2026-06,Daily Essentials
+33,Vikram Iyer,vikram.iyer640@gmail.com,8850392808,Delhi NCR,122001,Haryana,"Flat #1223, Tower A, Delhi NCR - 122001",2026-04-08 00:00:00,2026-04,Daily Essentials
+34,Shweta Banerjee,shweta.banerjee680@gmail.com,9972409658,Hyderabad,500081,Telangana,"Flat #1006, Tower B, Hyderabad - 500081",2026-06-16 00:00:00,2026-06,Impulse & Snacks
+35,Shaurya Patel,shaurya.patel300@gmail.com,8899100953,Delhi NCR,110001,Delhi,"Flat #292, Tower B, Delhi NCR - 110001",2026-08-03 00:00:00,2026-08,Daily Essentials
+36,Diya Nair,diya.nair35@gmail.com,9842862209,Hyderabad,500081,Telangana,"Flat #1352, Tower A, Hyderabad - 500081",2026-05-29 00:00:00,2026-05,Occasional
+37,Manish Gupta,manish.gupta745@gmail.com,7061536717,Hyderabad,500081,Telangana,"Flat #919, Tower B, Hyderabad - 500081",2026-02-04 00:00:00,2026-02,Impulse & Snacks
+38,Reyansh Rao,reyansh.rao234@gmail.com,9779519112,Hyderabad,500081,Telangana,"Flat #203, Tower B, Hyderabad - 500081",2026-10-09 00:00:00,2026-10,Daily Essentials
+39,Krishna Kulkarni,krishna.kulkarni693@gmail.com,8885017682,Delhi NCR,110001,Delhi,"Flat #1007, Tower D, Delhi NCR - 110001",2026-09-16 00:00:00,2026-09,Family Pantry
+40,Shaurya Deshmukh,shaurya.deshmukh470@gmail.com,9943183955,Mumbai,400050,Maharashtra,"Flat #1168, Tower D, Mumbai - 400050",2026-07-21 00:00:00,2026-07,Daily Essentials
+41,Arjun Mehta,arjun.mehta250@gmail.com,9955076693,Delhi NCR,110001,Delhi,"Flat #1207, Tower A, Delhi NCR - 110001",2026-01-31 00:00:00,2026-01,Daily Essentials
+42,Ishaan Gupta,ishaan.gupta75@gmail.com,9164707061,Delhi NCR,110001,Delhi,"Flat #1212, Tower D, Delhi NCR - 110001",2026-05-16 00:00:00,2026-05,Daily Essentials
+43,Karan Bhat,karan.bhat936@gmail.com,8812621534,Delhi NCR,122001,Haryana,"Flat #1077, Tower A, Delhi NCR - 122001",2026-10-16 00:00:00,2026-10,Daily Essentials
+44,Vikram Rao,vikram.rao561@gmail.com,7083300637,Mumbai,400001,Maharashtra,"Flat #1100, Tower B, Mumbai - 400001",2026-03-27 00:00:00,2026-03,Family Pantry
+45,Vikram Chopra,vikram.chopra694@gmail.com,7064266464,Bangalore,560102,Karnataka,"Flat #1058, Tower B, Bangalore - 560102",2026-10-26 00:00:00,2026-10,Family Pantry
+46,Neha Agarwal,neha.agarwal587@gmail.com,7013637575,Bangalore,560034,Karnataka,"Flat #978, Tower B, Bangalore - 560034",2026-09-26 00:00:00,2026-09,Daily Essentials
+47,Anushka Bhat,anushka.bhat345@gmail.com,9771028710,Delhi NCR,110001,Delhi,"Flat #792, Tower D, Delhi NCR - 110001",2026-03-29 00:00:00,2026-03,Occasional
+48,Karan Kumar,karan.kumar864@gmail.com,9873123515,Bangalore,560001,Karnataka,"Flat #1205, Tower A, Bangalore - 560001",2026-10-30 00:00:00,2026-10,Daily Essentials
+49,Arjun Verma,arjun.verma782@gmail.com,9843189803,Mumbai,400001,Maharashtra,"Flat #142, Tower B, Mumbai - 400001",2026-03-14 00:00:00,2026-03,Family Pantry
+50,Ayaan Agarwal,ayaan.agarwal980@gmail.com,9772415804,Mumbai,400050,Maharashtra,"Flat #856, Tower B, Mumbai - 400050",2026-07-15 00:00:00,2026-07,Occasional
+51,Ayaan Iyer,ayaan.iyer997@gmail.com,9924508768,Bangalore,560001,Karnataka,"Flat #739, Tower D, Bangalore - 560001",2026-05-10 00:00:00,2026-05,Impulse & Snacks
+52,Arjun Agarwal,arjun.agarwal717@gmail.com,7042594692,Bangalore,560034,Karnataka,"Flat #718, Tower A, Bangalore - 560034",2026-09-07 00:00:00,2026-09,Family Pantry
+53,Aditya Joshi,aditya.joshi555@gmail.com,9198787891,Delhi NCR,110001,Delhi,"Flat #242, Tower C, Delhi NCR - 110001",2025-11-18 00:00:00,2025-11,Family Pantry
+54,Meera Reddy,meera.reddy453@gmail.com,9995306788,Hyderabad,500081,Telangana,"Flat #414, Tower D, Hyderabad - 500081",2026-02-16 00:00:00,2026-02,Family Pantry
+55,Khushi Banerjee,khushi.banerjee837@gmail.com,8874893936,Hyderabad,500081,Telangana,"Flat #993, Tower C, Hyderabad - 500081",2026-04-14 00:00:00,2026-04,Daily Essentials
+56,Sai Kumar,sai.kumar912@gmail.com,9142730796,Hyderabad,500081,Telangana,"Flat #1268, Tower D, Hyderabad - 500081",2026-04-19 00:00:00,2026-04,Family Pantry
+57,Rohan Iyer,rohan.iyer509@gmail.com,9757623800,Mumbai,400050,Maharashtra,"Flat #798, Tower C, Mumbai - 400050",2026-09-29 00:00:00,2026-09,Impulse & Snacks
+58,Khushi Pillai,khushi.pillai20@gmail.com,8835643159,Bangalore,560034,Karnataka,"Flat #595, Tower D, Bangalore - 560034",2026-06-09 00:00:00,2026-06,Impulse & Snacks
+59,Deepak Deshmukh,deepak.deshmukh468@gmail.com,9822489409,Mumbai,400050,Maharashtra,"Flat #554, Tower D, Mumbai - 400050",2026-08-09 00:00:00,2026-08,Daily Essentials
+60,Shweta Joshi,shweta.joshi494@gmail.com,8881259135,Delhi NCR,110001,Delhi,"Flat #972, Tower C, Delhi NCR - 110001",2026-04-25 00:00:00,2026-04,Family Pantry
+61,Prisha Kumar,prisha.kumar246@gmail.com,9835848226,Delhi NCR,110001,Delhi,"Flat #345, Tower B, Delhi NCR - 110001",2026-02-23 00:00:00,2026-02,Impulse & Snacks
+62,Khushi Agarwal,khushi.agarwal788@gmail.com,8890099897,Mumbai,400050,Maharashtra,"Flat #306, Tower B, Mumbai - 400050",2026-04-05 00:00:00,2026-04,Family Pantry
+63,Prisha Sharma,prisha.sharma735@gmail.com,8826989677,Mumbai,400050,Maharashtra,"Flat #194, Tower A, Mumbai - 400050",2026-06-29 00:00:00,2026-06,Impulse & Snacks
+64,Krishna Deshmukh,krishna.deshmukh115@gmail.com,9887049595,Mumbai,400050,Maharashtra,"Flat #1062, Tower D, Mumbai - 400050",2026-05-25 00:00:00,2026-05,Daily Essentials
+65,Vihaan Kumar,vihaan.kumar973@gmail.com,9125312516,Bangalore,560034,Karnataka,"Flat #921, Tower D, Bangalore - 560034",2025-12-29 00:00:00,2025-12,Impulse & Snacks
+66,Vihaan Nair,vihaan.nair162@gmail.com,8850780112,Bangalore,560034,Karnataka,"Flat #609, Tower A, Bangalore - 560034",2026-06-30 00:00:00,2026-06,Family Pantry
+67,Naveen Banerjee,naveen.banerjee241@gmail.com,8861053474,Hyderabad,500081,Telangana,"Flat #1007, Tower C, Hyderabad - 500081",2026-09-24 00:00:00,2026-09,Occasional
+68,Prisha Agarwal,prisha.agarwal645@gmail.com,9891823275,Bangalore,560034,Karnataka,"Flat #526, Tower B, Bangalore - 560034",2026-03-24 00:00:00,2026-03,Daily Essentials
+69,Saanvi Iyer,saanvi.iyer575@gmail.com,9831009452,Bangalore,560001,Karnataka,"Flat #937, Tower D, Bangalore - 560001",2026-08-08 00:00:00,2026-08,Family Pantry
+70,Aditya Singh,aditya.singh305@gmail.com,7047945817,Hyderabad,500081,Telangana,"Flat #246, Tower B, Hyderabad - 500081",2026-10-11 00:00:00,2026-10,Impulse & Snacks
+71,Shweta Gupta,shweta.gupta445@gmail.com,9883089925,Mumbai,400001,Maharashtra,"Flat #406, Tower C, Mumbai - 400001",2026-09-15 00:00:00,2026-09,Daily Essentials
+72,Shaurya Mehta,shaurya.mehta619@gmail.com,7086397676,Mumbai,400050,Maharashtra,"Flat #1000, Tower A, Mumbai - 400050",2026-06-03 00:00:00,2026-06,Daily Essentials
+73,Neha Kumar,neha.kumar522@gmail.com,8876276072,Hyderabad,500081,Telangana,"Flat #265, Tower A, Hyderabad - 500081",2026-10-02 00:00:00,2026-10,Impulse & Snacks
+74,Naveen Kumar,naveen.kumar36@gmail.com,9840725714,Bangalore,560001,Karnataka,"Flat #652, Tower A, Bangalore - 560001",2026-08-29 00:00:00,2026-08,Daily Essentials
+75,Kavita Kulkarni,kavita.kulkarni948@gmail.com,9934359060,Delhi NCR,122001,Haryana,"Flat #1401, Tower D, Delhi NCR - 122001",2026-10-23 00:00:00,2026-10,Family Pantry
+76,Karan Chopra,karan.chopra338@gmail.com,7024039158,Bangalore,560102,Karnataka,"Flat #776, Tower D, Bangalore - 560102",2026-08-09 00:00:00,2026-08,Daily Essentials
+77,Neha Pillai,neha.pillai47@gmail.com,9121819185,Delhi NCR,110001,Delhi,"Flat #617, Tower C, Delhi NCR - 110001",2026-01-20 00:00:00,2026-01,Impulse & Snacks
+78,Rajesh Sharma,rajesh.sharma683@gmail.com,8872005415,Delhi NCR,122001,Haryana,"Flat #212, Tower B, Delhi NCR - 122001",2026-06-18 00:00:00,2026-06,Impulse & Snacks
+79,Meera Kulkarni,meera.kulkarni788@gmail.com,9837321124,Mumbai,400050,Maharashtra,"Flat #1225, Tower B, Mumbai - 400050",2026-10-12 00:00:00,2026-10,Family Pantry
+80,Meera Reddy,meera.reddy39@gmail.com,7091721371,Mumbai,400001,Maharashtra,"Flat #425, Tower C, Mumbai - 400001",2026-06-28 00:00:00,2026-06,Family Pantry
+81,Sai Singh,sai.singh871@gmail.com,9871934487,Bangalore,560034,Karnataka,"Flat #416, Tower D, Bangalore - 560034",2026-10-13 00:00:00,2026-10,Daily Essentials
+82,Khushi Rao,khushi.rao864@gmail.com,9173380266,Mumbai,400001,Maharashtra,"Flat #1036, Tower B, Mumbai - 400001",2026-05-06 00:00:00,2026-05,Occasional
+83,Rajesh Nair,rajesh.nair894@gmail.com,9847077298,Delhi NCR,122001,Haryana,"Flat #797, Tower C, Delhi NCR - 122001",2026-09-13 00:00:00,2026-09,Daily Essentials
+84,Prisha Agarwal,prisha.agarwal603@gmail.com,7075718414,Bangalore,560102,Karnataka,"Flat #1015, Tower D, Bangalore - 560102",2026-04-22 00:00:00,2026-04,Family Pantry
+85,Suresh Bhat,suresh.bhat476@gmail.com,9935320492,Mumbai,400001,Maharashtra,"Flat #1272, Tower D, Mumbai - 400001",2026-03-12 00:00:00,2026-03,Impulse & Snacks
+86,Aditya Chopra,aditya.chopra772@gmail.com,9161167978,Delhi NCR,122001,Haryana,"Flat #412, Tower D, Delhi NCR - 122001",2026-10-21 00:00:00,2026-10,Daily Essentials
+87,Shweta Chopra,shweta.chopra900@gmail.com,9869096899,Bangalore,560034,Karnataka,"Flat #1178, Tower D, Bangalore - 560034",2025-11-20 00:00:00,2025-11,Daily Essentials
+88,Ishaan Patel,ishaan.patel490@gmail.com,9955440919,Delhi NCR,122001,Haryana,"Flat #265, Tower C, Delhi NCR - 122001",2026-09-22 00:00:00,2026-09,Occasional
+89,Vikram Chopra,vikram.chopra651@gmail.com,7075491202,Pune,411001,Maharashtra,"Flat #174, Tower A, Pune - 411001",2026-03-12 00:00:00,2026-03,Impulse & Snacks
+90,Aditi Singh,aditi.singh774@gmail.com,9868246664,Bangalore,560034,Karnataka,"Flat #1398, Tower A, Bangalore - 560034",2026-05-26 00:00:00,2026-05,Impulse & Snacks
+91,Vivaan Verma,vivaan.verma342@gmail.com,9849375156,Delhi NCR,110001,Delhi,"Flat #868, Tower D, Delhi NCR - 110001",2026-02-03 00:00:00,2026-02,Family Pantry
+92,Manish Iyer,manish.iyer184@gmail.com,9720598952,Delhi NCR,122001,Haryana,"Flat #1370, Tower B, Delhi NCR - 122001",2026-06-12 00:00:00,2026-06,Family Pantry
+93,Pari Kulkarni,pari.kulkarni663@gmail.com,9971682508,Mumbai,400050,Maharashtra,"Flat #120, Tower D, Mumbai - 400050",2026-10-05 00:00:00,2026-10,Impulse & Snacks
+94,Shaurya Patel,shaurya.patel462@gmail.com,9988862539,Mumbai,400050,Maharashtra,"Flat #969, Tower C, Mumbai - 400050",2026-05-30 00:00:00,2026-05,Daily Essentials
+95,Vikram Deshmukh,vikram.deshmukh119@gmail.com,9761185849,Delhi NCR,110001,Delhi,"Flat #1278, Tower C, Delhi NCR - 110001",2026-10-29 00:00:00,2026-10,Daily Essentials
+96,Neha Kumar,neha.kumar18@gmail.com,8816582607,Hyderabad,500081,Telangana,"Flat #687, Tower B, Hyderabad - 500081",2026-07-15 00:00:00,2026-07,Family Pantry
+97,Diya Banerjee,diya.banerjee266@gmail.com,7098473848,Bangalore,560102,Karnataka,"Flat #1387, Tower A, Bangalore - 560102",2026-10-06 00:00:00,2026-10,Impulse & Snacks
+98,Prisha Kulkarni,prisha.kulkarni44@gmail.com,8858970845,Bangalore,560102,Karnataka,"Flat #285, Tower C, Bangalore - 560102",2026-04-16 00:00:00,2026-04,Family Pantry
+99,Diya Nair,diya.nair815@gmail.com,8859104566,Pune,411001,Maharashtra,"Flat #1128, Tower C, Pune - 411001",2026-09-16 00:00:00,2026-09,Daily Essentials
+100,Deepak Mehta,deepak.mehta774@gmail.com,9925457816,Hyderabad,500081,Telangana,"Flat #255, Tower B, Hyderabad - 500081",2026-08-26 00:00:00,2026-08,Daily Essentials
+101,Neha Pillai,neha.pillai384@gmail.com,9862958901,Bangalore,560001,Karnataka,"Flat #642, Tower A, Bangalore - 560001",2026-05-29 00:00:00,2026-05,Impulse & Snacks
+102,Anushka Agarwal,anushka.agarwal400@gmail.com,7059858348,Bangalore,560034,Karnataka,"Flat #579, Tower D, Bangalore - 560034",2025-11-28 00:00:00,2025-11,Occasional
+103,Anita Chopra,anita.chopra947@gmail.com,8839711402,Bangalore,560034,Karnataka,"Flat #1402, Tower D, Bangalore - 560034",2026-10-07 00:00:00,2026-10,Daily Essentials
+104,Karan Reddy,karan.reddy153@gmail.com,9814994527,Mumbai,400050,Maharashtra,"Flat #1109, Tower A, Mumbai - 400050",2026-01-11 00:00:00,2026-01,Occasional
+105,Krishna Bhat,krishna.bhat474@gmail.com,9999991136,Pune,411001,Maharashtra,"Flat #959, Tower B, Pune - 411001",2026-10-01 00:00:00,2026-10,Impulse & Snacks
+106,Meera Banerjee,meera.banerjee427@gmail.com,9914391105,Delhi NCR,110001,Delhi,"Flat #545, Tower D, Delhi NCR - 110001",2026-05-26 00:00:00,2026-05,Daily Essentials
+107,Pooja Reddy,pooja.reddy712@gmail.com,9983076970,Delhi NCR,110001,Delhi,"Flat #225, Tower D, Delhi NCR - 110001",2026-03-28 00:00:00,2026-03,Occasional
+108,Sunita Patel,sunita.patel688@gmail.com,9796128115,Bangalore,560001,Karnataka,"Flat #204, Tower C, Bangalore - 560001",2026-03-16 00:00:00,2026-03,Daily Essentials
+109,Manish Gupta,manish.gupta80@gmail.com,8837804191,Mumbai,400001,Maharashtra,"Flat #578, Tower C, Mumbai - 400001",2026-09-01 00:00:00,2026-09,Impulse & Snacks
+110,Naveen Sharma,naveen.sharma293@gmail.com,9727447248,Pune,411001,Maharashtra,"Flat #614, Tower B, Pune - 411001",2026-01-17 00:00:00,2026-01,Occasional
+111,Krishna Sharma,krishna.sharma376@gmail.com,9789034501,Delhi NCR,110001,Delhi,"Flat #133, Tower B, Delhi NCR - 110001",2026-03-24 00:00:00,2026-03,Daily Essentials
+112,Karan Menon,karan.menon126@gmail.com,7018530615,Hyderabad,500081,Telangana,"Flat #1019, Tower C, Hyderabad - 500081",2026-06-17 00:00:00,2026-06,Daily Essentials
+113,Rajesh Singh,rajesh.singh978@gmail.com,8815820356,Pune,411001,Maharashtra,"Flat #718, Tower D, Pune - 411001",2026-07-26 00:00:00,2026-07,Daily Essentials
+114,Deepak Bhat,deepak.bhat446@gmail.com,7024490391,Hyderabad,500081,Telangana,"Flat #1009, Tower A, Hyderabad - 500081",2026-10-04 00:00:00,2026-10,Daily Essentials
+115,Ishaan Patel,ishaan.patel139@gmail.com,9993794475,Pune,411001,Maharashtra,"Flat #766, Tower D, Pune - 411001",2026-10-29 00:00:00,2026-10,Family Pantry
+116,Sunita Menon,sunita.menon629@gmail.com,9123311507,Bangalore,560034,Karnataka,"Flat #1230, Tower B, Bangalore - 560034",2026-05-21 00:00:00,2026-05,Occasional
+117,Karan Chopra,karan.chopra857@gmail.com,9163516659,Delhi NCR,122001,Haryana,"Flat #295, Tower C, Delhi NCR - 122001",2026-05-20 00:00:00,2026-05,Impulse & Snacks
+118,Pooja Nair,pooja.nair713@gmail.com,9119010480,Bangalore,560034,Karnataka,"Flat #275, Tower A, Bangalore - 560034",2026-05-22 00:00:00,2026-05,Impulse & Snacks
+119,Pooja Nair,pooja.nair579@gmail.com,9888714010,Pune,411001,Maharashtra,"Flat #1251, Tower C, Pune - 411001",2026-08-03 00:00:00,2026-08,Family Pantry
+120,Priya Verma,priya.verma304@gmail.com,8851936181,Delhi NCR,110001,Delhi,"Flat #313, Tower B, Delhi NCR - 110001",2026-02-07 00:00:00,2026-02,Family Pantry
+121,Reyansh Joshi,reyansh.joshi875@gmail.com,8859333209,Bangalore,560034,Karnataka,"Flat #671, Tower B, Bangalore - 560034",2026-09-10 00:00:00,2026-09,Occasional
+122,Ritu Banerjee,ritu.banerjee701@gmail.com,7084724345,Bangalore,560001,Karnataka,"Flat #1348, Tower C, Bangalore - 560001",2025-12-01 00:00:00,2025-12,Daily Essentials
+123,Prisha Chopra,prisha.chopra369@gmail.com,9834347841,Bangalore,560102,Karnataka,"Flat #1260, Tower D, Bangalore - 560102",2025-12-27 00:00:00,2025-12,Impulse & Snacks
+124,Vivaan Patel,vivaan.patel774@gmail.com,8838874646,Delhi NCR,122001,Haryana,"Flat #960, Tower D, Delhi NCR - 122001",2026-04-21 00:00:00,2026-04,Family Pantry
+125,Rohan Agarwal,rohan.agarwal620@gmail.com,9817061037,Bangalore,560102,Karnataka,"Flat #423, Tower A, Bangalore - 560102",2026-08-04 00:00:00,2026-08,Daily Essentials
+126,Priya Deshmukh,priya.deshmukh631@gmail.com,9165590800,Mumbai,400050,Maharashtra,"Flat #542, Tower A, Mumbai - 400050",2026-04-22 00:00:00,2026-04,Daily Essentials
+127,Shweta Deshmukh,shweta.deshmukh549@gmail.com,7051395350,Bangalore,560001,Karnataka,"Flat #552, Tower D, Bangalore - 560001",2026-10-27 00:00:00,2026-10,Daily Essentials
+128,Aadhya Mehta,aadhya.mehta978@gmail.com,9728419343,Mumbai,400050,Maharashtra,"Flat #693, Tower C, Mumbai - 400050",2026-01-22 00:00:00,2026-01,Family Pantry
+129,Priya Iyer,priya.iyer142@gmail.com,9181481992,Mumbai,400001,Maharashtra,"Flat #1125, Tower C, Mumbai - 400001",2025-12-28 00:00:00,2025-12,Occasional
+130,Aditya Rao,aditya.rao29@gmail.com,9120450542,Delhi NCR,110001,Delhi,"Flat #1280, Tower D, Delhi NCR - 110001",2026-07-05 00:00:00,2026-07,Impulse & Snacks
+131,Karan Mehta,karan.mehta127@gmail.com,9112799319,Delhi NCR,110001,Delhi,"Flat #452, Tower D, Delhi NCR - 110001",2026-09-17 00:00:00,2026-09,Occasional
+132,Sai Rao,sai.rao874@gmail.com,9842657384,Delhi NCR,122001,Haryana,"Flat #1307, Tower D, Delhi NCR - 122001",2026-06-20 00:00:00,2026-06,Family Pantry
+133,Prisha Chopra,prisha.chopra236@gmail.com,9932566390,Bangalore,560034,Karnataka,"Flat #1146, Tower A, Bangalore - 560034",2026-06-22 00:00:00,2026-06,Daily Essentials
+134,Rahul Joshi,rahul.joshi754@gmail.com,7029822594,Mumbai,400001,Maharashtra,"Flat #311, Tower B, Mumbai - 400001",2026-03-21 00:00:00,2026-03,Daily Essentials
+135,Ishaan Patel,ishaan.patel191@gmail.com,7076319264,Hyderabad,500081,Telangana,"Flat #1255, Tower D, Hyderabad - 500081",2026-08-06 00:00:00,2026-08,Occasional
+136,Ritu Chopra,ritu.chopra894@gmail.com,7052431444,Bangalore,560102,Karnataka,"Flat #1001, Tower A, Bangalore - 560102",2026-06-03 00:00:00,2026-06,Impulse & Snacks
+137,Khushi Agarwal,khushi.agarwal67@gmail.com,9978093604,Bangalore,560034,Karnataka,"Flat #736, Tower D, Bangalore - 560034",2026-05-28 00:00:00,2026-05,Daily Essentials
+138,Aditi Patel,aditi.patel670@gmail.com,9892545028,Pune,411001,Maharashtra,"Flat #888, Tower D, Pune - 411001",2026-07-07 00:00:00,2026-07,Occasional
+139,Aditya Kulkarni,aditya.kulkarni940@gmail.com,8897488142,Mumbai,400001,Maharashtra,"Flat #759, Tower D, Mumbai - 400001",2026-06-13 00:00:00,2026-06,Occasional
+140,Amit Reddy,amit.reddy840@gmail.com,9921318464,Pune,411001,Maharashtra,"Flat #454, Tower A, Pune - 411001",2026-03-18 00:00:00,2026-03,Family Pantry
+141,Amit Menon,amit.menon545@gmail.com,8831306555,Delhi NCR,110001,Delhi,"Flat #864, Tower C, Delhi NCR - 110001",2026-05-07 00:00:00,2026-05,Impulse & Snacks
+142,Naveen Verma,naveen.verma818@gmail.com,7096879854,Delhi NCR,110001,Delhi,"Flat #235, Tower C, Delhi NCR - 110001",2026-01-09 00:00:00,2026-01,Impulse & Snacks
+143,Aditi Kumar,aditi.kumar751@gmail.com,7090893133,Bangalore,560102,Karnataka,"Flat #783, Tower A, Bangalore - 560102",2026-07-08 00:00:00,2026-07,Daily Essentials
+144,Rahul Mehta,rahul.mehta681@gmail.com,7098870276,Delhi NCR,122001,Haryana,"Flat #365, Tower A, Delhi NCR - 122001",2026-04-10 00:00:00,2026-04,Family Pantry
+145,Sneha Nair,sneha.nair696@gmail.com,7080651318,Bangalore,560034,Karnataka,"Flat #968, Tower C, Bangalore - 560034",2025-11-23 00:00:00,2025-11,Daily Essentials
+146,Aadhya Chopra,aadhya.chopra980@gmail.com,9135770506,Mumbai,400001,Maharashtra,"Flat #382, Tower B, Mumbai - 400001",2025-12-31 00:00:00,2025-12,Occasional
+147,Reyansh Menon,reyansh.menon799@gmail.com,8880669879,Bangalore,560001,Karnataka,"Flat #790, Tower B, Bangalore - 560001",2026-07-12 00:00:00,2026-07,Daily Essentials
+148,Ananya Banerjee,ananya.banerjee838@gmail.com,9768743530,Bangalore,560001,Karnataka,"Flat #942, Tower C, Bangalore - 560001",2026-08-04 00:00:00,2026-08,Daily Essentials
+149,Amit Banerjee,amit.banerjee301@gmail.com,7070254091,Mumbai,400001,Maharashtra,"Flat #1194, Tower B, Mumbai - 400001",2026-04-10 00:00:00,2026-04,Occasional
+150,Deepak Gupta,deepak.gupta386@gmail.com,7086560394,Hyderabad,500081,Telangana,"Flat #1046, Tower C, Hyderabad - 500081",2026-09-02 00:00:00,2026-09,Family Pantry
+151,Karan Iyer,karan.iyer846@gmail.com,9791156554,Bangalore,560102,Karnataka,"Flat #613, Tower A, Bangalore - 560102",2026-07-25 00:00:00,2026-07,Occasional
+152,Anita Reddy,anita.reddy738@gmail.com,8826733967,Mumbai,400050,Maharashtra,"Flat #272, Tower B, Mumbai - 400050",2026-03-27 00:00:00,2026-03,Occasional
+153,Ishaan Rao,ishaan.rao103@gmail.com,9770549373,Delhi NCR,110001,Delhi,"Flat #155, Tower D, Delhi NCR - 110001",2025-12-17 00:00:00,2025-12,Family Pantry
+154,Saanvi Bhat,saanvi.bhat93@gmail.com,9940137082,Bangalore,560001,Karnataka,"Flat #753, Tower A, Bangalore - 560001",2026-09-18 00:00:00,2026-09,Impulse & Snacks
+155,Ishaan Nair,ishaan.nair49@gmail.com,9973411827,Bangalore,560102,Karnataka,"Flat #1061, Tower D, Bangalore - 560102",2026-07-18 00:00:00,2026-07,Occasional
+156,Vivaan Kumar,vivaan.kumar230@gmail.com,9783659258,Pune,411001,Maharashtra,"Flat #967, Tower A, Pune - 411001",2026-09-01 00:00:00,2026-09,Daily Essentials
+157,Ayaan Verma,ayaan.verma254@gmail.com,9195758649,Hyderabad,500081,Telangana,"Flat #229, Tower A, Hyderabad - 500081",2026-09-18 00:00:00,2026-09,Family Pantry
+158,Suresh Sharma,suresh.sharma657@gmail.com,8887181563,Mumbai,400001,Maharashtra,"Flat #395, Tower C, Mumbai - 400001",2026-05-21 00:00:00,2026-05,Impulse & Snacks
+159,Saanvi Agarwal,saanvi.agarwal436@gmail.com,9799170406,Bangalore,560034,Karnataka,"Flat #1173, Tower C, Bangalore - 560034",2025-12-26 00:00:00,2025-12,Family Pantry
+160,Rajesh Menon,rajesh.menon577@gmail.com,9862405812,Hyderabad,500081,Telangana,"Flat #190, Tower D, Hyderabad - 500081",2026-10-26 00:00:00,2026-10,Daily Essentials
+161,Vivaan Joshi,vivaan.joshi817@gmail.com,9856278607,Mumbai,400001,Maharashtra,"Flat #1387, Tower A, Mumbai - 400001",2026-08-31 00:00:00,2026-08,Impulse & Snacks
+162,Sneha Nair,sneha.nair55@gmail.com,9983284724,Delhi NCR,110001,Delhi,"Flat #459, Tower D, Delhi NCR - 110001",2026-10-26 00:00:00,2026-10,Family Pantry
+163,Ananya Nair,ananya.nair74@gmail.com,7071428713,Bangalore,560001,Karnataka,"Flat #701, Tower B, Bangalore - 560001",2025-12-11 00:00:00,2025-12,Daily Essentials
+164,Aditya Chopra,aditya.chopra965@gmail.com,9979173614,Delhi NCR,122001,Haryana,"Flat #1213, Tower D, Delhi NCR - 122001",2026-03-20 00:00:00,2026-03,Impulse & Snacks
+165,Diya Mehta,diya.mehta375@gmail.com,9898010774,Delhi NCR,110001,Delhi,"Flat #660, Tower A, Delhi NCR - 110001",2026-09-08 00:00:00,2026-09,Family Pantry
+166,Neha Kulkarni,neha.kulkarni926@gmail.com,9155504725,Bangalore,560102,Karnataka,"Flat #1117, Tower D, Bangalore - 560102",2026-04-30 00:00:00,2026-04,Impulse & Snacks
+167,Khushi Patel,khushi.patel754@gmail.com,9120593403,Delhi NCR,122001,Haryana,"Flat #1334, Tower B, Delhi NCR - 122001",2026-06-27 00:00:00,2026-06,Daily Essentials
+168,Sai Chopra,sai.chopra686@gmail.com,9951137177,Hyderabad,500081,Telangana,"Flat #1335, Tower D, Hyderabad - 500081",2026-02-12 00:00:00,2026-02,Family Pantry
+169,Amit Verma,amit.verma754@gmail.com,9992523968,Delhi NCR,122001,Haryana,"Flat #663, Tower A, Delhi NCR - 122001",2025-12-30 00:00:00,2025-12,Impulse & Snacks
+170,Pooja Menon,pooja.menon830@gmail.com,7031473054,Bangalore,560001,Karnataka,"Flat #393, Tower D, Bangalore - 560001",2025-12-05 00:00:00,2025-12,Daily Essentials
+171,Pooja Joshi,pooja.joshi402@gmail.com,8814346684,Bangalore,560102,Karnataka,"Flat #1022, Tower C, Bangalore - 560102",2026-05-02 00:00:00,2026-05,Impulse & Snacks
+172,Manish Nair,manish.nair552@gmail.com,9963423225,Delhi NCR,110001,Delhi,"Flat #671, Tower B, Delhi NCR - 110001",2026-10-20 00:00:00,2026-10,Daily Essentials
+173,Ananya Deshmukh,ananya.deshmukh540@gmail.com,9185386435,Bangalore,560034,Karnataka,"Flat #637, Tower C, Bangalore - 560034",2026-08-12 00:00:00,2026-08,Daily Essentials
+174,Ritu Mehta,ritu.mehta720@gmail.com,9136867482,Bangalore,560034,Karnataka,"Flat #378, Tower A, Bangalore - 560034",2026-05-28 00:00:00,2026-05,Occasional
+175,Amit Patel,amit.patel839@gmail.com,7052894344,Delhi NCR,110001,Delhi,"Flat #233, Tower C, Delhi NCR - 110001",2026-10-02 00:00:00,2026-10,Occasional
+176,Ananya Joshi,ananya.joshi530@gmail.com,9726288992,Mumbai,400001,Maharashtra,"Flat #385, Tower B, Mumbai - 400001",2026-09-05 00:00:00,2026-09,Daily Essentials
+177,Anita Agarwal,anita.agarwal387@gmail.com,9184040798,Bangalore,560102,Karnataka,"Flat #1354, Tower A, Bangalore - 560102",2025-12-25 00:00:00,2025-12,Family Pantry
+178,Deepak Menon,deepak.menon430@gmail.com,9187161840,Bangalore,560034,Karnataka,"Flat #357, Tower C, Bangalore - 560034",2026-07-26 00:00:00,2026-07,Family Pantry
+179,Kavita Joshi,kavita.joshi141@gmail.com,8895871687,Bangalore,560102,Karnataka,"Flat #365, Tower D, Bangalore - 560102",2026-06-13 00:00:00,2026-06,Occasional
+180,Ayaan Menon,ayaan.menon166@gmail.com,9932099899,Bangalore,560102,Karnataka,"Flat #761, Tower B, Bangalore - 560102",2026-04-23 00:00:00,2026-04,Occasional
+181,Aditi Patel,aditi.patel266@gmail.com,9795235919,Pune,411001,Maharashtra,"Flat #663, Tower B, Pune - 411001",2026-07-20 00:00:00,2026-07,Impulse & Snacks
+182,Sai Menon,sai.menon666@gmail.com,9789431184,Bangalore,560102,Karnataka,"Flat #451, Tower C, Bangalore - 560102",2026-09-19 00:00:00,2026-09,Family Pantry
+183,Vivaan Patel,vivaan.patel56@gmail.com,7087412924,Mumbai,400050,Maharashtra,"Flat #532, Tower D, Mumbai - 400050",2026-07-18 00:00:00,2026-07,Daily Essentials
+184,Suresh Mehta,suresh.mehta667@gmail.com,9974819756,Mumbai,400001,Maharashtra,"Flat #932, Tower C, Mumbai - 400001",2026-05-29 00:00:00,2026-05,Impulse & Snacks
+185,Shaurya Kulkarni,shaurya.kulkarni435@gmail.com,9172336371,Mumbai,400001,Maharashtra,"Flat #797, Tower B, Mumbai - 400001",2026-04-11 00:00:00,2026-04,Impulse & Snacks
+186,Rahul Bhat,rahul.bhat143@gmail.com,9979119463,Pune,411001,Maharashtra,"Flat #318, Tower C, Pune - 411001",2026-03-15 00:00:00,2026-03,Daily Essentials
+187,Amit Singh,amit.singh154@gmail.com,9816792127,Mumbai,400050,Maharashtra,"Flat #887, Tower D, Mumbai - 400050",2026-03-18 00:00:00,2026-03,Occasional
+188,Shaurya Chopra,shaurya.chopra966@gmail.com,8851971886,Mumbai,400001,Maharashtra,"Flat #427, Tower D, Mumbai - 400001",2026-10-29 00:00:00,2026-10,Family Pantry
+189,Prisha Deshmukh,prisha.deshmukh33@gmail.com,9862780072,Pune,411001,Maharashtra,"Flat #1037, Tower B, Pune - 411001",2026-03-05 00:00:00,2026-03,Family Pantry
+190,Vihaan Mehta,vihaan.mehta516@gmail.com,8897813295,Hyderabad,500081,Telangana,"Flat #686, Tower A, Hyderabad - 500081",2026-09-21 00:00:00,2026-09,Family Pantry
+191,Anushka Joshi,anushka.joshi792@gmail.com,9159115280,Bangalore,560001,Karnataka,"Flat #921, Tower A, Bangalore - 560001",2026-07-04 00:00:00,2026-07,Daily Essentials
+192,Anita Mehta,anita.mehta85@gmail.com,9177680031,Hyderabad,500081,Telangana,"Flat #1227, Tower C, Hyderabad - 500081",2026-09-15 00:00:00,2026-09,Impulse & Snacks
+193,Ritu Reddy,ritu.reddy141@gmail.com,9862868861,Delhi NCR,110001,Delhi,"Flat #795, Tower C, Delhi NCR - 110001",2026-08-26 00:00:00,2026-08,Daily Essentials
+194,Rajesh Bhat,rajesh.bhat522@gmail.com,9816080513,Bangalore,560001,Karnataka,"Flat #381, Tower C, Bangalore - 560001",2026-09-09 00:00:00,2026-09,Family Pantry
+195,Ishaan Banerjee,ishaan.banerjee924@gmail.com,8828761086,Delhi NCR,110001,Delhi,"Flat #1356, Tower C, Delhi NCR - 110001",2026-02-11 00:00:00,2026-02,Occasional
+196,Prisha Agarwal,prisha.agarwal354@gmail.com,8878412668,Pune,411001,Maharashtra,"Flat #1104, Tower C, Pune - 411001",2026-06-05 00:00:00,2026-06,Daily Essentials
+197,Sneha Reddy,sneha.reddy436@gmail.com,8851295819,Bangalore,560001,Karnataka,"Flat #1323, Tower D, Bangalore - 560001",2026-03-24 00:00:00,2026-03,Impulse & Snacks
+198,Shweta Agarwal,shweta.agarwal243@gmail.com,7016892773,Hyderabad,500081,Telangana,"Flat #450, Tower D, Hyderabad - 500081",2026-02-04 00:00:00,2026-02,Impulse & Snacks
+199,Aditya Agarwal,aditya.agarwal980@gmail.com,7024749927,Mumbai,400001,Maharashtra,"Flat #139, Tower D, Mumbai - 400001",2026-04-11 00:00:00,2026-04,Daily Essentials
+200,Aadhya Rao,aadhya.rao523@gmail.com,8873297813,Bangalore,560001,Karnataka,"Flat #383, Tower B, Bangalore - 560001",2026-07-01 00:00:00,2026-07,Occasional
+201,Deepak Menon,deepak.menon395@gmail.com,9933244151,Hyderabad,500081,Telangana,"Flat #1192, Tower C, Hyderabad - 500081",2026-06-27 00:00:00,2026-06,Impulse & Snacks
+202,Anushka Banerjee,anushka.banerjee505@gmail.com,9743087238,Mumbai,400050,Maharashtra,"Flat #1243, Tower C, Mumbai - 400050",2026-03-09 00:00:00,2026-03,Occasional
+203,Prisha Mehta,prisha.mehta731@gmail.com,9775632882,Delhi NCR,110001,Delhi,"Flat #1083, Tower C, Delhi NCR - 110001",2026-07-01 00:00:00,2026-07,Occasional
+204,Khushi Mehta,khushi.mehta134@gmail.com,8882905845,Delhi NCR,122001,Haryana,"Flat #909, Tower C, Delhi NCR - 122001",2026-10-19 00:00:00,2026-10,Occasional
+205,Aditi Verma,aditi.verma304@gmail.com,7020607151,Delhi NCR,110001,Delhi,"Flat #1006, Tower C, Delhi NCR - 110001",2026-08-24 00:00:00,2026-08,Daily Essentials
+206,Suresh Kumar,suresh.kumar965@gmail.com,8846456416,Bangalore,560102,Karnataka,"Flat #324, Tower B, Bangalore - 560102",2026-03-16 00:00:00,2026-03,Impulse & Snacks
+207,Kavita Singh,kavita.singh663@gmail.com,9717045237,Bangalore,560034,Karnataka,"Flat #947, Tower C, Bangalore - 560034",2026-08-16 00:00:00,2026-08,Daily Essentials
+208,Krishna Sharma,krishna.sharma997@gmail.com,8831198492,Delhi NCR,122001,Haryana,"Flat #1075, Tower D, Delhi NCR - 122001",2026-07-28 00:00:00,2026-07,Impulse & Snacks
+209,Aditi Chopra,aditi.chopra302@gmail.com,7017940667,Bangalore,560034,Karnataka,"Flat #1276, Tower B, Bangalore - 560034",2026-06-23 00:00:00,2026-06,Impulse & Snacks
+210,Aditya Iyer,aditya.iyer437@gmail.com,9714877451,Delhi NCR,122001,Haryana,"Flat #1115, Tower B, Delhi NCR - 122001",2026-10-14 00:00:00,2026-10,Occasional
+211,Aditi Verma,aditi.verma19@gmail.com,9986230551,Bangalore,560034,Karnataka,"Flat #787, Tower C, Bangalore - 560034",2026-05-29 00:00:00,2026-05,Impulse & Snacks
+212,Kavita Deshmukh,kavita.deshmukh920@gmail.com,9777674279,Hyderabad,500081,Telangana,"Flat #659, Tower B, Hyderabad - 500081",2026-09-10 00:00:00,2026-09,Daily Essentials
+213,Sunita Kumar,sunita.kumar745@gmail.com,9711890348,Delhi NCR,110001,Delhi,"Flat #705, Tower B, Delhi NCR - 110001",2026-02-16 00:00:00,2026-02,Occasional
+214,Neha Rao,neha.rao537@gmail.com,9921641746,Delhi NCR,122001,Haryana,"Flat #296, Tower B, Delhi NCR - 122001",2026-10-26 00:00:00,2026-10,Family Pantry
+215,Saanvi Sharma,saanvi.sharma277@gmail.com,9141611127,Hyderabad,500081,Telangana,"Flat #647, Tower C, Hyderabad - 500081",2026-04-07 00:00:00,2026-04,Impulse & Snacks
+216,Aarav Kumar,aarav.kumar679@gmail.com,9941715995,Bangalore,560001,Karnataka,"Flat #343, Tower D, Bangalore - 560001",2026-04-09 00:00:00,2026-04,Family Pantry
+217,Rajesh Mehta,rajesh.mehta716@gmail.com,9895726382,Mumbai,400050,Maharashtra,"Flat #853, Tower B, Mumbai - 400050",2026-03-06 00:00:00,2026-03,Daily Essentials
+218,Ishaan Kulkarni,ishaan.kulkarni775@gmail.com,8860147077,Delhi NCR,122001,Haryana,"Flat #1225, Tower D, Delhi NCR - 122001",2026-08-27 00:00:00,2026-08,Occasional
+219,Aadhya Singh,aadhya.singh706@gmail.com,8820988446,Pune,411001,Maharashtra,"Flat #1015, Tower C, Pune - 411001",2026-01-01 00:00:00,2026-01,Family Pantry
+220,Vihaan Pillai,vihaan.pillai934@gmail.com,8837133023,Pune,411001,Maharashtra,"Flat #407, Tower B, Pune - 411001",2026-04-16 00:00:00,2026-04,Family Pantry
+221,Ayaan Gupta,ayaan.gupta744@gmail.com,8875609379,Bangalore,560034,Karnataka,"Flat #1146, Tower D, Bangalore - 560034",2026-09-10 00:00:00,2026-09,Family Pantry
+222,Rajesh Rao,rajesh.rao477@gmail.com,8817749299,Pune,411001,Maharashtra,"Flat #1047, Tower C, Pune - 411001",2026-08-18 00:00:00,2026-08,Family Pantry
+223,Aarav Gupta,aarav.gupta602@gmail.com,9816078694,Delhi NCR,122001,Haryana,"Flat #806, Tower A, Delhi NCR - 122001",2026-06-25 00:00:00,2026-06,Daily Essentials
+224,Arjun Deshmukh,arjun.deshmukh42@gmail.com,9964877191,Bangalore,560102,Karnataka,"Flat #378, Tower D, Bangalore - 560102",2026-05-03 00:00:00,2026-05,Occasional
+225,Amit Bhat,amit.bhat394@gmail.com,9898824290,Pune,411001,Maharashtra,"Flat #373, Tower C, Pune - 411001",2026-01-21 00:00:00,2026-01,Occasional
+226,Neha Menon,neha.menon140@gmail.com,7039888974,Bangalore,560001,Karnataka,"Flat #147, Tower C, Bangalore - 560001",2026-06-01 00:00:00,2026-06,Impulse & Snacks
+227,Priya Pillai,priya.pillai398@gmail.com,9743220503,Hyderabad,500081,Telangana,"Flat #809, Tower B, Hyderabad - 500081",2026-03-28 00:00:00,2026-03,Occasional
+228,Ayaan Verma,ayaan.verma838@gmail.com,7066269520,Bangalore,560001,Karnataka,"Flat #593, Tower B, Bangalore - 560001",2025-12-26 00:00:00,2025-12,Family Pantry
+229,Amit Banerjee,amit.banerjee698@gmail.com,7016533225,Mumbai,400001,Maharashtra,"Flat #191, Tower D, Mumbai - 400001",2026-05-24 00:00:00,2026-05,Family Pantry
+230,Vihaan Nair,vihaan.nair525@gmail.com,9941428626,Delhi NCR,110001,Delhi,"Flat #1283, Tower C, Delhi NCR - 110001",2026-03-13 00:00:00,2026-03,Occasional
+231,Kavita Singh,kavita.singh433@gmail.com,9946930534,Bangalore,560001,Karnataka,"Flat #1241, Tower B, Bangalore - 560001",2026-07-21 00:00:00,2026-07,Family Pantry
+232,Meera Verma,meera.verma362@gmail.com,7061157708,Pune,411001,Maharashtra,"Flat #753, Tower D, Pune - 411001",2026-05-14 00:00:00,2026-05,Daily Essentials
+233,Ananya Pillai,ananya.pillai494@gmail.com,9740245233,Mumbai,400050,Maharashtra,"Flat #396, Tower D, Mumbai - 400050",2026-10-08 00:00:00,2026-10,Family Pantry
+234,Karan Pillai,karan.pillai552@gmail.com,9762132722,Mumbai,400001,Maharashtra,"Flat #623, Tower B, Mumbai - 400001",2026-04-17 00:00:00,2026-04,Daily Essentials
+235,Amit Joshi,amit.joshi104@gmail.com,8835566010,Bangalore,560001,Karnataka,"Flat #650, Tower D, Bangalore - 560001",2026-08-04 00:00:00,2026-08,Impulse & Snacks
+236,Arjun Gupta,arjun.gupta833@gmail.com,8885007641,Mumbai,400001,Maharashtra,"Flat #1082, Tower B, Mumbai - 400001",2026-09-27 00:00:00,2026-09,Daily Essentials
+237,Aarav Gupta,aarav.gupta969@gmail.com,9725745913,Hyderabad,500081,Telangana,"Flat #597, Tower B, Hyderabad - 500081",2026-05-10 00:00:00,2026-05,Daily Essentials
+238,Rohan Mehta,rohan.mehta399@gmail.com,9181625307,Delhi NCR,110001,Delhi,"Flat #732, Tower C, Delhi NCR - 110001",2026-04-27 00:00:00,2026-04,Occasional
+239,Sunita Reddy,sunita.reddy832@gmail.com,7073013937,Delhi NCR,110001,Delhi,"Flat #517, Tower C, Delhi NCR - 110001",2026-04-11 00:00:00,2026-04,Daily Essentials
+240,Pari Nair,pari.nair26@gmail.com,9984264220,Delhi NCR,122001,Haryana,"Flat #705, Tower B, Delhi NCR - 122001",2026-02-25 00:00:00,2026-02,Daily Essentials
+241,Manish Singh,manish.singh521@gmail.com,8897859993,Delhi NCR,110001,Delhi,"Flat #628, Tower D, Delhi NCR - 110001",2026-10-22 00:00:00,2026-10,Impulse & Snacks
+242,Meera Kulkarni,meera.kulkarni182@gmail.com,7057268285,Bangalore,560102,Karnataka,"Flat #387, Tower D, Bangalore - 560102",2026-02-20 00:00:00,2026-02,Occasional
+243,Vihaan Menon,vihaan.menon44@gmail.com,9899686372,Bangalore,560001,Karnataka,"Flat #114, Tower D, Bangalore - 560001",2026-01-30 00:00:00,2026-01,Impulse & Snacks
+244,Arjun Nair,arjun.nair19@gmail.com,9777878323,Hyderabad,500081,Telangana,"Flat #865, Tower A, Hyderabad - 500081",2026-07-18 00:00:00,2026-07,Impulse & Snacks
+245,Ritu Deshmukh,ritu.deshmukh685@gmail.com,9112111482,Bangalore,560001,Karnataka,"Flat #1190, Tower D, Bangalore - 560001",2025-11-17 00:00:00,2025-11,Family Pantry
+246,Khushi Pillai,khushi.pillai303@gmail.com,9877406294,Delhi NCR,122001,Haryana,"Flat #468, Tower A, Delhi NCR - 122001",2026-10-09 00:00:00,2026-10,Family Pantry
+247,Saanvi Gupta,saanvi.gupta644@gmail.com,8843878996,Delhi NCR,110001,Delhi,"Flat #648, Tower D, Delhi NCR - 110001",2026-01-01 00:00:00,2026-01,Occasional
+248,Sunita Agarwal,sunita.agarwal259@gmail.com,7040314047,Mumbai,400050,Maharashtra,"Flat #266, Tower A, Mumbai - 400050",2026-01-09 00:00:00,2026-01,Family Pantry
+249,Anita Deshmukh,anita.deshmukh67@gmail.com,7011268380,Bangalore,560102,Karnataka,"Flat #270, Tower D, Bangalore - 560102",2026-09-20 00:00:00,2026-09,Impulse & Snacks
+250,Sneha Agarwal,sneha.agarwal888@gmail.com,9880888325,Bangalore,560001,Karnataka,"Flat #571, Tower B, Bangalore - 560001",2026-10-05 00:00:00,2026-10,Impulse & Snacks

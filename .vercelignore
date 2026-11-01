@@ -1,0 +1,5 @@
+# Vercel Serverless Function Deployment Ignore List
+tests/
+analytics/
+.pytest_cache/
+run_tests.sh

@@ -1,0 +1,242 @@
+product_id,name,category,subcategory,selling_price,cost_price,margin_pct,stock
+1,Aashirvaad Iodised Salt (1 kg),Grocery,Salt & Sugar,28.0,23.52,16.0,106
+2,Godrej aer Pocket Bathroom Fragrance (10 g),Household,freshners,65.0,45.5,30.0,39
+3,Solid Brass Agarbatti Incense Holder Stand,Home & Kitchen,pooja needs,65.0,40.3,38.0,28
+4,Odonil Room Air Freshener Spray (240 ml),Household,freshners,140.0,98.0,30.0,119
+5,Air Mist Instant Room Deodorizer (250 ml),Household,freshners,135.0,94.5,30.0,60
+6,Air Wick Automatic Spray Refill (250 ml),Household,freshners,250.0,175.0,30.0,56
+7,Ariel Matic Front Load Detergent Powder (1 kg),Household,freshners,235.0,164.5,30.0,53
+8,Amul Rose Flavour Sweet Lassi (200 ml),Beverages,lassi,15.0,11.25,25.0,42
+9,Royal Gala Fresh Apples (1 kg),Fruits & Vegetables,fruits,160.0,108.8,32.0,119
+10,Waterproof Cotton Kitchen Cooking Apron,Home & Kitchen,kitchen,149.0,92.38,38.0,38
+11,Aashirvaad Shudh Chakki Atta (5 kg),Grocery,Atta & Flours,245.0,205.8,16.0,111
+12,Attack Concentrated Liquid Laundry Detergent (1 L),Household,cleaning tools,210.0,147.0,30.0,119
+13,Farley's Teething Baby Rusks Biscuits (150 g),Baby Care,baby food,65.0,52.0,20.0,139
+14,Cavin's Badam Flavoured Milk (200 ml),Beverages,dairy,35.0,26.25,25.0,94
+15,Fresh Robusta Bananas (1 kg),Fruits & Vegetables,fruits,45.0,30.6,32.0,36
+16,Johnson & Johnson Band-Aid Washproof (Pack of 20),Personal Care,personal care,45.0,29.25,35.0,100
+17,India Gate Basmati Rice (1 kg),Grocery,Rice & Grains,135.0,113.4,16.0,79
+18,Tata Sampann Fine Besan (500 g),Grocery,Atta & Flours,55.0,46.2,16.0,29
+19,Everest Shahi Biryani Masala (50 g),Grocery,Spices & Masalas,45.0,37.8,16.0,28
+20,Fresh Seedless Black Grapes (500 g),Fruits & Vegetables,fruits,75.0,51.0,32.0,36
+21,Pure Kalonji / Black Seeds (100 g),Grocery,Spices & Masalas,45.0,37.8,16.0,52
+22,Organic Blueberry Cinnamon Flax Cereal (300 g),Dairy & Breakfast,breakfast,220.0,180.4,18.0,54
+23,Bounty Coconut Chocolate Bar (57 g),Snacks,chips,50.0,36.0,28.0,89
+24,Cadbury Bournvita Health Drink (500 g),Dairy & Breakfast,breakfast,235.0,192.7,18.0,102
+25,Ceramic Serving & Mixing Bowls (Set of 4),Home & Kitchen,dainning needs,299.0,185.38,38.0,28
+26,Britannia White Sandwich Bread (400 g),Dairy & Breakfast,breakfast,40.0,32.8,18.0,96
+27,Fresh Purple Round Brinjal (500 g),Fruits & Vegetables,vegetables,28.0,19.04,32.0,50
+28,Fresh Farm Green Broccoli (500 g),Fruits & Vegetables,vegetables,55.0,37.4,32.0,116
+29,Britannia 100% Whole Wheat Brown Bread (400 g),Dairy & Breakfast,breakfast,50.0,41.0,18.0,108
+30,Fresh Bakery Burger Buns (Pack of 4),Dairy & Breakfast,breakfast,35.0,28.7,18.0,114
+31,Amul Salted Table Butter (100 g),Dairy & Breakfast,dairy,56.0,45.92,18.0,94
+32,Hydroponic Butterhead Lettuce (200 g),Fruits & Vegetables,leafy,45.0,30.6,32.0,78
+33,"Fresh Green Cabbage (1 pc, ~700 g)",Fruits & Vegetables,vegetables,30.0,20.4,32.0,53
+34,Fresh Green Capsicum / Shimla Mirch (500 g),Fruits & Vegetables,vegetables,38.0,25.84,32.0,82
+35,Green Cardamom / Choti Elaichi (50 g),Grocery,Spices & Masalas,145.0,121.8,16.0,100
+36,Whole Cardamom Pods (50 g),Grocery,Spices & Masalas,140.0,117.6,16.0,60
+37,Cardamom Seeds / Elaichi Dana (50 g),Grocery,Spices & Masalas,95.0,79.8,16.0,128
+38,Cardamom Seeds Economy Pack (50 g),Grocery,Spices & Masalas,80.0,67.2,16.0,136
+39,Fresh Star Fruit / Carambola (250 g),Fruits & Vegetables,exotics,60.0,40.8,32.0,25
+40,Rey Naturals Pure Cold-Pressed Castor Oil (200 ml),Personal Care,Hair Care,179.0,116.35,35.0,122
+41,"Fresh White Cauliflower (1 pc, ~600 g)",Fruits & Vegetables,vegetables,35.0,23.8,32.0,128
+42,Fortune Chakki Fresh Atta (5 kg),Grocery,Atta & Flours,235.0,197.4,16.0,45
+43,Haribo Chamallows Marshmallows (100 g),Snacks,chips,85.0,61.2,28.0,114
+44,Amul Processed Cheese Block (200 g),Dairy & Breakfast,dairy,125.0,102.5,18.0,79
+45,"Amul Cheese Slices (Pack of 10, 200 g)",Dairy & Breakfast,dairy,140.0,114.8,18.0,68
+46,Cheetos Masala Balls (30 g),Snacks,chips,20.0,14.4,28.0,60
+47,Kellogg's Choco Krispies Cereal (350 g),Dairy & Breakfast,chocos,175.0,143.5,18.0,44
+48,Pigeon Handy Quick Vegetable Chopper (450 ml),Home & Kitchen,kitchen,199.0,123.38,38.0,52
+49,Heavy Duty Plastic Cloth Clips (Pack of 12),Household,cleaning tools,55.0,38.5,30.0,147
+50,Clorox All-Purpose Disinfecting Bleach (1 L),Household,cleaning tools,140.0,98.0,30.0,122
+51,Whole Cloves / Laung (50 g),Grocery,Spices & Masalas,85.0,71.4,16.0,68
+52,Coca-Cola Refreshing Soda Can (300 ml),Beverages,soft drinks,40.0,30.0,25.0,38
+53,Kellogg's Coco Pops Crunchy Cereal (375 g),Dairy & Breakfast,chocos,185.0,151.7,18.0,36
+54,Fresh Grated Whole Coconut (1 pc),Fruits & Vegetables,fruits,35.0,23.8,32.0,73
+55,Dabur Hommade Coconut Milk (200 ml),Dairy & Breakfast,dairy,65.0,53.3,18.0,37
+56,Kellogg's Chocos Crunchy Bites (375 g),Dairy & Breakfast,chocos,180.0,147.6,18.0,70
+57,Colgate Strong Teeth Anticavity Toothpaste (150 g),Personal Care,personal care,85.0,55.25,35.0,133
+58,Colgate Total 12-Hour Protection Toothpaste (120 g),Personal Care,personal care,110.0,71.5,35.0,69
+59,Airtight Kitchen Storage Container (1.5 L),Home & Kitchen,kitchen,130.0,80.6,38.0,102
+60,Sunfeast Dark Fantasy Choco Fills (75 g),Snacks,cookie,40.0,28.8,28.0,58
+61,Catch Coriander / Dhaniya Powder (200 g),Grocery,Spices & Masalas,62.0,52.08,16.0,128
+62,Fresh Sweet Corn on the Cob (Pack of 2),Fruits & Vegetables,vegetables,35.0,23.8,32.0,30
+63,Stainless Steel Kitchen Dish Drying Rack Stand,Home & Kitchen,kitchen,350.0,217.0,38.0,118
+64,Bauli Moonfils Chocolate Croissant (45 g),Snacks,cookie,25.0,18.0,28.0,83
+65,Fresh Crisp Local Cucumber (500 g),Fruits & Vegetables,vegetables,25.0,17.0,32.0,93
+66,Ground Cumin Seeds (180 g),Grocery,Spices & Masalas,115.0,96.6,16.0,40
+67,Multi-Blade Stainless Steel Vegetable Slicer,Home & Kitchen,kitchen,179.0,110.98,38.0,149
+68,Heavy Duty Bamboo Chopping Board (Large),Home & Kitchen,kitchen,189.0,117.18,38.0,143
+69,Dabur 100% Pure Honey (250 g),Dairy & Breakfast,breakfast,115.0,94.3,18.0,73
+70,MTR Ready-To-Eat Dal Tadka (300 g),Grocery,Ready to Eat,85.0,71.4,16.0,35
+71,Dettol Antiseptic Disinfectant Liquid (250 ml),Household,cleaning tools,135.0,94.5,30.0,95
+72,Finish Powerball Dishwasher Tablets (Pack of 10),Household,cleaning tools,199.0,139.3,30.0,62
+73,Dove Deeply Nourishing Body Wash (190 ml),Personal Care,personal care,175.0,113.75,35.0,131
+74,Baby Dove Rich Moisture Bath & Skin Care Kit,Baby Care,hygiene,475.0,380.0,20.0,105
+75,Dove Original Anti-Perspirant Deodorant Spray (150 ml),Personal Care,Deodrant,210.0,136.5,35.0,104
+76,"Dove Cream Beauty Bathing Bar (Pack of 3, 100 g each)",Personal Care,personal care,165.0,107.25,35.0,138
+77,Dove Go Fresh Pomegranate Deodorant Spray (150 ml),Personal Care,Deodrant,210.0,136.5,35.0,135
+78,Downy Fabric Softener Conditioner (800 ml),Household,cleaning tools,280.0,196.0,30.0,71
+79,Downy Fabric Care Detergent (1 L),Household,cleaning tools,295.0,206.5,30.0,98
+80,Exotic Red Dragon Fruit (1 pc),Fruits & Vegetables,exotics,75.0,51.0,32.0,49
+81,Ferrero Duplo Chocnut Wafer Bar (26 g),Snacks,chips,45.0,32.4,28.0,115
+82,Dustpan with Long Handle Cleaning Brush Set,Household,cleaning tools,85.0,59.5,30.0,33
+83,Pedal Step Plastic Dustbin (7 L),Household,cleaning tools,199.0,139.3,30.0,30
+84,"Oxo-Biodegradable Garbage Bags (Medium, 30 Bags)",Household,cleaning tools,99.0,69.3,30.0,109
+85,Farm Fresh White Eggs (Pack of 6),Dairy & Breakfast,breakfast,48.0,39.36,18.0,54
+86,Eno Regular Fruit Salt Sachet (Pack of 6),Dairy & Breakfast,breakfast,48.0,39.36,18.0,123
+87,Natural Jade Roller Facial Massager,Personal Care,personal care,299.0,194.35,35.0,62
+88,Stainless Steel Facial Ice Roller Tool,Personal Care,personal care,199.0,129.35,35.0,35
+89,The Face Shop Real Nature Sheet Mask (20 g),Personal Care,Facewash,100.0,65.0,35.0,134
+90,Fairy Dishwashing Liquid Platinum (400 ml),Household,cleaning tools,145.0,101.5,30.0,54
+91,Fanta Orange Soda Bottle (750 ml),Beverages,soft drinks,40.0,30.0,25.0,135
+92,Fanta Orange Soda Can (300 ml),Beverages,soft drinks,40.0,30.0,25.0,37
+93,Febreze Air Effects Odor-Eliminating Mist (250 g),Household,freshners,299.0,209.3,30.0,73
+94,Fresh Methi / Fenugreek Leaves (250 g),Fruits & Vegetables,leafy,20.0,13.6,32.0,60
+95,Fish Curry Masala,Grocery,besan maida powder,200.0,168.0,16.0,83
+96,LuxaDerme Exfoliating Foot Peel Mask Socks,Personal Care,Femine care,249.0,161.85,35.0,106
+97,MDH Garam Masala (100 g),Grocery,Spices & Masalas,85.0,71.4,16.0,131
+98,Garnier Skin Naturals Micellar Cleansing Water (125 ml),Personal Care,Facewash,199.0,129.35,35.0,71
+99,Garnier SkinActive Oil-Infused Micellar Wipes (25 pcs),Personal Care,Facewash,149.0,96.85,35.0,45
+100,Amul Pure Cow Ghee (500 ml),Dairy & Breakfast,dairy,325.0,266.5,18.0,72
+101,Glade Automatic Air Freshener Spray (269 ml),Household,freshners,225.0,157.5,30.0,70
+102,Glade Air Aromatherapy Relaxing Spray (250 ml),Household,freshners,210.0,147.0,30.0,51
+103,Glade Clean Linen Room Spray (300 ml),Household,freshners,165.0,115.5,30.0,110
+104,Ocean Clear Glass Water Tumblers (Set of 6),Home & Kitchen,dainning needs,280.0,173.6,38.0,59
+105,Glade Scented Gel Air Freshener (Pack of 2),Household,freshners,180.0,126.0,30.0,114
+106,Govind Sweet Creamy Lassi (200 ml),Beverages,lassi,25.0,18.75,25.0,144
+107,Grain & Pulse Dispenser Storage Box (5 kg),Home & Kitchen,kitchen,349.0,216.38,38.0,112
+108,Imported Crisp Green Apples (500 g),Fruits & Vegetables,fruits,120.0,81.6,32.0,107
+109,Whole Green Cardamom Select (50 g),Grocery,Spices & Masalas,150.0,126.0,16.0,34
+110,Whole Green Moong Sabut (1 kg),Grocery,Dals & Pulses,130.0,109.2,16.0,102
+111,Everest Ground Cumin / Jeera (100 g),Grocery,Spices & Masalas,65.0,54.6,16.0,106
+112,Gits Gulab Jamun Instant Mix (200 g),Dairy & Breakfast,breakfast,85.0,69.7,18.0,46
+113,Harpic Power Plus Toilet Cleaner (500 ml),Household,cleaning tools,93.0,65.1,30.0,93
+114,Hershey's Whole Almonds Milk Chocolate (40 g),Snacks,chips,60.0,43.2,28.0,118
+115,Patanjali Pure Honey (250 g),Dairy & Breakfast,breakfast,95.0,77.9,18.0,56
+116,Horlicks Classic Malt Nutrition Drink (500 g),Dairy & Breakfast,breakfast,245.0,200.9,18.0,45
+117,"Huggies Complete Comfort Diaper Pants (M, 30 pcs)",Baby Care,daipers,389.0,311.2,20.0,84
+118,Huggies Natural Care Aloe Vera Baby Wipes (72 Wipes),Baby Care,hygiene,175.0,140.0,20.0,73
+119,Fresh Fruit Jam Jar (200 g),Dairy & Breakfast,breakfast,65.0,53.3,18.0,59
+120,Clear Glass Mason Storage Jar with Wooden Lid (500 ml),Home & Kitchen,kitchen,140.0,86.8,38.0,143
+121,Royal Jasmine Fragrant Rice (1 kg),Grocery,Rice & Grains,160.0,134.4,16.0,106
+122,Everest Jeera Powder (100 g),Grocery,Spices & Masalas,68.0,57.12,16.0,113
+123,Johnson's Baby Essential Grooming Gift Box,Baby Care,hygiene,420.0,336.0,20.0,96
+124,Johnson's Baby Blossoms Fragrant Powder (200 g),Baby Care,hygiene,145.0,116.0,20.0,53
+125,Johnson's No More Tears Baby Shampoo (200 ml),Baby Care,hygiene,175.0,140.0,20.0,112
+126,Johnson's Baby Shampoo Family Value Pack (500 ml),Baby Care,hygiene,360.0,288.0,20.0,66
+127,Everest Kasoori Methi (50 g),Grocery,Spices & Masalas,38.0,31.92,16.0,132
+128,MDH Kasuri Methi (50 g),Grocery,Spices & Masalas,38.0,31.92,16.0,123
+129,Kinder Joy Chocolate with Surprise Toy (20 g),Snacks,chips,45.0,32.4,28.0,124
+130,Kissan Mixed Fruit Jam (500 g),Dairy & Breakfast,breakfast,160.0,131.2,18.0,32
+131,Nestle KitKat 4-Finger Wafer Bar (38 g),Snacks,chips,25.0,18.0,28.0,54
+132,Nestle KitKat Chocolate Waffle Cone (110 ml),Frozen Foods,ice cream,60.0,44.4,26.0,130
+133,Zespri Premium Green Kiwi (Pack of 3),Fruits & Vegetables,exotics,85.0,57.8,32.0,29
+134,Stainless Steel Kitchen Knife Block Holder,Home & Kitchen,kitchen,320.0,198.4,38.0,128
+135,Kurkure Masala Munch Crisps (85 g),Snacks,chips,20.0,14.4,28.0,65
+136,L'Oréal Paris Kajal Magique Bold (0.35 g),Personal Care,personal care,199.0,129.35,35.0,76
+137,Fresh Tender Ladies Finger / Bhindi (500 g),Fruits & Vegetables,vegetables,32.0,21.76,32.0,59
+138,Lakme 9 to 5 Complexion Care CC Cream (30 g),Personal Care,personal care,299.0,194.35,35.0,33
+139,Lakme Absolute Blur Perfect Makeup Primer (30 g),Personal Care,personal care,299.0,194.35,35.0,52
+140,Lakme Sun Expert Ultra Matte Gel SPF 50 (50 ml),Personal Care,Sunscreen,290.0,188.5,35.0,141
+141,Fresh Mango Sweet Lassi (250 ml),Beverages,lassi,30.0,22.5,25.0,145
+142,Innisfree Lavender Calming Sheet Mask (20 ml),Personal Care,Facewash,120.0,78.0,35.0,97
+143,Lay's Potato Chips Party Pack Combo (Pack of 3),Snacks,chips,60.0,43.2,28.0,137
+144,Lay's Classic Salted Potato Chips (50 g),Snacks,chips,20.0,14.4,28.0,116
+145,Lenor In-Wash Scent Booster Beads (210 g),Household,cleaning tools,350.0,245.0,30.0,65
+146,Lotus Herbals Safe Sun UV Screen Matte Gel SPF 50 (50 g),Personal Care,personal care,295.0,191.75,35.0,52
+147,Lotus Herbals WhiteGlow Skin Brightening Gel Cream (60 g),Personal Care,personal care,245.0,159.25,35.0,108
+148,Real Lychee Fruit Lassi (200 ml),Beverages,lassi,25.0,18.75,25.0,88
+149,M&M's Milk Chocolate Candies (45 g),Snacks,chips,50.0,36.0,28.0,75
+150,M.A.C Studio Fix Fluid SPF 15 Foundation (30 ml),Personal Care,personal care,999.0,649.35,35.0,138
+151,M.A.C Prep + Prime Natural Radiance Base (50 ml),Personal Care,personal care,799.0,519.35,35.0,142
+152,Bingo! Mad Angles Achaari Masti (66 g),Snacks,chips,20.0,14.4,28.0,107
+153,"Maggi 2-Minute Masala Noodles (Pack of 4, 280 g)",Dairy & Breakfast,breakfast,56.0,45.92,18.0,83
+154,"MamyPoko Pants Extra Absorb Diaper Pants (M, 34 pcs)",Baby Care,daipers,425.0,340.0,20.0,43
+155,"MamyPoko Pants Extra Absorb Diapers (L, 30 pcs)",Baby Care,daipers,449.0,359.2,20.0,58
+156,"MamyPoko Pants Standard Diapers (S, 40 pcs)",Baby Care,daipers,399.0,319.2,20.0,42
+157,Britannia Marie Gold Tea Biscuits (250 g),Snacks,cookie,30.0,21.6,28.0,56
+158,MTR Masala Vada Mix (200 g),Grocery,Ready to Eat,65.0,54.6,16.0,120
+159,Tata Sampann Masoor Dal (1 kg),Grocery,Dals & Pulses,115.0,96.6,16.0,96
+160,Mentos Rainbow Chewy Candy Roll (29 g),Snacks,chips,10.0,7.2,28.0,93
+161,Amul Taaza Homogenised Toned Milk (1 L),Dairy & Breakfast,milk,72.0,59.04,18.0,58
+162,Nestle Milkmaid Sweetened Condensed Milk (380 g),Dairy & Breakfast,dairy,144.0,118.08,18.0,120
+163,Nivea Soft Light Moisturiser Cream (100 ml),Personal Care,personal care,175.0,113.75,35.0,99
+164,Tata Sampann Moong Dal Dhuli (1 kg),Grocery,Dals & Pulses,140.0,117.6,16.0,79
+165,Floor Cleaning Spin Mop with Microfiber Head,Household,cleaning tools,399.0,279.3,30.0,139
+166,Amul Mozzarella Pizza Cheese (200 g),Dairy & Breakfast,dairy,130.0,106.6,18.0,99
+167,Aashirvaad Multigrain Atta (5 kg),Grocery,Atta & Flours,295.0,247.8,16.0,76
+168,"Sweet Musk Melon / Kharbuja (1 pc, ~1 kg)",Fruits & Vegetables,melons,55.0,37.4,32.0,71
+169,Everest Meat / Mutton Masala (100 g),Grocery,Spices & Masalas,68.0,57.12,16.0,53
+170,Natco Fine Rice Flour (500 g),Grocery,Atta & Flours,48.0,40.32,16.0,42
+171,Nutella Hazelnut Cocoa Spread (180 g),Dairy & Breakfast,breakfast,190.0,155.8,18.0,90
+172,Nescafe Classic Instant Coffee (50 g),Dairy & Breakfast,breakfast,165.0,135.3,18.0,88
+173,Nestle Cerelac Wheat Apple Baby Cereal (300 g),Baby Care,baby food,245.0,196.0,20.0,36
+174,Nivea Men Total Care Grooming Gift Kit (4 pcs),Personal Care,personal care,449.0,291.85,35.0,121
+175,Almond & Nut Butter Spread (200 g),Dairy & Breakfast,dairy,199.0,163.18,18.0,31
+176,Nutella Hazelnut Cocoa Spread (350 g),Snacks,chips,320.0,230.4,28.0,135
+177,Kellogg's Whole Wheat Oatmeal (500 g),Dairy & Breakfast,breakfast,125.0,102.5,18.0,39
+178,Cadbury Oreo Vanilla Creme Biscuits (120 g),Snacks,cookie,35.0,25.2,28.0,44
+179,Cadbury Oreo Crunchy Waffle Cone (110 ml),Frozen Foods,ice cream,60.0,44.4,26.0,105
+180,Cadbury Oreo Cookies & Cream Tub (500 ml),Frozen Foods,ice cream,199.0,147.26,26.0,45
+181,Organic Tattva Kalonji Seeds (100 g),Grocery,Spices & Masalas,55.0,46.2,16.0,126
+182,Organic Tattva Moong Dal (1 kg),Grocery,Dals & Pulses,160.0,134.4,16.0,112
+183,"Pampers All-Round Protection Diaper Pants (M, 28 pcs)",Baby Care,daipers,399.0,319.2,20.0,79
+184,Pampers Sensitive Skin Baby Wipes (72 Wipes),Baby Care,hygiene,185.0,148.0,20.0,101
+185,Pantene Advanced Hairfall Control Shampoo (340 ml),Personal Care,Hair Care,260.0,169.0,35.0,33
+186,"Semi-Ripe Sweet Farm Papaya (1 pc, ~1 kg)",Fruits & Vegetables,fruits,48.0,32.64,32.0,74
+187,Parle-G Original Gluco Biscuits (250 g),Snacks,cookie,25.0,18.0,28.0,73
+188,Fresh Exotic Passion Fruit (250 g),Fruits & Vegetables,exotics,80.0,54.4,32.0,101
+189,Patanjali Mixed Fruit Jam (500 g),Dairy & Breakfast,breakfast,110.0,90.2,18.0,84
+190,Pintola All-Natural Peanut Butter (350 g),Dairy & Breakfast,dairy,175.0,143.5,18.0,92
+191,Haldiram's Classic Salted Peanuts (200 g),Snacks,chips,48.0,34.56,28.0,57
+192,Sundrop Creamy Peanut Butter (462 g),Dairy & Breakfast,breakfast,165.0,135.3,18.0,149
+193,Pepsi Cola Soft Drink Bottle (750 ml),Beverages,soft drinks,40.0,30.0,25.0,95
+194,Pepsi Refreshing Soda Can (300 ml),Beverages,soft drinks,40.0,30.0,25.0,135
+195,Mother's Recipe Mixed Pickle (400 g),Grocery,Pickles & Sauces,89.0,74.76,16.0,145
+196,"Fresh Sweet Queen Pineapple (1 pc, ~1 kg)",Fruits & Vegetables,fruits,65.0,44.2,32.0,26
+197,Veeba Pizza & Pasta Sauce (350 g),Grocery,Pickles & Sauces,89.0,74.76,16.0,112
+198,Melamine Dinner Serving Plates (Set of 6),Home & Kitchen,dainning needs,449.0,278.38,38.0,117
+199,Fresh Ruby Red Pomegranate (500 g),Fruits & Vegetables,fruits,95.0,64.6,32.0,39
+200,Pond's Age Miracle Youthful Glow Day Cream SPF 18 (35 g),Personal Care,personal care,349.0,226.85,35.0,112
+201,Pond's Dreamflower Pink Lily Fragrant Talcum Powder (100 g),Personal Care,personal care,95.0,61.75,35.0,138
+202,Pond's Serum Boost Sunscreen Gel SPF 50 (50 g),Personal Care,Sunscreen,249.0,161.85,35.0,93
+203,Complete Daily Pooja Samagri Kit Box,Home & Kitchen,pooja needs,349.0,216.38,38.0,121
+204,Pril Lime Liquid Dishwash (425 ml),Household,cleaning tools,95.0,66.5,30.0,59
+205,Quaker Rolled Oats (400 g),Dairy & Breakfast,breakfast,99.0,81.18,18.0,123
+206,Manna Pure Ragi Flour (500 g),Grocery,Atta & Flours,45.0,37.8,16.0,107
+207,MTR Rava Dosa Instant Mix (500 g),Dairy & Breakfast,breakfast,95.0,77.9,18.0,68
+208,Fresh Raw Sour Mangoes (500 g),Fruits & Vegetables,fruits,40.0,27.2,32.0,39
+209,Brooke Bond Red Label Strong Tea (500 g),Dairy & Breakfast,breakfast,260.0,213.2,18.0,62
+210,Daily Drop Premium Sona Masoori Rice (5 kg),Grocery,Rice & Grains,275.0,231.0,16.0,80
+211,Ambi Pur Room Fresh Air Effects (275 g),Household,freshners,230.0,161.0,30.0,45
+212,Prestige Non-Stick Round Frying Pan (24 cm),Home & Kitchen,kitchen,499.0,309.38,38.0,83
+213,Tata Salt Vacuum Evaporated (1 kg),Grocery,Salt & Sugar,25.0,21.0,16.0,25
+214,Simple Kind to Skin Refreshing Facial Wash (150 ml),Personal Care,Facewash,299.0,194.35,35.0,147
+215,Wipro Softouch Fabric Conditioner (800 ml),Household,cleaning tools,190.0,133.0,30.0,117
+216,Knorr Classic Mixed Vegetable Soup (43 g),Dairy & Breakfast,breakfast,40.0,32.8,18.0,137
+217,Revolving Countertop Spice Rack (Set of 8 Jars),Home & Kitchen,kitchen,399.0,247.38,38.0,117
+218,Scotch-Brite Sponge Wipe (Pack of 3),Household,cleaning tools,110.0,77.0,30.0,58
+219,Multi-Purpose Trigger Spray Bottle (500 ml),Household,cleaning tools,85.0,59.5,30.0,149
+220,Sprite Clear Lemon-Lime Bottle (750 ml),Beverages,soft drinks,40.0,30.0,25.0,89
+221,Sprite Lemon & Lime Can (300 ml),Beverages,soft drinks,40.0,30.0,25.0,122
+222,Royal Thai Sweet Sticky Rice (1 kg),Grocery,Rice & Grains,175.0,147.0,16.0,47
+223,Sting Energy Drink Pet Bottle (250 ml),Beverages,energy bars,20.0,15.0,25.0,89
+224,Madhur Pure & Hygienic Sugar (1 kg),Grocery,Salt & Sugar,48.0,40.32,16.0,141
+225,Sona Masoori Raw Rice (1 kg),Grocery,Rice & Grains,65.0,54.6,16.0,38
+226,Mother Dairy Sweet Mishti Doi (400 g),Dairy & Breakfast,dairy,75.0,61.5,18.0,136
+227,Tata Sampann Chana Dal (1 kg),Grocery,Dals & Pulses,110.0,92.4,16.0,105
+228,Tide Plus Extra Power Detergent Powder (1 kg),Household,cleaning tools,145.0,101.5,30.0,63
+229,Farm Fresh Red Hybrid Tomatoes (1 kg),Fruits & Vegetables,vegetables,35.0,23.8,32.0,132
+230,Tata Sampann Unpolished Toor Dal (1 kg),Grocery,Dals & Pulses,165.0,138.6,16.0,106
+231,Oral-B CrossAction Pro-Health Toothbrush (Pack of 2),Personal Care,personal care,65.0,42.25,35.0,89
+232,Heavy Duty Plastic Multi-Utility Tub (15 L),Household,cleaning tools,180.0,126.0,30.0,102
+233,Tata Sampann Urad Dal Split (1 kg),Grocery,Dals & Pulses,145.0,121.8,16.0,50
+234,Vanish Oxi Action Fabric Stain Remover (400 g),Household,cleaning tools,165.0,115.5,30.0,44
+235,Vaseline Intensive Care Deep Moisture Lotion (200 ml),Personal Care,personal care,199.0,129.35,35.0,72
+236,Vaseline 100% Pure Petroleum Jelly (85 g),Personal Care,personal care,75.0,48.75,35.0,122
+237,Gillette Venus Smooth Body Razor (1 pc),Personal Care,Hair Care,99.0,64.35,35.0,45
+238,Gillette Venus Simply 3 Blades Razor (Pack of 3),Personal Care,Hair Care,199.0,129.35,35.0,94
+239,"Kiran Sweet Red Watermelon (1 pc, ~2-3 kg)",Fruits & Vegetables,melons,60.0,40.8,32.0,147
+240,Whisper Ultra Clean Wings Sanitary Pads (Pack of 15),Personal Care,Femine care,160.0,104.0,35.0,124
+241,Sunfeast YiPPee! Magic Masala Noodles (Pack of 4),Dairy & Breakfast,breakfast,52.0,42.64,18.0,143
