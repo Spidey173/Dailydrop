@@ -77,9 +77,18 @@ class Config:
     DB_TIMEOUT = 30
 
     # Redis Cache & Distributed Lock Settings
-    REDIS_URL = sanitize_redis_url(os.getenv('REDIS_URL', 'redis://127.0.0.1:6379/0'))
-    REDIS_SOCKET_TIMEOUT = float(os.getenv('REDIS_SOCKET_TIMEOUT', 2.0))
-    REDIS_ENABLED = os.getenv('REDIS_ENABLED', 'true').lower() in ('true', '1', 'yes')
+    _raw_redis_url = os.getenv('REDIS_URL', '').strip()
+    _is_serverless = bool(os.getenv('VERCEL') or os.getenv('AWS_LAMBDA_FUNCTION_NAME'))
+    if _is_serverless and (not _raw_redis_url or '127.0.0.1' in _raw_redis_url or 'localhost' in _raw_redis_url):
+        REDIS_URL = ''
+        REDIS_ENABLED = False
+    else:
+        REDIS_URL = sanitize_redis_url(_raw_redis_url or 'redis://127.0.0.1:6379/0')
+        REDIS_ENABLED = os.getenv('REDIS_ENABLED', 'true').lower() in ('true', '1', 'yes')
+        if _is_serverless and ('127.0.0.1' in REDIS_URL or 'localhost' in REDIS_URL):
+            REDIS_ENABLED = False
+
+    REDIS_SOCKET_TIMEOUT = float(os.getenv('REDIS_SOCKET_TIMEOUT', 0.5))
     CACHE_CATALOG_TTL = int(os.getenv('CACHE_CATALOG_TTL', 600))  # 10 minutes
     IDEMPOTENCY_TTL = int(os.getenv('IDEMPOTENCY_TTL', 86400))  # 24 hours
 

@@ -338,8 +338,11 @@ class TrafficSimulatorService:
     def check_heartbeat_on_request(cls) -> None:
         """
         Lightweight check called during web requests.
-        Ensures catch-up runs at most once every 30 minutes in a non-blocking thread.
+        Disabled in serverless environments (Vercel) to keep request latency sub-millisecond.
         """
+        if os.getenv('VERCEL') or os.getenv('AWS_LAMBDA_FUNCTION_NAME'):
+            return
+
         now = time.time()
         # Only run if 30 minutes have elapsed since last check
         if now - cls._last_activity_check > 1800:
@@ -350,7 +353,12 @@ class TrafficSimulatorService:
     def start_daemon(cls, app: Optional[Any] = None) -> None:
         """
         Starts the background autonomous quick-commerce traffic generator daemon thread.
+        Disabled in serverless environments where background threads cause latency & freeze.
         """
+        if os.getenv('VERCEL') or os.getenv('AWS_LAMBDA_FUNCTION_NAME'):
+            logger.info("⚡ Serverless runtime detected (Vercel). Autonomous traffic daemon disabled.")
+            return
+
         with cls._daemon_lock:
             if cls._daemon_started:
                 return

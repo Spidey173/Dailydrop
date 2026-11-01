@@ -45,7 +45,7 @@ def get_pool() -> pool.ThreadedConnectionPool:
         try:
             is_serverless = bool(os.getenv('VERCEL') or os.getenv('AWS_LAMBDA_FUNCTION_NAME'))
             minconn = 1 if is_serverless else Config.DB_MIN_CONN
-            maxconn = 4 if is_serverless else Config.DB_MAX_CONN
+            maxconn = 3 if is_serverless else Config.DB_MAX_CONN
 
             _db_pool = pool.ThreadedConnectionPool(
                 minconn=minconn,
@@ -74,12 +74,29 @@ def get_db_connection():
     conn = None
     try:
         conn = p.getconn()
+        # Verify connection is open; discard stale socket closed by Neon serverless compute sleep
+        if conn and conn.closed != 0:
+            try:
+                p.putconn(conn, close=True)
+            except Exception:
+                pass
+            conn = p.getconn()
+
         conn.autocommit = False
         yield conn
         conn.commit()
     except Exception as e:
         if conn:
-            conn.rollback()
+            try:
+                conn.rollback()
+            except Exception:
+                pass
+            # If broken or disconnected, discard from pool so subsequent requests get a fresh socket
+            try:
+                p.putconn(conn, close=True)
+                conn = None
+            except Exception:
+                pass
         logger.error(f"Database error during transaction: {e}")
         raise DatabaseError(f"Database error: {e}") from e
     finally:
@@ -93,10 +110,28 @@ _IS_DB_INITIALIZED = False
 def init_database() -> None:
     """
     Initialize database schema and indexes on Neon PostgreSQL once.
+    Uses an ultra-fast check to skip heavy DDL/seeding if already initialized.
     """
     global _IS_DB_INITIALIZED
     if _IS_DB_INITIALIZED:
         return
+
+    # Fast-path: Check if database tables already exist and are populated
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT 1 FROM products LIMIT 1")
+                row = cursor.fetchone()
+                if row:
+                    _IS_DB_INITIALIZED = True
+                    try:
+                        get_all_products()
+                    except Exception:
+                        pass
+                    logger.info("⚡ Neon database schema and catalog verified. Fast-path startup active.")
+                    return
+    except Exception as check_err:
+        logger.info(f"Schema verification note ({check_err}). Performing full schema initialization...")
 
     try:
         with get_db_connection() as conn:
@@ -668,7 +703,7 @@ def get_product_by_name(name: str) -> Optional[Dict[str, Any]]:
 
 
 _ANALYTICS_CACHE: Dict[str, Tuple[float, Dict[str, Any]]] = {}
-_ANALYTICS_TTL_SECONDS = 30.0  # 30 seconds in-memory cache for ultra-fast, responsive dashboard
+_ANALYTICS_TTL_SECONDS = 300.0  # 5 minutes in-memory cache for ultra-fast, responsive dashboard
 
 _DEFAULT_CUSTOMER_PROFILES = [
     {'user_id': 101, 'name': 'Aditya Sharma', 'email': 'aditya.sharma@gmail.com', 'phone': '+91 98201 44521', 'city': 'Bangalore', 'total_orders': 28, 'total_spend': 14850.00, 'avg_order_value': 530.36, 'recency_days': 24, 'last_order_str': '2026-10-08 18:42', 'segment': 'At Risk (High Value Churn)'},
@@ -825,8 +860,13 @@ def get_unified_analytics(days: int = 30) -> Dict[str, Any]:
                             ) h
                         ) AS hourly_rows,
                         (
-                            SELECT COALESCE(json_agg(o.products_ordered), '[]'::json) FROM orders o
-                        ) AS orders_products;
+                            SELECT COALESCE(json_agg(c), '[]'::json) FROM (
+                                SELECT COALESCE(p.category, 'Grocery') as category, SUM(oi.subtotal) as cat_revenue
+                                FROM order_items oi
+                                LEFT JOIN products p ON oi.product_id = p.product_id
+                                GROUP BY 1
+                            ) c
+                        ) AS category_rows;
                 ''')
                 row = cursor.fetchone()
 
@@ -845,20 +885,30 @@ def get_unified_analytics(days: int = 30) -> Dict[str, Any]:
                         h_str = f"{int(h['order_hour']):02d}:00"
                         hour_counts[h_str] = int(h['count'])
 
-                # Process category totals in memory
-                for raw_items in (row['orders_products'] or []):
-                    try:
-                        items = json.loads(raw_items) if isinstance(raw_items, str) else raw_items
-                        if not isinstance(items, list):
+                # Process category totals from SQL aggregate
+                for c in (row.get('category_rows') or []):
+                    if isinstance(c, dict) and c.get('category'):
+                        cat_name = c['category']
+                        rev = float(c.get('cat_revenue') or 0.0)
+                        category_totals[cat_name] = round(category_totals.get(cat_name, 0.0) + rev, 2)
+
+                # Fallback if order_items has not yet been populated
+                if sum(category_totals.values()) == 0.0 and total_orders > 0:
+                    cursor.execute("SELECT products_ordered FROM orders LIMIT 200")
+                    for cord in cursor.fetchall():
+                        try:
+                            raw_items = cord['products_ordered'] if isinstance(cord, dict) else cord[0]
+                            items = json.loads(raw_items) if isinstance(raw_items, str) else raw_items
+                            if not isinstance(items, list):
+                                continue
+                            for item in items:
+                                name = (item.get('name') or '').lower()
+                                price = float(item.get('price', 0))
+                                qty = int(item.get('quantity', 1))
+                                cat = prod_cat_map.get(name, 'Grocery')
+                                category_totals[cat] = round(category_totals.get(cat, 0.0) + (price * qty), 2)
+                        except Exception:
                             continue
-                        for item in items:
-                            name = (item.get('name') or '').lower()
-                            price = float(item.get('price', 0))
-                            qty = int(item.get('quantity', 1))
-                            cat = prod_cat_map.get(name, 'Grocery')
-                            category_totals[cat] = round(category_totals.get(cat, 0.0) + (price * qty), 2)
-                    except Exception:
-                        continue
 
                 city_sla = []
                 try:

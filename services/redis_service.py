@@ -70,6 +70,11 @@ class RedisService:
         if not getattr(Config, 'REDIS_ENABLED', True):
             return None
 
+        redis_url = getattr(Config, 'REDIS_URL', '').strip()
+        is_serverless = bool(os.getenv('VERCEL') or os.getenv('AWS_LAMBDA_FUNCTION_NAME'))
+        if not redis_url or (is_serverless and ('127.0.0.1' in redis_url or 'localhost' in redis_url)):
+            return None
+
         now = time.time()
         if cls._last_failure_time and (now - cls._last_failure_time < cls._CIRCUIT_COOLDOWN_SECONDS):
             return None
@@ -78,8 +83,7 @@ class RedisService:
             return cls._raw_client
 
         try:
-            redis_url = getattr(Config, 'REDIS_URL', 'redis://127.0.0.1:6379/0')
-            socket_timeout = getattr(Config, 'REDIS_SOCKET_TIMEOUT', 2.0)
+            socket_timeout = getattr(Config, 'REDIS_SOCKET_TIMEOUT', 0.5)
             cls._raw_pool = redis.ConnectionPool.from_url(
                 redis_url,
                 socket_timeout=socket_timeout,
@@ -106,6 +110,11 @@ class RedisService:
         if not getattr(Config, 'REDIS_ENABLED', True):
             return None
 
+        redis_url = getattr(Config, 'REDIS_URL', '').strip()
+        is_serverless = bool(os.getenv('VERCEL') or os.getenv('AWS_LAMBDA_FUNCTION_NAME'))
+        if not redis_url or (is_serverless and ('127.0.0.1' in redis_url or 'localhost' in redis_url)):
+            return None
+
         # Circuit-breaker cooldown if recently failed
         now = time.time()
         if cls._last_failure_time and (now - cls._last_failure_time < cls._CIRCUIT_COOLDOWN_SECONDS):
@@ -115,8 +124,7 @@ class RedisService:
             return cls._client
 
         try:
-            redis_url = getattr(Config, 'REDIS_URL', 'redis://127.0.0.1:6379/0')
-            socket_timeout = getattr(Config, 'REDIS_SOCKET_TIMEOUT', 2.0)
+            socket_timeout = getattr(Config, 'REDIS_SOCKET_TIMEOUT', 0.5)
             
             cls._pool = redis.ConnectionPool.from_url(
                 redis_url,

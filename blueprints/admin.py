@@ -24,8 +24,10 @@ admin_bp = Blueprint('admin', __name__)
 @admin_required
 def admin_dashboard():
     """Render the Admin Portal dashboard with sub-millisecond in-memory cache responses."""
-    from services.traffic_simulator_service import TrafficSimulatorService
-    TrafficSimulatorService.check_heartbeat_on_request()
+    is_serverless = bool(os.getenv('VERCEL') or os.getenv('AWS_LAMBDA_FUNCTION_NAME'))
+    if not is_serverless:
+        from services.traffic_simulator_service import TrafficSimulatorService
+        TrafficSimulatorService.check_heartbeat_on_request()
 
     analytics = OrderService.get_analytics(days=30)
     products = ProductService.get_products_by_category()

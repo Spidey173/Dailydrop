@@ -41,13 +41,20 @@ def _init_serverless_app():
     os.environ['DISABLE_FILE_UPLOADS'] = 'true'
     os.environ['VERCEL'] = '1'
 
-    # Auto-sanitize REDIS_URL in environment if present
+    # Auto-sanitize REDIS_URL in environment if present, else disable Redis on Vercel
     if os.getenv('REDIS_URL'):
         from config import sanitize_redis_url
         clean_redis = sanitize_redis_url(os.environ['REDIS_URL'])
         os.environ['REDIS_URL'] = clean_redis
         Config.REDIS_URL = clean_redis
         ProductionConfig.REDIS_URL = clean_redis
+        Config.REDIS_ENABLED = True
+        ProductionConfig.REDIS_ENABLED = True
+    else:
+        Config.REDIS_URL = ''
+        ProductionConfig.REDIS_URL = ''
+        Config.REDIS_ENABLED = False
+        ProductionConfig.REDIS_ENABLED = False
 
     try:
         from app import create_app

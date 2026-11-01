@@ -152,7 +152,8 @@ def create_app(config_name: Optional[str] = None) -> Flask:
         try:
             init_database()
             logger.info("Neon PostgreSQL Database initialized successfully")
-            if not app.config.get('TESTING') and os.getenv('FLASK_ENV') != 'testing':
+            is_serverless = bool(os.getenv('VERCEL') or os.getenv('AWS_LAMBDA_FUNCTION_NAME'))
+            if not is_serverless and not app.config.get('TESTING') and os.getenv('FLASK_ENV') != 'testing':
                 from services.traffic_simulator_service import TrafficSimulatorService
                 TrafficSimulatorService.start_daemon(app)
         except DatabaseError as e:

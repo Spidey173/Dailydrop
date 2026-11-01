@@ -26,7 +26,7 @@
     window.IS_USER_LOGGED_IN = {{ 'true' if session.get('user_id') else 'false' }};
     window.CSRF_TOKEN = "{{ csrf_token() }}";
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
   <script src="{{ url_for('static', filename='js/products.js') }}?v=20261028_2" defer></script>
   <script src="{{ url_for('static', filename='js/cart-helpers.js') }}?v=20261028_2" defer></script>
   <script src="{{ url_for('static', filename='js/product-modal.js') }}?v=20261028_2" defer></script>
