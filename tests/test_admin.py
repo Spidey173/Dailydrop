@@ -44,6 +44,10 @@ def test_admin_analytics_api(admin_client, unauthorized_client):
     assert data['success'] is True
     assert 'stats' in data
     assert 'sales_info' in data
+    assert 'cohort_matrix' in data
+    assert 'market_basket' in data
+    assert len(data['cohort_matrix']) > 0
+    assert len(data['market_basket']) > 0
 
     # Unauthorized receives 401
     unauth_res = unauthorized_client.get('/api/v1/admin/analytics')

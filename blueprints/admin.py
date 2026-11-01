@@ -40,7 +40,9 @@ def admin_dashboard():
         hourly_distribution=analytics.get('hourly', {}),
         city_sla=analytics.get('city_sla', []),
         rfm_summary=analytics.get('rfm_summary', []),
-        abc_summary=analytics.get('abc_summary', [])
+        abc_summary=analytics.get('abc_summary', []),
+        cohort_matrix=analytics.get('cohort_matrix', []),
+        market_basket=analytics.get('market_basket', [])
     )
 
 
@@ -73,6 +75,8 @@ def api_admin_analytics():
         'city_sla': analytics.get('city_sla', []),
         'rfm_summary': analytics.get('rfm_summary', []),
         'abc_summary': analytics.get('abc_summary', []),
+        'cohort_matrix': analytics.get('cohort_matrix', []),
+        'market_basket': analytics.get('market_basket', []),
         'low_stock_count': len(low_stock),
         'critical_stock_count': len(critical_stock)
     }), 200
