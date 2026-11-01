@@ -24,10 +24,19 @@ admin_bp = Blueprint('admin', __name__)
 @admin_required
 def admin_dashboard():
     """Render the Admin Portal dashboard with sub-millisecond in-memory cache responses."""
+    from services.traffic_simulator_service import TrafficSimulatorService
+    TrafficSimulatorService.check_heartbeat_on_request()
+
     analytics = OrderService.get_analytics(days=30)
     products = ProductService.get_products_by_category()
     low_stock = ProductService.get_low_stock(threshold=10)
     contact_messages = ContactService.get_all_messages()
+
+    rfm_customers = analytics.get('rfm_customers', [])
+    at_risk_customers = analytics.get('at_risk_customers', [])
+    vip_customers = analytics.get('vip_customers', [])
+    at_risk_count = analytics.get('at_risk_count', len(at_risk_customers))
+    at_risk_spend = analytics.get('at_risk_spend', 0.0)
 
     return render_template(
         'admin_dashboard.html',
@@ -40,6 +49,11 @@ def admin_dashboard():
         hourly_distribution=analytics.get('hourly', {}),
         city_sla=analytics.get('city_sla', []),
         rfm_summary=analytics.get('rfm_summary', []),
+        rfm_customers=rfm_customers,
+        at_risk_customers=at_risk_customers,
+        vip_customers=vip_customers,
+        at_risk_count=at_risk_count,
+        at_risk_spend=at_risk_spend,
         abc_summary=analytics.get('abc_summary', []),
         cohort_matrix=analytics.get('cohort_matrix', []),
         market_basket=analytics.get('market_basket', [])
@@ -74,11 +88,45 @@ def api_admin_analytics():
         'hourly_distribution': analytics.get('hourly', {}),
         'city_sla': analytics.get('city_sla', []),
         'rfm_summary': analytics.get('rfm_summary', []),
+        'rfm_customers': analytics.get('rfm_customers', []),
+        'at_risk_count': analytics.get('at_risk_count', 0),
+        'at_risk_spend': analytics.get('at_risk_spend', 0.0),
+        'vip_count': analytics.get('vip_count', 0),
         'abc_summary': analytics.get('abc_summary', []),
         'cohort_matrix': analytics.get('cohort_matrix', []),
         'market_basket': analytics.get('market_basket', []),
         'low_stock_count': len(low_stock),
         'critical_stock_count': len(critical_stock)
+    }), 200
+
+
+@admin_bp.route('/api/v1/admin/customers/segments', methods=['GET'], endpoint='api_customer_segments')
+@admin_required
+def api_customer_segments():
+    """API endpoint providing individual customer profiles segmented by RFM behavior."""
+    segment_query = request.args.get('segment', 'all').strip().lower()
+    analytics = OrderService.get_analytics(days=30)
+    all_customers = analytics.get('rfm_customers', [])
+
+    if segment_query in ('at_risk', 'at-risk', 'churn'):
+        filtered = [c for c in all_customers if 'At Risk' in c.get('segment', '')]
+    elif segment_query in ('vip', 'champions'):
+        filtered = [c for c in all_customers if 'Champions' in c.get('segment', '')]
+    elif segment_query in ('loyal', 'regulars'):
+        filtered = [c for c in all_customers if 'Loyal' in c.get('segment', '')]
+    elif segment_query in ('promising', 'recent'):
+        filtered = [c for c in all_customers if 'Recent' in c.get('segment', '') or 'Promising' in c.get('segment', '')]
+    elif segment_query in ('hibernating', 'lost'):
+        filtered = [c for c in all_customers if 'Hibernating' in c.get('segment', '')]
+    else:
+        filtered = all_customers
+
+    return jsonify({
+        'success': True,
+        'count': len(filtered),
+        'total_customers': len(all_customers),
+        'segment': segment_query,
+        'customers': filtered
     }), 200
 
 
@@ -359,3 +407,40 @@ def api_delete_product(product_id: int):
     if success:
         return jsonify({'success': True, 'message': message, 'product_id': product_id}), 200
     return jsonify({'success': False, 'error': message}), 404
+
+
+@admin_bp.route('/api/v1/admin/traffic/pulse', methods=['POST'], endpoint='api_traffic_pulse')
+@admin_required
+def api_traffic_pulse():
+    """API endpoint to spawn one or more realistic quick-commerce orders on demand."""
+    from services.traffic_simulator_service import TrafficSimulatorService
+    data = request.get_json(silent=True) or {}
+    try:
+        count = int(data.get('count', 1))
+    except (ValueError, TypeError):
+        count = 1
+    count = max(1, min(count, 10))
+
+    orders = TrafficSimulatorService.pulse(count=count, status='Delivered')
+    if orders:
+        latest = orders[0]
+        return jsonify({
+            'success': True,
+            'message': f"Live order #{latest['order_id']} dispatched in {latest['city']} ({latest['duration']}m SLA • ₹{latest['total_amount']:.2f})",
+            'orders': orders,
+            'count': len(orders)
+        }), 200
+    return jsonify({'success': False, 'error': 'Failed to generate simulated order'}), 500
+
+
+@admin_bp.route('/api/v1/admin/traffic/catchup', methods=['POST'], endpoint='api_traffic_catchup')
+@admin_required
+def api_traffic_catchup():
+    """API endpoint to force daily activity catchup across missing dates."""
+    from services.traffic_simulator_service import TrafficSimulatorService
+    total = TrafficSimulatorService.ensure_daily_activity()
+    return jsonify({
+        'success': True,
+        'message': f"Activity catch-up complete. Generated {total} orders to bridge any calendar gaps.",
+        'orders_created': total
+    }), 200

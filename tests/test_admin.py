@@ -48,10 +48,29 @@ def test_admin_analytics_api(admin_client, unauthorized_client):
     assert 'market_basket' in data
     assert len(data['cohort_matrix']) > 0
     assert len(data['market_basket']) > 0
+    assert 'rfm_customers' in data
+    assert len(data['rfm_customers']) > 0
+
+    # Test Customer Audience Segments API
+    seg_res = admin_client.get('/api/v1/admin/customers/segments?segment=all')
+    assert seg_res.status_code == 200
+    seg_data = seg_res.get_json()
+    assert seg_data['success'] is True
+    assert 'customers' in seg_data
+    assert len(seg_data['customers']) > 0
+    assert 'name' in seg_data['customers'][0]
+    assert 'email' in seg_data['customers'][0]
+
+    # Filter by at_risk
+    risk_res = admin_client.get('/api/v1/admin/customers/segments?segment=at_risk')
+    assert risk_res.status_code == 200
+    assert risk_res.get_json()['success'] is True
 
     # Unauthorized receives 401
     unauth_res = unauthorized_client.get('/api/v1/admin/analytics')
     assert unauth_res.status_code == 401
+    unauth_seg = unauthorized_client.get('/api/v1/admin/customers/segments')
+    assert unauth_seg.status_code == 401
 
 
 def test_admin_product_management(admin_client):

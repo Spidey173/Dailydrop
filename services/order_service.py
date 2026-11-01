@@ -9,7 +9,7 @@ import logging
 from datetime import datetime
 from database import (
     get_db_connection, DatabaseError, get_all_orders_with_user_info,
-    clear_analytics_cache, get_unified_analytics
+    clear_analytics_cache, get_unified_analytics, get_customer_audiences
 )
 from utils import validate_order_data, sanitize_string
 
@@ -555,4 +555,13 @@ class OrderService:
         except DatabaseError as e:
             logger.error(f"Error retrieving analytics: {e}")
             return {}
+
+    @staticmethod
+    def get_customer_audiences(days: int = 30) -> List[Dict[str, Any]]:
+        """Retrieve customer audience profiles scored by RFM segmentation."""
+        try:
+            return get_customer_audiences(days=days)
+        except DatabaseError as e:
+            logger.error(f"Error retrieving customer audiences: {e}")
+            return []
 

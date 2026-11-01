@@ -631,6 +631,284 @@
             gap: 4px;
         }
 
+        .action-card-clickable {
+            cursor: pointer;
+        }
+
+        .action-card-clickable:hover {
+            border-color: rgba(255, 107, 74, 0.45);
+            box-shadow: 0 10px 28px rgba(255, 107, 74, 0.18);
+            transform: translateY(-3px);
+        }
+
+        .playbook-cta-btn {
+            background: rgba(255, 107, 74, 0.14);
+            color: #FF9E7D;
+            border: 1px solid rgba(255, 107, 74, 0.32);
+            border-radius: 6px;
+            padding: 4px 10px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .playbook-cta-btn:hover {
+            background: var(--sunset-btn-gradient);
+            color: #FFFFFF;
+            border-color: transparent;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(255, 107, 74, 0.35);
+        }
+
+        /* Customer Audience Intelligence Modal Styles */
+        .modal-box.extra-large {
+            max-width: 1140px;
+            width: 95%;
+            max-height: 88vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 0;
+            background: var(--bg-surface);
+            border: 1px solid var(--card-border);
+        }
+
+        .audience-modal-inner {
+            padding: 24px;
+            overflow-y: auto;
+            max-height: calc(88vh - 40px);
+        }
+
+        .audience-tabs-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 6px;
+            margin-bottom: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .audience-tab-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--text-secondary);
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .audience-tab-btn:hover {
+            background: rgba(255, 107, 74, 0.1);
+            color: #FF9E7D;
+            border-color: rgba(255, 107, 74, 0.25);
+        }
+
+        .audience-tab-btn.active {
+            background: var(--sunset-btn-gradient);
+            color: #FFFFFF;
+            border-color: transparent;
+            box-shadow: 0 4px 14px rgba(255, 107, 74, 0.3);
+        }
+
+        .audience-tab-badge {
+            background: rgba(0, 0, 0, 0.25);
+            padding: 2px 7px;
+            border-radius: 12px;
+            font-size: 0.72rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .audience-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 18px;
+            background: rgba(11, 10, 20, 0.6);
+            padding: 12px 16px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .audience-search-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            min-width: 250px;
+            position: relative;
+        }
+
+        .audience-search-box i {
+            position: absolute;
+            left: 12px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .audience-search-box input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #FFFFFF;
+            padding: 8px 12px 8px 34px;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .audience-search-box input:focus {
+            border-color: var(--accent-sunset);
+        }
+
+        .audience-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 0.82rem;
+        }
+
+        .audience-table th {
+            background: rgba(19, 18, 36, 0.95);
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            padding: 10px 14px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+
+        .audience-table td {
+            padding: 12px 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            color: var(--text-secondary);
+            vertical-align: middle;
+        }
+
+        .audience-table tbody tr {
+            transition: background 0.15s ease;
+        }
+
+        .audience-table tbody tr:hover {
+            background: rgba(255, 107, 74, 0.04);
+        }
+
+        .cust-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(255, 107, 74, 0.25), rgba(244, 63, 94, 0.18));
+            border: 1px solid rgba(255, 107, 74, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #FF9E7D;
+            font-weight: 700;
+            font-size: 0.82rem;
+            flex-shrink: 0;
+        }
+
+        .cust-segment-pill {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .cust-segment-pill.at-risk {
+            background: rgba(244, 63, 94, 0.14);
+            color: #FDA4AF;
+            border: 1px solid rgba(244, 63, 94, 0.3);
+        }
+
+        .cust-segment-pill.vip {
+            background: rgba(251, 191, 36, 0.14);
+            color: #FDE68A;
+            border: 1px solid rgba(251, 191, 36, 0.3);
+        }
+
+        .cust-segment-pill.loyal {
+            background: rgba(255, 107, 74, 0.14);
+            color: #FF9E7D;
+            border: 1px solid rgba(255, 107, 74, 0.3);
+        }
+
+        .cust-segment-pill.promising {
+            background: rgba(139, 92, 246, 0.14);
+            color: #DDD6FE;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .cust-segment-pill.hibernating {
+            background: rgba(148, 163, 184, 0.14);
+            color: #CBD5E1;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+        }
+
+        .btn-nudge-wa {
+            background: rgba(37, 211, 102, 0.12);
+            color: #25D366;
+            border: 1px solid rgba(37, 211, 102, 0.3);
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-nudge-wa:hover {
+            background: #25D366;
+            color: #000000;
+            border-color: #25D366;
+            transform: translateY(-1px);
+        }
+
+        .btn-nudge-mail {
+            background: rgba(255, 107, 74, 0.12);
+            color: #FF9E7D;
+            border: 1px solid rgba(255, 107, 74, 0.3);
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-nudge-mail:hover {
+            background: var(--sunset-btn-gradient);
+            color: #FFFFFF;
+            border-color: transparent;
+            transform: translateY(-1px);
+        }
+
         /* Operations Telemetry Strip */
         .ops-telemetry-banner {
             background: rgba(22, 20, 44, 0.7);
@@ -688,6 +966,43 @@
         .hub-pill .hub-sla {
             color: #FF9E7D;
             font-weight: 700;
+        }
+
+        .live-traffic-badge {
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.35);
+            color: #34D399;
+            padding: 4px 10px;
+            border-radius: 7px;
+            font-size: 0.74rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .btn-traffic {
+            background: linear-gradient(135deg, rgba(255, 107, 74, 0.22) 0%, rgba(245, 158, 11, 0.18) 100%);
+            border: 1px solid rgba(255, 107, 74, 0.45);
+            color: #FDBA74;
+            font-size: 0.76rem;
+            font-weight: 700;
+            padding: 5px 12px;
+            border-radius: 7px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.25s ease;
+        }
+
+        .btn-traffic:hover {
+            background: linear-gradient(135deg, rgba(255, 107, 74, 0.45) 0%, rgba(245, 158, 11, 0.35) 100%);
+            border-color: #FF6B4A;
+            color: #FFFFFF;
+            box-shadow: 0 0 14px rgba(255, 107, 74, 0.35);
+            transform: translateY(-1px);
         }
 
         .chart-meta-pill {
@@ -1682,7 +1997,7 @@
 
                 <div class="playbook-grid">
                     <!-- Action 1: RFM Churn Defense -->
-                    <div class="playbook-card">
+                    <div class="playbook-card action-card-clickable" onclick="openCustomerAudienceModal('at_risk')" title="Click to inspect and contact at-risk customers">
                         <div class="playbook-top">
                             <div class="playbook-icon">
                                 <i class="fa-solid fa-crown" style="color: #FBBF24;"></i>
@@ -1690,41 +2005,47 @@
                             <span class="playbook-badge warn">VIP Retention</span>
                         </div>
                         <div class="playbook-title">Bring Back At-Risk Champions</div>
-                        <div class="playbook-metric">32 Top Customers Inactive</div>
+                        <div class="playbook-metric" id="playbookAtRiskCount">
+                            {{ at_risk_count|default(47) }} Top Customers Inactive
+                        </div>
                         <div class="playbook-desc">
-                            Send WhatsApp reminders with a ₹150 store credit to loyal buyers who haven't placed an order in over 21 days.
+                            High-value buyers inactive for 21+ days. Click to view their full names, contact info, and send 1-click WhatsApp win-back credits.
                         </div>
                         <div class="playbook-footer">
                             <span class="playbook-tag">
-                                <i class="fa-solid fa-bolt"></i> +₹48,000 Expected Recovery
+                                <i class="fa-solid fa-bolt"></i> +₹{{ "{:,.0f}".format(at_risk_spend|default(48000)|float) }} at Stake
                             </span>
-                            <span style="font-size: 0.7rem; color: var(--text-muted);">High Priority</span>
+                            <button type="button" class="playbook-cta-btn" onclick="event.stopPropagation(); openCustomerAudienceModal('at_risk');">
+                                <i class="fa-solid fa-users-viewfinder"></i> View People &rarr;
+                            </button>
                         </div>
                     </div>
 
                     <!-- Action 2: Darkstore Fleet Scaling -->
-                    <div class="playbook-card">
+                    <div class="playbook-card action-card-clickable" onclick="scrollToElement('hubOperationsBanner')" title="Click to view Darkstore Hub telemetry">
                         <div class="playbook-top">
                             <div class="playbook-icon">
                                 <i class="fa-solid fa-stopwatch" style="color: #FF6B4A;"></i>
                             </div>
                             <span class="playbook-badge accent">Delivery Speed</span>
                         </div>
-                        <div class="playbook-title">Evening Dinner Rush Capacity</div>
+                        <div class="playbook-title">Evening Peak Dispatch Auto-Scale</div>
                         <div class="playbook-metric">6:00 PM &ndash; 9:00 PM Peak</div>
                         <div class="playbook-desc">
-                            Add 35% more packing staff and rider batches in Bangalore &amp; Delhi to protect 98.4% on-time benchmark.
+                            Peak evening rush across Bangalore &amp; Delhi dark stores. Pre-deploy +35% picker capacity & multi-drop rider batching to protect 98.4% SLA.
                         </div>
                         <div class="playbook-footer">
                             <span class="playbook-tag">
-                                <i class="fa-solid fa-clock"></i> 7.2 Min Average Time
+                                <i class="fa-solid fa-clock"></i> 7.24 Mins Avg Dispatch
                             </span>
-                            <span style="font-size: 0.7rem; color: var(--text-muted);">Store Operations</span>
+                            <button type="button" class="playbook-cta-btn" onclick="event.stopPropagation(); scrollToElement('hubOperationsBanner');">
+                                <i class="fa-solid fa-truck-fast"></i> Inspect Hubs &rarr;
+                            </button>
                         </div>
                     </div>
 
                     <!-- Action 3: 80/20 Inventory Allocation -->
-                    <div class="playbook-card">
+                    <div class="playbook-card action-card-clickable" onclick="switchTab('tabCatalog')" title="Click to inspect Class A catalog inventory">
                         <div class="playbook-top">
                             <div class="playbook-icon">
                                 <i class="fa-solid fa-boxes-stacked" style="color: #FBBF24;"></i>
@@ -1732,20 +2053,24 @@
                             <span class="playbook-badge warn">80/20 Inventory</span>
                         </div>
                         <div class="playbook-title">Restock Priority Items</div>
-                        <div class="playbook-metric">Top 18 SKUs Drive 80% Sales</div>
+                        <div class="playbook-metric">
+                            Top {{ (abc_summary[0].count if abc_summary else 18)|default(18) }} SKUs Drive 80% Sales
+                        </div>
                         <div class="playbook-desc">
-                            Keep extra buffer stock of top cold drinks and dairy. Avoid over-ordering slow movers to free up working capital.
+                            Maintain strict 3.5-day safety buffer on core beverages & dairy. Restrict capital replenishment on slow movers.
                         </div>
                         <div class="playbook-footer">
                             <span class="playbook-tag">
                                 <i class="fa-solid fa-coins"></i> +24% Capital Velocity
                             </span>
-                            <span style="font-size: 0.7rem; color: var(--text-muted);">Procurement</span>
+                            <button type="button" class="playbook-cta-btn" onclick="event.stopPropagation(); switchTab('tabCatalog');">
+                                <i class="fa-solid fa-boxes-stacked"></i> View Catalog &rarr;
+                            </button>
                         </div>
                     </div>
 
                     <!-- Action 4: Basket Bundling -->
-                    <div class="playbook-card">
+                    <div class="playbook-card action-card-clickable" onclick="scrollToElement('marketBasketCard')" title="Click to inspect frequently bought combos">
                         <div class="playbook-top">
                             <div class="playbook-icon">
                                 <i class="fa-solid fa-cart-shopping" style="color: #F43F5E;"></i>
@@ -1753,22 +2078,30 @@
                             <span class="playbook-badge rose">Cross-Selling</span>
                         </div>
                         <div class="playbook-title">1-Click Checkout Combos</div>
-                        <div class="playbook-metric">7.6x Higher Co-Purchase</div>
+                        <div class="playbook-metric">
+                            {{ (market_basket[0].lift if market_basket else 7.62)|default(7.62) }}x Association Lift
+                        </div>
                         <div class="playbook-desc">
-                            Prompt customers at checkout with frequent combos (e.g. Pepsi + Sprite or Badam Milk + Sting) to expand basket depth.
+                            {% if market_basket and market_basket|length > 0 %}
+                            Top co-purchase: <strong>{{ market_basket[0].product_a|truncate(20) }}</strong> + <strong>{{ market_basket[0].product_b|truncate(20) }}</strong>. Prompt at cart to increase basket depth.
+                            {% else %}
+                            Prompt customers at checkout with frequent combos to expand average basket depth.
+                            {% endif %}
                         </div>
                         <div class="playbook-footer">
                             <span class="playbook-tag">
-                                <i class="fa-solid fa-chart-line"></i> +₹65 More Per Basket
+                                <i class="fa-solid fa-chart-line"></i> +₹65 Target AOV Lift
                             </span>
-                            <span style="font-size: 0.7rem; color: var(--text-muted);">Checkout Boost</span>
+                            <button type="button" class="playbook-cta-btn" onclick="event.stopPropagation(); scrollToElement('marketBasketCard');">
+                                <i class="fa-solid fa-basket-shopping"></i> View Combos &rarr;
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Quick-Commerce Operations & Hub SLA Strip -->
-            <div class="ops-telemetry-banner">
+            <div class="ops-telemetry-banner" id="hubOperationsBanner">
                 <div class="ops-left">
                     <span class="sla-gauge-badge">
                         <i class="fa-solid fa-clock"></i> 7.24 MINS AVG TIME
@@ -1792,6 +2125,14 @@
                     <span class="hub-pill">Hyderabad: <strong>419 orders</strong> (<span class="hub-sla">96.9%</span>)</span>
                     <span class="hub-pill">Pune: <strong>266 orders</strong> (<span class="hub-sla">97.0%</span>)</span>
                     {% endfor %}
+                </div>
+                <div class="ops-actions" style="display: flex; align-items: center; gap: 8px;">
+                    <span class="live-traffic-badge" title="Background traffic heartbeat keeps order volume fresh 24/7">
+                        <span class="pulse-dot"></span> Traffic Engine: LIVE
+                    </span>
+                    <button class="btn btn-traffic" id="trafficPulseBtn" onclick="triggerTrafficPulse(this)" title="Instantly spawn a live simulated order in Neon PostgreSQL">
+                        <i class="fa-solid fa-bolt"></i> <span>Spawn Live Order</span>
+                    </button>
                 </div>
             </div>
 
@@ -1833,11 +2174,11 @@
                             <i class="fa-solid fa-user-group" style="color: var(--accent-peach);"></i>
                             Customer Retention Segments
                         </h3>
-                        <span class="chart-meta-pill">
-                            Loyalty Breakdown
-                        </span>
+                        <button type="button" class="playbook-cta-btn" onclick="openCustomerAudienceModal('all')" style="font-size: 0.72rem; padding: 3px 8px;">
+                            <i class="fa-solid fa-users"></i> View People &rarr;
+                        </button>
                     </div>
-                    <div class="trio-canvas-box">
+                    <div class="trio-canvas-box" onclick="openCustomerAudienceModal('all')" style="cursor: pointer;" title="Click to view all segmented customers">
                         <canvas id="rfmSegmentsChart"></canvas>
                         <div class="donut-center-badge">
                             <span class="donut-val">{{ stats.total_users|default(252) }}</span>
@@ -1845,17 +2186,17 @@
                         </div>
                     </div>
                     <div class="trio-legend-stats">
-                        <div class="legend-row">
+                        <div class="legend-row" onclick="openCustomerAudienceModal('vip')" style="cursor: pointer;" title="Click to inspect VIP Champions">
                             <span class="legend-label"><span class="legend-dot" style="background: #FF6B4A;"></span> VIP Champions (High Spend)</span>
-                            <strong>35 users (38% of sales)</strong>
+                            <strong>{{ vip_count|default(35) }} users &rarr;</strong>
                         </div>
-                        <div class="legend-row">
+                        <div class="legend-row" onclick="openCustomerAudienceModal('loyal')" style="cursor: pointer;" title="Click to inspect Loyal Regulars">
                             <span class="legend-label"><span class="legend-dot" style="background: #FBBF24;"></span> Loyal Regulars (Frequent)</span>
-                            <strong>68 users (Steady)</strong>
+                            <strong>{{ (loyal_customers|default([])|length)|default(68) }} users &rarr;</strong>
                         </div>
-                        <div class="legend-row">
-                            <span class="legend-label"><span class="legend-dot" style="background: #F43F5E;"></span> At-Risk Customers (Needs Win-Back)</span>
-                            <strong>47 users (Inactive)</strong>
+                        <div class="legend-row" onclick="openCustomerAudienceModal('at_risk')" style="cursor: pointer;" title="Click to inspect At-Risk Customers needing win-back">
+                            <span class="legend-label"><span class="legend-dot" style="background: #F43F5E;"></span> At-Risk (Needs Win-Back)</span>
+                            <strong style="color: #FDA4AF;">{{ at_risk_count|default(47) }} users &rarr;</strong>
                         </div>
                     </div>
                 </div>
@@ -2027,7 +2368,7 @@
                 </div>
 
                 <!-- 2. Market Basket Co-Purchase Affinity Matrix -->
-                <div class="intel-card">
+                <div class="intel-card" id="marketBasketCard">
                     <div class="chart-header">
                         <div>
                             <h3>
@@ -2356,6 +2697,118 @@
 
     </div>
 
+    <!-- Embedded JSON Data for High-Speed Client-Side Filtering -->
+    <script id="customer-audience-json" type="application/json">{{ rfm_customers|default([])|tojson|safe }}</script>
+
+    <!-- ==================================================================== -->
+    <!-- CUSTOMER AUDIENCE & RETENTION ENGINE MODAL                            -->
+    <!-- ==================================================================== -->
+    <div class="modal-overlay" id="customerAudienceModal" onclick="handleAudienceOverlayClick(event)">
+        <div class="modal-box extra-large">
+            <div class="audience-modal-inner">
+                <div class="modal-header" style="margin-bottom: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 14px;">
+                    <div>
+                        <h2 style="font-size: 1.25rem; font-weight: 800; color: #FFFFFF; display: flex; align-items: center; gap: 10px;">
+                            <i class="fa-solid fa-users" style="color: var(--accent-sunset);"></i>
+                            Customer Retention &amp; Audience Intelligence
+                            <span class="audience-tab-badge" id="audienceTotalCountBadge" style="background: rgba(255, 107, 74, 0.2); color: #FF9E7D; font-size: 0.78rem;">
+                                {{ rfm_customers|default([])|length }} Customers Scored
+                            </span>
+                        </h2>
+                        <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 4px;">
+                            Real-time customer directory scored via Recency, Frequency &amp; Monetary window functions (<code style="color: var(--accent-peach);">NTILE(5)</code>) on Neon PostgreSQL. Take direct 1-click marketing action on high-value buyers.
+                        </p>
+                    </div>
+                    <button class="modal-close" onclick="closeCustomerAudienceModal()">&times;</button>
+                </div>
+
+                <!-- Segment Filter Tabs -->
+                <div class="audience-tabs-bar">
+                    <button class="audience-tab-btn active" id="audTab_at_risk" onclick="filterAudienceSegment('at_risk')">
+                        <i class="fa-solid fa-triangle-exclamation" style="color: #FDA4AF;"></i>
+                        At-Risk Champions (Win-Back)
+                        <span class="audience-tab-badge" id="badgeCount_at_risk">{{ at_risk_count|default(0) }}</span>
+                    </button>
+                    <button class="audience-tab-btn" id="audTab_vip" onclick="filterAudienceSegment('vip')">
+                        <i class="fa-solid fa-crown" style="color: #FDE68A;"></i>
+                        VIP Champions
+                        <span class="audience-tab-badge" id="badgeCount_vip">{{ vip_count|default(0) }}</span>
+                    </button>
+                    <button class="audience-tab-btn" id="audTab_loyal" onclick="filterAudienceSegment('loyal')">
+                        <i class="fa-solid fa-heart" style="color: #FF9E7D;"></i>
+                        Loyal Regulars
+                        <span class="audience-tab-badge" id="badgeCount_loyal">{{ (loyal_customers|default([])|length)|default(0) }}</span>
+                    </button>
+                    <button class="audience-tab-btn" id="audTab_promising" onclick="filterAudienceSegment('promising')">
+                        <i class="fa-solid fa-seedling" style="color: #DDD6FE;"></i>
+                        Recent / Promising
+                        <span class="audience-tab-badge" id="badgeCount_promising">--</span>
+                    </button>
+                    <button class="audience-tab-btn" id="audTab_hibernating" onclick="filterAudienceSegment('hibernating')">
+                        <i class="fa-solid fa-moon" style="color: #CBD5E1;"></i>
+                        Hibernating / Lost
+                        <span class="audience-tab-badge" id="badgeCount_hibernating">--</span>
+                    </button>
+                    <button class="audience-tab-btn" id="audTab_all" onclick="filterAudienceSegment('all')">
+                        <i class="fa-solid fa-layer-group"></i>
+                        All Customers
+                        <span class="audience-tab-badge" id="badgeCount_all">{{ rfm_customers|default([])|length }}</span>
+                    </button>
+                </div>
+
+                <!-- Interactive Search & Action Toolbar -->
+                <div class="audience-toolbar">
+                    <div class="audience-search-box">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="audienceSearchInput" placeholder="Filter by customer name, email, phone, or city..." onkeyup="filterAudienceTable()">
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                        <select id="audienceCityFilter" class="select-control" onchange="filterAudienceTable()" style="padding: 7px 12px; font-size: 0.8rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #FFFFFF; border-radius: 8px;">
+                            <option value="all">All Metro Hubs</option>
+                            <option value="Bangalore">Bangalore</option>
+                            <option value="Delhi NCR">Delhi NCR</option>
+                            <option value="Mumbai">Mumbai</option>
+                            <option value="Hyderabad">Hyderabad</option>
+                            <option value="Pune">Pune</option>
+                        </select>
+                        <button type="button" class="btn btn-outline btn-sm" onclick="exportAudienceCsv()" title="Download current segment audience as a CSV spreadsheet">
+                            <i class="fa-solid fa-file-csv"></i> Export Audience CSV
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Customer Audience Data Table -->
+                <div class="table-responsive" style="max-height: 480px; overflow-y: auto; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 10px;">
+                    <table class="audience-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 250px;">Customer Profile</th>
+                                <th style="width: 220px;">Contact &amp; Hub</th>
+                                <th style="width: 140px; text-align: right;">Total GMV</th>
+                                <th style="width: 110px; text-align: center;">Orders</th>
+                                <th style="width: 130px; text-align: center;">Inactivity</th>
+                                <th style="width: 150px;">RFM Cluster</th>
+                                <th style="width: 170px; text-align: right;">1-Click Win-Back</th>
+                            </tr>
+                        </thead>
+                        <tbody id="audienceTableBody">
+                            <!-- Injected dynamically via renderAudienceTable() -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-size: 0.78rem; color: var(--text-muted); padding-top: 10px; border-top: 1px solid rgba(255, 255, 255, 0.06); flex-wrap: wrap; gap: 10px;">
+                    <span id="audienceFooterSummary">
+                        Showing <strong id="audienceVisibleCount" style="color: #FFFFFF;">0</strong> customers
+                    </span>
+                    <div style="display: flex; gap: 10px;">
+                        <button type="button" class="btn btn-outline btn-sm" onclick="closeCustomerAudienceModal()">Close Explorer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- ==================================================================== -->
     <!-- SQL ANALYTICS LAB MODAL (SHOWCASE HIGHLIGHT)                          -->
     <!-- ==================================================================== -->
@@ -2573,6 +3026,7 @@
             initAnalyticsCharts();
             initPagination();
             showSqlQuery('rfm');
+            updateAudienceBadges();
         });
 
         // ====================================================================
@@ -2999,6 +3453,287 @@ ORDER BY cp.cohort_month ASC, cp.month_number ASC;`
             const codeEl = document.getElementById('sqlCodeContainer');
             if (codeEl) {
                 codeEl.textContent = SQL_QUERIES[queryKey] || '-- Query not found';
+            }
+        }
+
+        // ====================================================================
+        // CUSTOMER AUDIENCE & RETENTION ENGINE CONTROLLER
+        // ====================================================================
+        let currentAudienceSegment = 'at_risk';
+        let rawAudienceList = [];
+
+        function getAudienceData() {
+            if (rawAudienceList.length === 0) {
+                try {
+                    const el = document.getElementById('customer-audience-json');
+                    rawAudienceList = el ? JSON.parse(el.textContent || '[]') : [];
+                } catch (e) {
+                    rawAudienceList = [];
+                }
+            }
+            return rawAudienceList;
+        }
+
+        function updateAudienceBadges() {
+            const list = getAudienceData();
+            const atRisk = list.filter(c => (c.segment || '').includes('At Risk'));
+            const vip = list.filter(c => (c.segment || '').includes('Champions'));
+            const loyal = list.filter(c => (c.segment || '').includes('Loyal'));
+            const promising = list.filter(c => (c.segment || '').includes('Recent') || (c.segment || '').includes('Promising'));
+            const hibernating = list.filter(c => (c.segment || '').includes('Hibernating'));
+
+            const setBadge = (id, count) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = count;
+            };
+
+            setBadge('badgeCount_at_risk', atRisk.length);
+            setBadge('badgeCount_vip', vip.length);
+            setBadge('badgeCount_loyal', loyal.length);
+            setBadge('badgeCount_promising', promising.length);
+            setBadge('badgeCount_hibernating', hibernating.length);
+            setBadge('badgeCount_all', list.length);
+
+            const totalBadge = document.getElementById('audienceTotalCountBadge');
+            if (totalBadge) totalBadge.textContent = `${list.length} Customers Scored`;
+
+            const playbookCount = document.getElementById('playbookAtRiskCount');
+            if (playbookCount) playbookCount.textContent = `${atRisk.length} Top Customers Inactive`;
+        }
+
+        function openCustomerAudienceModal(segment = 'at_risk') {
+            currentAudienceSegment = segment;
+            updateAudienceBadges();
+
+            // Set active tab button
+            document.querySelectorAll('.audience-tab-btn').forEach(btn => btn.classList.remove('active'));
+            const activeTab = document.getElementById('audTab_' + segment) || document.getElementById('audTab_all');
+            if (activeTab) activeTab.classList.add('active');
+
+            // Reset search & city inputs
+            const searchInput = document.getElementById('audienceSearchInput');
+            if (searchInput) searchInput.value = '';
+            const cityFilter = document.getElementById('audienceCityFilter');
+            if (cityFilter) cityFilter.value = 'all';
+
+            filterAudienceTable();
+            const modal = document.getElementById('customerAudienceModal');
+            if (modal) modal.classList.add('active');
+        }
+
+        function closeCustomerAudienceModal() {
+            const modal = document.getElementById('customerAudienceModal');
+            if (modal) modal.classList.remove('active');
+        }
+
+        function handleAudienceOverlayClick(e) {
+            if (e.target.id === 'customerAudienceModal') {
+                closeCustomerAudienceModal();
+            }
+        }
+
+        function filterAudienceSegment(segment) {
+            currentAudienceSegment = segment;
+            document.querySelectorAll('.audience-tab-btn').forEach(btn => btn.classList.remove('active'));
+            const activeTab = document.getElementById('audTab_' + segment);
+            if (activeTab) activeTab.classList.add('active');
+            filterAudienceTable();
+        }
+
+        function filterAudienceTable() {
+            const list = getAudienceData();
+            const search = (document.getElementById('audienceSearchInput')?.value || '').toLowerCase().trim();
+            const city = document.getElementById('audienceCityFilter')?.value || 'all';
+
+            const filtered = list.filter(c => {
+                // Segment match
+                let matchSegment = true;
+                const seg = c.segment || '';
+                if (currentAudienceSegment === 'at_risk') matchSegment = seg.includes('At Risk');
+                else if (currentAudienceSegment === 'vip') matchSegment = seg.includes('Champions');
+                else if (currentAudienceSegment === 'loyal') matchSegment = seg.includes('Loyal');
+                else if (currentAudienceSegment === 'promising') matchSegment = seg.includes('Recent') || seg.includes('Promising');
+                else if (currentAudienceSegment === 'hibernating') matchSegment = seg.includes('Hibernating');
+
+                if (!matchSegment) return false;
+
+                // City match
+                if (city !== 'all' && (c.city || '').toLowerCase() !== city.toLowerCase()) {
+                    return false;
+                }
+
+                // Search query match
+                if (search) {
+                    const text = `${c.name || ''} ${c.email || ''} ${c.phone || ''} ${c.city || ''}`.toLowerCase();
+                    if (!text.includes(search)) return false;
+                }
+
+                return true;
+            });
+
+            renderAudienceTable(filtered);
+        }
+
+        function renderAudienceTable(customers) {
+            const tbody = document.getElementById('audienceTableBody');
+            const countEl = document.getElementById('audienceVisibleCount');
+            if (countEl) countEl.textContent = customers.length;
+            if (!tbody) return;
+
+            if (customers.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                            <i class="fa-solid fa-user-slash" style="font-size: 2rem; color: rgba(255, 107, 74, 0.3); display: block; margin-bottom: 8px;"></i>
+                            No customer profiles found matching this segment and filter criteria.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            let html = '';
+            customers.forEach(c => {
+                const initials = (c.name || 'CU').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                const cleanPhone = (c.phone || '').replace(/[^0-9]/g, '');
+                const phoneParam = cleanPhone.length === 10 ? '91' + cleanPhone : cleanPhone;
+                const waMsg = encodeURIComponent(`Hi ${c.name}! 👋 We miss you at Daily Drop. Here is ₹150 OFF your next 10-minute grocery delivery with voucher WINBACK150! Shop your favorites here: ${window.location.origin}`);
+                const mailSubject = encodeURIComponent(`We miss you at Daily Drop! ₹150 Credit for ${c.name}`);
+                const mailBody = encodeURIComponent(`Hi ${c.name},\n\nWe noticed you haven't placed an order recently. We've added ₹150 store credit to your account! Use coupon WINBACK150 at checkout for instant 10-minute delivery.\n\nBest regards,\nDaily Drop Operations Team`);
+
+                let segClass = 'loyal';
+                let segLabel = c.segment || 'Loyal Regular';
+                if (segLabel.includes('At Risk')) segClass = 'at-risk';
+                else if (segLabel.includes('Champions')) segClass = 'vip';
+                else if (segLabel.includes('Recent') || segLabel.includes('Promising')) segClass = 'promising';
+                else if (segLabel.includes('Hibernating')) segClass = 'hibernating';
+
+                html += `
+                    <tr>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div class="cust-avatar">${initials}</div>
+                                <div>
+                                    <strong style="color: #FFFFFF; font-size: 0.88rem; display: block;">${c.name}</strong>
+                                    <span style="font-size: 0.72rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace;">ID: #DD-${c.user_id}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <a href="mailto:${c.email}" style="color: var(--accent-peach); text-decoration: none; font-size: 0.8rem; display: block;" title="Email customer">
+                                ${c.email}
+                            </a>
+                            <span style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 2px;">
+                                📞 ${c.phone || 'N/A'} • <span class="hub-pill" style="padding: 1px 6px; font-size: 0.68rem;">${c.city || 'Bangalore'}</span>
+                            </span>
+                        </td>
+                        <td style="text-align: right;">
+                            <strong style="color: #FF9E7D; font-family: 'JetBrains Mono', monospace; font-size: 0.88rem;">
+                                ₹${Number(c.total_spend || 0).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                            </strong>
+                            <span style="font-size: 0.72rem; color: var(--text-muted); display: block;">
+                                AOV: ₹${Number(c.avg_order_value || 0).toFixed(0)}
+                            </span>
+                        </td>
+                        <td style="text-align: center;">
+                            <span class="tab-badge" style="background: rgba(255, 255, 255, 0.06); font-family: 'JetBrains Mono', monospace; padding: 2px 7px;">
+                                ${c.total_orders || 0}
+                            </span>
+                        </td>
+                        <td style="text-align: center;">
+                            ${c.recency_days >= 21 ? `
+                                <span style="display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; background: rgba(244, 63, 94, 0.16); color: #FDA4AF; border: 1px solid rgba(244, 63, 94, 0.3);">
+                                    ${c.recency_days}d inactive
+                                </span>
+                            ` : `
+                                <span style="font-size: 0.78rem; color: var(--text-muted);">
+                                    ${c.recency_days}d ago
+                                </span>
+                            `}
+                        </td>
+                        <td>
+                            <span class="cust-segment-pill ${segClass}">
+                                ${segClass === 'at-risk' ? '<i class="fa-solid fa-triangle-exclamation"></i>' : ''}
+                                ${segClass === 'vip' ? '<i class="fa-solid fa-crown"></i>' : ''}
+                                ${c.segment}
+                            </span>
+                        </td>
+                        <td style="text-align: right;">
+                            <div style="display: inline-flex; align-items: center; gap: 6px;">
+                                <a href="https://wa.me/${phoneParam}?text=${waMsg}" target="_blank" class="btn-nudge-wa" title="Send WhatsApp Win-Back Credit">
+                                    <i class="fa-brands fa-whatsapp"></i> Nudge
+                                </a>
+                                <a href="mailto:${c.email}?subject=${mailSubject}&body=${mailBody}" class="btn-nudge-mail" title="Send Email Offer">
+                                    <i class="fa-regular fa-envelope"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            tbody.innerHTML = html;
+        }
+
+        function exportAudienceCsv() {
+            const list = getAudienceData();
+            const search = (document.getElementById('audienceSearchInput')?.value || '').toLowerCase().trim();
+            const city = document.getElementById('audienceCityFilter')?.value || 'all';
+
+            const filtered = list.filter(c => {
+                let matchSegment = true;
+                const seg = c.segment || '';
+                if (currentAudienceSegment === 'at_risk') matchSegment = seg.includes('At Risk');
+                else if (currentAudienceSegment === 'vip') matchSegment = seg.includes('Champions');
+                else if (currentAudienceSegment === 'loyal') matchSegment = seg.includes('Loyal');
+                else if (currentAudienceSegment === 'promising') matchSegment = seg.includes('Recent') || seg.includes('Promising');
+                else if (currentAudienceSegment === 'hibernating') matchSegment = seg.includes('Hibernating');
+                if (!matchSegment) return false;
+                if (city !== 'all' && (c.city || '').toLowerCase() !== city.toLowerCase()) return false;
+                if (search && !`${c.name || ''} ${c.email || ''} ${c.phone || ''} ${c.city || ''}`.toLowerCase().includes(search)) return false;
+                return true;
+            });
+
+            let csv = 'Customer ID,Name,Email,Phone,City,Total Orders,Total Spend (INR),AOV (INR),Days Inactive,Segment,Last Order Date\n';
+            filtered.forEach(c => {
+                const clean = (val) => `"${String(val || '').replace(/"/g, '""')}"`;
+                csv += [
+                    clean(c.user_id),
+                    clean(c.name),
+                    clean(c.email),
+                    clean(c.phone),
+                    clean(c.city),
+                    c.total_orders || 0,
+                    (c.total_spend || 0).toFixed(2),
+                    (c.avg_order_value || 0).toFixed(2),
+                    c.recency_days || 0,
+                    clean(c.segment),
+                    clean(c.last_order_str)
+                ].join(',') + '\n';
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `dailydrop_audience_${currentAudienceSegment}_${new Date().toISOString().slice(0, 10)}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            showToast(`Exported ${filtered.length} customers to CSV successfully!`);
+        }
+
+        function scrollToElement(elementId) {
+            const el = document.getElementById(elementId);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                el.style.transition = 'box-shadow 0.4s ease, border-color 0.4s ease';
+                el.style.boxShadow = '0 0 24px rgba(255, 107, 74, 0.45)';
+                el.style.borderColor = 'var(--accent-sunset)';
+                setTimeout(() => {
+                    el.style.boxShadow = '';
+                    el.style.borderColor = '';
+                }, 2200);
             }
         }
 
@@ -3571,6 +4306,50 @@ ORDER BY cp.cohort_month ASC, cp.month_number ASC;`
             } catch(e) {
                 console.error(e);
                 showToast('Failed to export JSON: ' + e.message, true);
+            }
+        }
+
+        // 1-Click Autonomous Traffic Simulator Pulse
+        async function triggerTrafficPulse(btn) {
+            if (!btn) btn = document.getElementById('trafficPulseBtn');
+            const originalHtml = btn ? btn.innerHTML : '';
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Dispatching...</span>`;
+            }
+
+            try {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                const res = await fetch('/api/v1/admin/traffic/pulse', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken || ''
+                    },
+                    body: JSON.stringify({ count: 1 })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message || '⚡ Quick-commerce order dispatched!');
+                    const navCounter = document.getElementById('navOrderCount');
+                    if (navCounter) {
+                        const cur = parseInt(navCounter.textContent.replace(/,/g, '')) || 0;
+                        navCounter.textContent = (cur + (data.count || 1)).toLocaleString();
+                    }
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 900);
+                } else {
+                    showToast(data.error || 'Failed to spawn order', true);
+                }
+            } catch (err) {
+                console.error('Traffic pulse error:', err);
+                showToast('Network error spawning live order', true);
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = originalHtml;
+                }
             }
         }
 

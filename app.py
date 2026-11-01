@@ -152,6 +152,9 @@ def create_app(config_name: Optional[str] = None) -> Flask:
         try:
             init_database()
             logger.info("Neon PostgreSQL Database initialized successfully")
+            if not app.config.get('TESTING') and os.getenv('FLASK_ENV') != 'testing':
+                from services.traffic_simulator_service import TrafficSimulatorService
+                TrafficSimulatorService.start_daemon(app)
         except DatabaseError as e:
             logger.error(f"Failed to initialize Neon PostgreSQL database: {e}")
 

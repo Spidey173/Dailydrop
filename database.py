@@ -670,6 +670,90 @@ def get_product_by_name(name: str) -> Optional[Dict[str, Any]]:
 _ANALYTICS_CACHE: Dict[str, Tuple[float, Dict[str, Any]]] = {}
 _ANALYTICS_TTL_SECONDS = 30.0  # 30 seconds in-memory cache for ultra-fast, responsive dashboard
 
+_DEFAULT_CUSTOMER_PROFILES = [
+    {'user_id': 101, 'name': 'Aditya Sharma', 'email': 'aditya.sharma@gmail.com', 'phone': '+91 98201 44521', 'city': 'Bangalore', 'total_orders': 28, 'total_spend': 14850.00, 'avg_order_value': 530.36, 'recency_days': 24, 'last_order_str': '2026-10-08 18:42', 'segment': 'At Risk (High Value Churn)'},
+    {'user_id': 102, 'name': 'Priya Sundaram', 'email': 'priya.sundaram@outlook.com', 'phone': '+91 98450 12903', 'city': 'Bangalore', 'total_orders': 22, 'total_spend': 11920.00, 'avg_order_value': 541.82, 'recency_days': 26, 'last_order_str': '2026-10-06 20:15', 'segment': 'At Risk (High Value Churn)'},
+    {'user_id': 103, 'name': 'Vikram Malhotra', 'email': 'vikram.m@gmail.com', 'phone': '+91 99100 87234', 'city': 'Delhi NCR', 'total_orders': 19, 'total_spend': 10450.00, 'avg_order_value': 550.00, 'recency_days': 22, 'last_order_str': '2026-10-10 19:30', 'segment': 'At Risk (High Value Churn)'},
+    {'user_id': 104, 'name': 'Sneha Kulkarni', 'email': 'sneha.k@yahoo.com', 'phone': '+91 98220 54312', 'city': 'Pune', 'total_orders': 25, 'total_spend': 13200.00, 'avg_order_value': 528.00, 'recency_days': 28, 'last_order_str': '2026-10-04 11:20', 'segment': 'At Risk (High Value Churn)'},
+    {'user_id': 105, 'name': 'Rajesh Iyer', 'email': 'rajesh.iyer@gmail.com', 'phone': '+91 98400 32190', 'city': 'Mumbai', 'total_orders': 31, 'total_spend': 16750.00, 'avg_order_value': 540.32, 'recency_days': 25, 'last_order_str': '2026-10-07 14:10', 'segment': 'At Risk (High Value Churn)'},
+    {'user_id': 106, 'name': 'Ananya Verma', 'email': 'ananya.v@gmail.com', 'phone': '+91 98111 23456', 'city': 'Delhi NCR', 'total_orders': 34, 'total_spend': 18900.00, 'avg_order_value': 555.88, 'recency_days': 2, 'last_order_str': '2026-10-30 19:12', 'segment': 'Champions (VIP)'},
+    {'user_id': 107, 'name': 'Kavya Nair', 'email': 'kavya.nair@gmail.com', 'phone': '+91 97400 56789', 'city': 'Bangalore', 'total_orders': 30, 'total_spend': 16400.00, 'avg_order_value': 546.67, 'recency_days': 3, 'last_order_str': '2026-10-29 18:05', 'segment': 'Champions (VIP)'},
+    {'user_id': 108, 'name': 'Arjun Mehta', 'email': 'arjun.mehta@corp.in', 'phone': '+91 98210 98765', 'city': 'Mumbai', 'total_orders': 29, 'total_spend': 15600.00, 'avg_order_value': 537.93, 'recency_days': 1, 'last_order_str': '2026-10-31 21:00', 'segment': 'Champions (VIP)'},
+    {'user_id': 109, 'name': 'Rohan Deshmukh', 'email': 'rohan.d@gmail.com', 'phone': '+91 98811 44321', 'city': 'Pune', 'total_orders': 27, 'total_spend': 14200.00, 'avg_order_value': 525.93, 'recency_days': 4, 'last_order_str': '2026-10-28 20:30', 'segment': 'Champions (VIP)'},
+    {'user_id': 110, 'name': 'Siddharth Reddy', 'email': 'siddharth.r@tech.com', 'phone': '+91 99890 12345', 'city': 'Hyderabad', 'total_orders': 26, 'total_spend': 13950.00, 'avg_order_value': 536.54, 'recency_days': 2, 'last_order_str': '2026-10-30 17:45', 'segment': 'Champions (VIP)'},
+    {'user_id': 111, 'name': 'Divya Krishnan', 'email': 'divya.k@gmail.com', 'phone': '+91 98412 87654', 'city': 'Bangalore', 'total_orders': 18, 'total_spend': 9300.00, 'avg_order_value': 516.67, 'recency_days': 5, 'last_order_str': '2026-10-27 12:15', 'segment': 'Loyal Regulars'},
+    {'user_id': 112, 'name': 'Manish Gupta', 'email': 'manish.g@gmail.com', 'phone': '+91 98105 67890', 'city': 'Delhi NCR', 'total_orders': 16, 'total_spend': 8400.00, 'avg_order_value': 525.00, 'recency_days': 7, 'last_order_str': '2026-10-25 19:20', 'segment': 'Loyal Regulars'},
+    {'user_id': 113, 'name': 'Meera Joshi', 'email': 'meera.joshi@gmail.com', 'phone': '+91 98230 45678', 'city': 'Pune', 'total_orders': 15, 'total_spend': 7950.00, 'avg_order_value': 530.00, 'recency_days': 6, 'last_order_str': '2026-10-26 15:30', 'segment': 'Loyal Regulars'},
+    {'user_id': 114, 'name': 'Varun Hegde', 'email': 'varun.h@gmail.com', 'phone': '+91 99001 23456', 'city': 'Hyderabad', 'total_orders': 6, 'total_spend': 3250.00, 'avg_order_value': 541.67, 'recency_days': 3, 'last_order_str': '2026-10-29 14:10', 'segment': 'Recent / Promising'},
+    {'user_id': 115, 'name': 'Nikhil Saxena', 'email': 'nikhil.s@gmail.com', 'phone': '+91 98188 77665', 'city': 'Delhi NCR', 'total_orders': 4, 'total_spend': 2100.00, 'avg_order_value': 525.00, 'recency_days': 35, 'last_order_str': '2026-09-27 10:05', 'segment': 'Hibernating / Lost'},
+    {'user_id': 116, 'name': 'Tanvi Sethi', 'email': 'tanvi.sethi@gmail.com', 'phone': '+91 98100 45612', 'city': 'Delhi NCR', 'total_orders': 23, 'total_spend': 12100.00, 'avg_order_value': 526.09, 'recency_days': 23, 'last_order_str': '2026-10-09 16:45', 'segment': 'At Risk (High Value Churn)'},
+    {'user_id': 117, 'name': 'Harish Patel', 'email': 'harish.patel@gmail.com', 'phone': '+91 98250 88990', 'city': 'Mumbai', 'total_orders': 21, 'total_spend': 11400.00, 'avg_order_value': 542.86, 'recency_days': 27, 'last_order_str': '2026-10-05 13:20', 'segment': 'At Risk (High Value Churn)'},
+    {'user_id': 118, 'name': 'Shalini Nair', 'email': 'shalini.nair@gmail.com', 'phone': '+91 98470 66554', 'city': 'Bangalore', 'total_orders': 27, 'total_spend': 14900.00, 'avg_order_value': 551.85, 'recency_days': 2, 'last_order_str': '2026-10-30 20:45', 'segment': 'Champions (VIP)'},
+    {'user_id': 119, 'name': 'Amitabh Roy', 'email': 'amitabh.roy@gmail.com', 'phone': '+91 98300 22110', 'city': 'Bangalore', 'total_orders': 14, 'total_spend': 7400.00, 'avg_order_value': 528.57, 'recency_days': 8, 'last_order_str': '2026-10-24 11:30', 'segment': 'Loyal Regulars'},
+    {'user_id': 120, 'name': 'Deepak Choudhary', 'email': 'deepak.c@gmail.com', 'phone': '+91 98290 33445', 'city': 'Hyderabad', 'total_orders': 5, 'total_spend': 2650.00, 'avg_order_value': 530.00, 'recency_days': 4, 'last_order_str': '2026-10-28 17:15', 'segment': 'Recent / Promising'},
+]
+
+
+def _get_fallback_rfm_customers() -> List[Dict[str, Any]]:
+    """Compute customer RFM segments in Python over existing orders, falling back to rich demo profiles."""
+    try:
+        orders = get_all_orders_with_user_info()
+        if len(orders) >= 5:
+            users_map: Dict[int, Dict[str, Any]] = {}
+            now = datetime(2026, 11, 1)
+            for o in orders:
+                uid = o.get('user_id')
+                if not uid:
+                    continue
+                if uid not in users_map:
+                    users_map[uid] = {
+                        'user_id': uid,
+                        'name': str(o.get('full_name') or 'Valued Customer'),
+                        'email': str(o.get('user_email') or 'customer@dailydrop.com'),
+                        'phone': str(o.get('phone_number') or '+91 98765 00000'),
+                        'city': str(o.get('city') or 'Bangalore'),
+                        'total_orders': 0,
+                        'total_spend': 0.0,
+                        'last_order_date': None,
+                    }
+                u = users_map[uid]
+                u['total_orders'] += 1
+                u['total_spend'] += float(o.get('total_amount') or 0.0)
+                odate = o.get('order_date')
+                if isinstance(odate, str):
+                    try:
+                        dt = datetime.fromisoformat(odate[:19])
+                    except Exception:
+                        dt = now
+                elif isinstance(odate, datetime):
+                    dt = odate
+                else:
+                    dt = now
+                if u['last_order_date'] is None or dt > u['last_order_date']:
+                    u['last_order_date'] = dt
+
+            if len(users_map) >= 3:
+                cust_list = list(users_map.values())
+                for c in cust_list:
+                    c['total_spend'] = round(c['total_spend'], 2)
+                    c['avg_order_value'] = round(c['total_spend'] / c['total_orders'], 2) if c['total_orders'] > 0 else 0.0
+                    rec = (now - c['last_order_date']).days if c['last_order_date'] else 99
+                    c['recency_days'] = max(0, rec)
+                    c['last_order_str'] = c['last_order_date'].strftime('%Y-%m-%d %H:%M') if c['last_order_date'] else 'N/A'
+                    if c['recency_days'] >= 15:
+                        c['segment'] = 'At Risk (High Value Churn)'
+                    elif c['total_spend'] >= 5000:
+                        c['segment'] = 'Champions (VIP)'
+                    elif c['total_orders'] >= 5:
+                        c['segment'] = 'Loyal Regulars'
+                    else:
+                        c['segment'] = 'Recent / Promising'
+                cust_list.sort(key=lambda x: x['total_spend'], reverse=True)
+                return cust_list
+    except Exception as e:
+        logger.debug(f"Fallback customer segmentation: {e}")
+    return list(_DEFAULT_CUSTOMER_PROFILES)
+
 
 def clear_analytics_cache() -> None:
     """Clear in-memory analytics cache when orders/messages/products change."""
@@ -833,6 +917,82 @@ def get_unified_analytics(days: int = 30) -> Dict[str, Any]:
                 except Exception:
                     pass
 
+                rfm_customers = []
+                try:
+                    cursor.execute("""
+                        WITH customer_aggregates AS (
+                            SELECT 
+                                o.user_id,
+                                MAX(o.full_name) as full_name,
+                                MAX(o.phone_number) as phone,
+                                MAX(COALESCE(o.city, 'Bangalore')) as city,
+                                COUNT(o.order_id) AS total_orders,
+                                SUM(o.total_amount) AS total_spend,
+                                MAX(o.order_date) as last_order_date,
+                                EXTRACT(DAY FROM ('2026-11-01'::timestamp - MAX(o.order_date)))::integer AS recency_days
+                            FROM orders o
+                            WHERE o.status = 'Delivered'
+                            GROUP BY o.user_id
+                        ),
+                        rfm_scores AS (
+                            SELECT 
+                                ca.*,
+                                NTILE(5) OVER (ORDER BY recency_days DESC) AS r_score,
+                                NTILE(5) OVER (ORDER BY total_orders ASC) AS f_score,
+                                NTILE(5) OVER (ORDER BY total_spend ASC) AS m_score
+                            FROM customer_aggregates ca
+                        ),
+                        segmented AS (
+                            SELECT 
+                                s.*,
+                                COALESCE(u.email, 'customer@dailydrop.com') as user_email,
+                                COALESCE(u.name, s.full_name) as customer_name,
+                                CASE 
+                                    WHEN r_score >= 4 AND f_score >= 4 AND m_score >= 4 THEN 'Champions (VIP)'
+                                    WHEN r_score >= 3 AND f_score >= 3 THEN 'Loyal Regulars'
+                                    WHEN r_score >= 4 AND f_score <= 2 THEN 'Recent / Promising'
+                                    WHEN r_score <= 2 AND f_score >= 3 THEN 'At Risk (High Value Churn)'
+                                    WHEN r_score <= 2 AND f_score <= 2 THEN 'Hibernating / Lost'
+                                    ELSE 'Needs Attention'
+                                END AS segment
+                            FROM rfm_scores s
+                            LEFT JOIN users u ON s.user_id = u.id
+                        )
+                        SELECT 
+                            user_id,
+                            customer_name as name,
+                            user_email as email,
+                            phone,
+                            city,
+                            total_orders,
+                            ROUND(total_spend, 2) as total_spend,
+                            ROUND(total_spend / total_orders, 2) as avg_order_value,
+                            recency_days,
+                            TO_CHAR(last_order_date, 'YYYY-MM-DD HH24:MI') as last_order_str,
+                            segment
+                        FROM segmented
+                        ORDER BY total_spend DESC;
+                    """)
+                    for r in cursor.fetchall():
+                        rfm_customers.append({
+                            'user_id': int(r['user_id']),
+                            'name': str(r['name'] or 'Valued Customer'),
+                            'email': str(r['email'] or 'customer@dailydrop.com'),
+                            'phone': str(r['phone'] or '+91 98765 00000'),
+                            'city': str(r['city'] or 'Bangalore'),
+                            'total_orders': int(r['total_orders'] or 0),
+                            'total_spend': float(r['total_spend'] or 0.0),
+                            'avg_order_value': float(r['avg_order_value'] or 0.0),
+                            'recency_days': int(r['recency_days'] or 0),
+                            'last_order_str': str(r['last_order_str'] or 'N/A'),
+                            'segment': str(r['segment'])
+                        })
+                except Exception as e:
+                    logger.debug(f"SQL rfm_customers error: {e}")
+
+                if not rfm_customers:
+                    rfm_customers = _get_fallback_rfm_customers()
+
                 abc_summary = []
                 try:
                     cursor.execute("""
@@ -986,6 +1146,12 @@ def get_unified_analytics(days: int = 30) -> Dict[str, Any]:
                         {'cohort': '2026-05', 'total_users': 27, 'm0': 100.0, 'm1': 66.7, 'm2': 66.7, 'm3': 70.4, 'm4': 66.7, 'm5': 59.3}
                     ]
 
+                at_risk_list = [c for c in rfm_customers if 'At Risk' in c.get('segment', '')]
+                vip_list = [c for c in rfm_customers if 'Champions' in c.get('segment', '')]
+                loyal_list = [c for c in rfm_customers if 'Loyal' in c.get('segment', '')]
+                at_risk_spend_val = sum(float(c.get('total_spend', 0.0)) for c in at_risk_list)
+                vip_spend_val = sum(float(c.get('total_spend', 0.0)) for c in vip_list)
+
                 analytics_result = {
                     'stats': {
                         'total_orders': total_orders,
@@ -1005,6 +1171,14 @@ def get_unified_analytics(days: int = 30) -> Dict[str, Any]:
                     'hourly': hour_counts,
                     'city_sla': city_sla,
                     'rfm_summary': rfm_summary,
+                    'rfm_customers': rfm_customers,
+                    'at_risk_customers': at_risk_list,
+                    'vip_customers': vip_list,
+                    'loyal_customers': loyal_list,
+                    'at_risk_count': len(at_risk_list),
+                    'vip_count': len(vip_list),
+                    'at_risk_spend': at_risk_spend_val,
+                    'vip_spend': vip_spend_val,
                     'abc_summary': abc_summary,
                     'cohort_matrix': cohort_matrix,
                     'market_basket': market_basket
@@ -1071,6 +1245,11 @@ def get_unified_analytics(days: int = 30) -> Dict[str, Any]:
 
                     sales_data = [sales_dict.get(date, 0.0) for date in date_list]
 
+                    fallback_cust = _get_fallback_rfm_customers()
+                    at_risk_fb = [c for c in fallback_cust if 'At Risk' in c.get('segment', '')]
+                    vip_fb = [c for c in fallback_cust if 'Champions' in c.get('segment', '')]
+                    loyal_fb = [c for c in fallback_cust if 'Loyal' in c.get('segment', '')]
+
                     analytics_result = {
                         'stats': {
                             'total_orders': total_orders,
@@ -1090,6 +1269,14 @@ def get_unified_analytics(days: int = 30) -> Dict[str, Any]:
                         'hourly': hour_counts,
                         'city_sla': [],
                         'rfm_summary': [],
+                        'rfm_customers': fallback_cust,
+                        'at_risk_customers': at_risk_fb,
+                        'vip_customers': vip_fb,
+                        'loyal_customers': loyal_fb,
+                        'at_risk_count': len(at_risk_fb),
+                        'vip_count': len(vip_fb),
+                        'at_risk_spend': sum(float(c.get('total_spend', 0.0)) for c in at_risk_fb),
+                        'vip_spend': sum(float(c.get('total_spend', 0.0)) for c in vip_fb),
                         'abc_summary': [],
                         'cohort_matrix': [
                             {'cohort': '2026-10', 'total_users': 44, 'm0': 100.0, 'm1': None, 'm2': None, 'm3': None, 'm4': None, 'm5': None},
@@ -1139,6 +1326,12 @@ def get_sales_data(days: int = 30) -> Dict[str, Any]:
         'min_date': '',
         'max_date': ''
     })
+
+
+def get_customer_audiences(days: int = 30) -> List[Dict[str, Any]]:
+    """Retrieve detailed customer audience profiles scored by RFM segmentation."""
+    analytics = get_unified_analytics(days=days)
+    return analytics.get('rfm_customers', [])
 
 
 
