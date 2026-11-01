@@ -150,7 +150,8 @@ def api_create_order() -> Tuple[Any, int]:
                 phone_number=data.get('phone_number', ''),
                 address=data.get('address', ''),
                 products=products if products else [],
-                total_amount=final_total
+                total_amount=final_total,
+                city=data.get('city', 'Bangalore')
             )
         except Exception as pe:
             logger.warning(f"Could not persist pending order details for {rzp_order.get('id')}: {pe}")
@@ -341,6 +342,7 @@ def api_verify_payment() -> Tuple[Any, int]:
     full_name = pending.get('full_name') or data.get('full_name', '') or session.get('name', 'Customer')
     phone_number = pending.get('phone_number') or data.get('phone_number', '')
     address = pending.get('address') or data.get('address', '')
+    city = data.get('city') or (pending.get('city') if pending else None)
 
     success, message, order_id = OrderService.create_order(
         user_id=user_id,
@@ -351,7 +353,8 @@ def api_verify_payment() -> Tuple[Any, int]:
         total_amount=final_total,
         payment_method='Razorpay',
         payment_id=razorpay_payment_id,
-        status='Paid'
+        status='Paid',
+        city=city
     )
 
     if not success:
@@ -533,6 +536,8 @@ def place_order() -> Tuple[Any, int]:
             IdempotencyService.release(idempotency_key)
         return jsonify({'success': False, 'message': err_msg}), 400
 
+    city = data.get('city')
+
     success, message, order_id = OrderService.create_order(
         user_id=session['user_id'],
         full_name=full_name,
@@ -541,7 +546,8 @@ def place_order() -> Tuple[Any, int]:
         products=products,
         total_amount=final_total,
         payment_method=data.get('payment_method', 'COD'),
-        status='Processing'
+        status='Processing',
+        city=city
     )
 
     if not success:

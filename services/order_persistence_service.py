@@ -24,32 +24,59 @@ class OrderPersistenceService:
         authoritative_total: float,
         status: str,
         payment_method: str = 'COD',
-        payment_id: Optional[str] = None
+        payment_id: Optional[str] = None,
+        city: Optional[str] = 'Bangalore',
+        delivery_duration_minutes: Optional[float] = 7.5
     ) -> int:
         """
         Inserts the master order record, supporting extended schema with graceful fallback.
         Returns:
             order_id (int)
         """
+        target_city = city or 'Bangalore'
+        duration = float(delivery_duration_minutes) if delivery_duration_minutes else 7.5
+
         try:
             cursor.execute(
                 """
-                INSERT INTO orders (user_id, full_name, phone_number, address, products_ordered, total_amount, status, payment_method, payment_id)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                INSERT INTO orders (user_id, full_name, phone_number, address, city, delivery_duration_minutes, products_ordered, total_amount, status, payment_method, payment_id)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 RETURNING order_id
                 """,
-                (user_id, full_name, phone_number, address, products_json, authoritative_total, status, payment_method, payment_id)
+                (user_id, full_name, phone_number, address, target_city, duration, products_json, authoritative_total, status, payment_method, payment_id)
             )
         except Exception:
             conn.rollback()
-            cursor.execute(
-                """
-                INSERT INTO orders (user_id, full_name, phone_number, address, products_ordered, total_amount, status)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
-                RETURNING order_id
-                """,
-                (user_id, full_name, phone_number, address, products_json, authoritative_total, status)
-            )
+            try:
+                cursor.execute(
+                    """
+                    INSERT INTO orders (user_id, full_name, phone_number, address, city, products_ordered, total_amount, status, payment_method, payment_id)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    RETURNING order_id
+                    """,
+                    (user_id, full_name, phone_number, address, target_city, products_json, authoritative_total, status, payment_method, payment_id)
+                )
+            except Exception:
+                conn.rollback()
+                try:
+                    cursor.execute(
+                        """
+                        INSERT INTO orders (user_id, full_name, phone_number, address, products_ordered, total_amount, status, payment_method, payment_id)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        RETURNING order_id
+                        """,
+                        (user_id, full_name, phone_number, address, products_json, authoritative_total, status, payment_method, payment_id)
+                    )
+                except Exception:
+                    conn.rollback()
+                    cursor.execute(
+                        """
+                        INSERT INTO orders (user_id, full_name, phone_number, address, products_ordered, total_amount, status)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s)
+                        RETURNING order_id
+                        """,
+                        (user_id, full_name, phone_number, address, products_json, authoritative_total, status)
+                    )
 
         order_row = cursor.fetchone()
         order_id = order_row['order_id'] if isinstance(order_row, dict) else order_row[0]

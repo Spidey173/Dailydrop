@@ -136,6 +136,8 @@ def init_database() -> None:
                         full_name VARCHAR(255) NOT NULL,
                         phone_number VARCHAR(50) NOT NULL,
                         address TEXT NOT NULL,
+                        city VARCHAR(100) DEFAULT 'Bangalore',
+                        delivery_duration_minutes NUMERIC(4, 1) DEFAULT 7.5,
                         products_ordered TEXT NOT NULL,
                         total_amount NUMERIC(10, 2) NOT NULL,
                         status VARCHAR(50) DEFAULT 'Processing',
@@ -145,6 +147,8 @@ def init_database() -> None:
                     );
                     ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_method VARCHAR(50) DEFAULT 'COD';
                     ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_id VARCHAR(255);
+                    ALTER TABLE orders ADD COLUMN IF NOT EXISTS city VARCHAR(100) DEFAULT 'Bangalore';
+                    ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_duration_minutes NUMERIC(4, 1) DEFAULT 7.5;
                 ''')
 
                 # 3b. order_items table (Normalized relational items)
@@ -170,10 +174,12 @@ def init_database() -> None:
                         full_name VARCHAR(255) NOT NULL,
                         phone_number VARCHAR(50) NOT NULL,
                         address TEXT NOT NULL,
+                        city VARCHAR(100) DEFAULT 'Bangalore',
                         products_data TEXT NOT NULL,
                         total_amount NUMERIC(10, 2) NOT NULL,
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                     );
+                    ALTER TABLE pending_orders ADD COLUMN IF NOT EXISTS city VARCHAR(100) DEFAULT 'Bangalore';
                 ''')
 
                 # 4. contact_messages table
@@ -1281,10 +1287,12 @@ def get_order_items(order_id: int) -> List[Dict[str, Any]]:
 
 
 def save_pending_order(razorpay_order_id: str, user_id: Optional[int], full_name: str,
-                       phone_number: str, address: str, products: Any, total_amount: float) -> bool:
+                       phone_number: str, address: str, products: Any, total_amount: float,
+                       city: Optional[str] = 'Bangalore') -> bool:
     """Save pending order details to handle client disconnects during payment."""
     try:
         products_json = json.dumps(products) if not isinstance(products, str) else products
+        target_city = city or 'Bangalore'
         with get_db_connection() as conn:
             with conn.cursor() as cursor:
                 # Validate user_id exists if provided to prevent foreign key aborts on live DB
@@ -1300,17 +1308,31 @@ def save_pending_order(razorpay_order_id: str, user_id: Optional[int], full_name
 
                 try:
                     cursor.execute("SAVEPOINT save_pending_sp")
-                    cursor.execute('''
-                        INSERT INTO pending_orders (razorpay_order_id, user_id, full_name, phone_number, address, products_data, total_amount)
-                        VALUES (%s, %s, %s, %s, %s, %s, %s)
-                        ON CONFLICT (razorpay_order_id) DO UPDATE SET
-                            user_id = EXCLUDED.user_id,
-                            full_name = EXCLUDED.full_name,
-                            phone_number = EXCLUDED.phone_number,
-                            address = EXCLUDED.address,
-                            products_data = EXCLUDED.products_data,
-                            total_amount = EXCLUDED.total_amount
-                    ''', (razorpay_order_id, validated_user_id, full_name, phone_number, address, products_json, total_amount))
+                    try:
+                        cursor.execute('''
+                            INSERT INTO pending_orders (razorpay_order_id, user_id, full_name, phone_number, address, city, products_data, total_amount)
+                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                            ON CONFLICT (razorpay_order_id) DO UPDATE SET
+                                user_id = EXCLUDED.user_id,
+                                full_name = EXCLUDED.full_name,
+                                phone_number = EXCLUDED.phone_number,
+                                address = EXCLUDED.address,
+                                city = EXCLUDED.city,
+                                products_data = EXCLUDED.products_data,
+                                total_amount = EXCLUDED.total_amount
+                        ''', (razorpay_order_id, validated_user_id, full_name, phone_number, address, target_city, products_json, total_amount))
+                    except Exception:
+                        cursor.execute('''
+                            INSERT INTO pending_orders (razorpay_order_id, user_id, full_name, phone_number, address, products_data, total_amount)
+                            VALUES (%s, %s, %s, %s, %s, %s, %s)
+                            ON CONFLICT (razorpay_order_id) DO UPDATE SET
+                                user_id = EXCLUDED.user_id,
+                                full_name = EXCLUDED.full_name,
+                                phone_number = EXCLUDED.phone_number,
+                                address = EXCLUDED.address,
+                                products_data = EXCLUDED.products_data,
+                                total_amount = EXCLUDED.total_amount
+                        ''', (razorpay_order_id, validated_user_id, full_name, phone_number, address, products_json, total_amount))
                     cursor.execute("RELEASE SAVEPOINT save_pending_sp")
                 except Exception as query_err:
                     try:
@@ -1319,10 +1341,16 @@ def save_pending_order(razorpay_order_id: str, user_id: Optional[int], full_name
                         pass
                     # Fallback for environments or SQLite without ON CONFLICT DO UPDATE
                     cursor.execute('DELETE FROM pending_orders WHERE razorpay_order_id = %s', (razorpay_order_id,))
-                    cursor.execute('''
-                        INSERT INTO pending_orders (razorpay_order_id, user_id, full_name, phone_number, address, products_data, total_amount)
-                        VALUES (%s, %s, %s, %s, %s, %s, %s)
-                    ''', (razorpay_order_id, validated_user_id, full_name, phone_number, address, products_json, total_amount))
+                    try:
+                        cursor.execute('''
+                            INSERT INTO pending_orders (razorpay_order_id, user_id, full_name, phone_number, address, city, products_data, total_amount)
+                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                        ''', (razorpay_order_id, validated_user_id, full_name, phone_number, address, target_city, products_json, total_amount))
+                    except Exception:
+                        cursor.execute('''
+                            INSERT INTO pending_orders (razorpay_order_id, user_id, full_name, phone_number, address, products_data, total_amount)
+                            VALUES (%s, %s, %s, %s, %s, %s, %s)
+                        ''', (razorpay_order_id, validated_user_id, full_name, phone_number, address, products_json, total_amount))
                 return True
     except Exception as e:
         logger.error(f"Error saving pending order for {razorpay_order_id}: {e}")

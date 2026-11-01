@@ -243,6 +243,8 @@ def _seed_test_database():
             full_name VARCHAR(255) NOT NULL,
             phone_number VARCHAR(50) NOT NULL,
             address TEXT NOT NULL,
+            city VARCHAR(100) DEFAULT 'Bangalore',
+            delivery_duration_minutes NUMERIC(4, 1) DEFAULT 7.5,
             products_ordered TEXT NOT NULL,
             total_amount NUMERIC(10, 2) NOT NULL,
             status VARCHAR(50) DEFAULT 'Processing',
@@ -267,6 +269,7 @@ def _seed_test_database():
             full_name VARCHAR(255) NOT NULL,
             phone_number VARCHAR(50) NOT NULL,
             address TEXT NOT NULL,
+            city VARCHAR(100) DEFAULT 'Bangalore',
             products_data TEXT NOT NULL,
             total_amount NUMERIC(10, 2) NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

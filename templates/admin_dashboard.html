@@ -36,25 +36,24 @@
 
     <style>
         :root {
-            --bg-dark: #030712;
-            --bg-surface: #0B1320;
-            --card-bg: rgba(15, 23, 42, 0.75);
-            --card-border: rgba(52, 211, 153, 0.16);
-            --card-hover-border: rgba(52, 211, 153, 0.45);
+            --bg-dark: #020805;
+            --bg-surface: #06190e;
+            --card-bg: rgba(6, 26, 17, 0.78);
+            --card-border: rgba(16, 185, 129, 0.22);
+            --card-hover-border: rgba(52, 211, 153, 0.55);
             --accent-green: #10B981;
             --accent-mint: #34D399;
             --accent-emerald: #059669;
-            --accent-glow: rgba(16, 185, 129, 0.22);
-            --cyber-cyan: #38BDF8;
+            --accent-glow: rgba(16, 185, 129, 0.28);
             --purple-accent: #A78BFA;
-            --text-primary: #F9FAFB;
-            --text-secondary: #D1D5DB;
-            --text-muted: #9CA3AF;
+            --text-primary: #F8FAFC;
+            --text-secondary: #CBD5E1;
+            --text-muted: #6EE7B7;
             --danger: #EF4444;
             --danger-bg: rgba(239, 68, 68, 0.15);
             --warning: #F59E0B;
             --warning-bg: rgba(245, 158, 11, 0.15);
-            --info: #38BDF8;
+            --info: #34D399;
         }
 
         * {
@@ -69,9 +68,9 @@
             color: var(--text-primary);
             min-height: 100vh;
             background-image:
-                radial-gradient(circle at 10% 15%, rgba(16, 185, 129, 0.09) 0%, transparent 45%),
-                radial-gradient(circle at 90% 80%, rgba(56, 189, 248, 0.07) 0%, transparent 50%),
-                radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.5) 0%, transparent 100%);
+                radial-gradient(circle at 10% 15%, rgba(16, 185, 129, 0.14) 0%, transparent 45%),
+                radial-gradient(circle at 90% 80%, rgba(52, 211, 153, 0.10) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(3, 20, 12, 0.8) 0%, transparent 100%);
             padding-bottom: 60px;
         }
 
@@ -81,7 +80,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 16px 36px;
-            background: rgba(3, 7, 18, 0.90);
+            background: rgba(2, 8, 5, 0.92);
             backdrop-filter: blur(20px);
             border-bottom: 1px solid var(--card-border);
             position: sticky;
@@ -185,15 +184,16 @@
             box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
         }
 
-        .btn-cyan {
-            background: rgba(56, 189, 248, 0.15);
-            color: var(--cyber-cyan);
-            border: 1px solid rgba(56, 189, 248, 0.35);
+        .btn-mint {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--accent-mint);
+            border: 1px solid rgba(52, 211, 153, 0.35);
         }
 
-        .btn-cyan:hover {
-            background: rgba(56, 189, 248, 0.25);
-            border-color: var(--cyber-cyan);
+        .btn-mint:hover {
+            background: rgba(16, 185, 129, 0.25);
+            border-color: var(--accent-mint);
+            box-shadow: 0 4px 16px rgba(16, 185, 129, 0.25);
             transform: translateY(-1px);
         }
 
@@ -259,7 +259,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            background: rgba(15, 23, 42, 0.55);
+            background: rgba(4, 20, 12, 0.65);
             padding: 6px;
             border-radius: 12px;
             border: 1px solid var(--card-border);
@@ -376,10 +376,10 @@
             flex-shrink: 0;
         }
 
-        .stat-icon.cyan {
-            background: rgba(56, 189, 248, 0.12);
-            border-color: rgba(56, 189, 248, 0.25);
-            color: var(--cyber-cyan);
+        .stat-icon.mint {
+            background: rgba(16, 185, 129, 0.14);
+            border-color: rgba(52, 211, 153, 0.3);
+            color: var(--accent-mint);
         }
 
         .stat-icon.warning {
@@ -425,8 +425,8 @@
         }
 
         .trend-info {
-            background: rgba(56, 189, 248, 0.14);
-            color: var(--cyber-cyan);
+            background: rgba(16, 185, 129, 0.14);
+            color: var(--accent-mint);
         }
 
         .trend-warn {
@@ -436,8 +436,8 @@
 
         /* Quick-Commerce Operations Strip */
         .ops-telemetry-banner {
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(15, 23, 42, 0.6) 100%);
-            border: 1px solid rgba(52, 211, 153, 0.22);
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(6, 26, 17, 0.85) 100%);
+            border: 1px solid rgba(52, 211, 153, 0.28);
             border-radius: 14px;
             padding: 16px 24px;
             margin-bottom: 24px;
@@ -652,7 +652,7 @@
         }
 
         .select-control option {
-            background: #0B1320;
+            background: #06190e;
             color: #FFFFFF;
         }
 
@@ -707,9 +707,9 @@
             border-radius: 6px;
             font-size: 0.75rem;
             font-weight: 600;
-            background: rgba(56, 189, 248, 0.1);
-            color: var(--cyber-cyan);
-            border: 1px solid rgba(56, 189, 248, 0.22);
+            background: rgba(16, 185, 129, 0.12);
+            color: var(--accent-mint);
+            border: 1px solid rgba(16, 185, 129, 0.25);
         }
 
         /* Inline Price Editor */
@@ -869,7 +869,7 @@
         }
 
         .modal-box {
-            background: #0B1320;
+            background: #06190e;
             border: 1px solid var(--card-border);
             border-radius: 16px;
             padding: 30px;
@@ -975,8 +975,8 @@
         }
 
         .sql-code-block {
-            background: #020617;
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: #020c06;
+            border: 1px solid rgba(16, 185, 129, 0.22);
             border-radius: 10px;
             padding: 16px;
             font-family: 'JetBrains Mono', monospace;
@@ -1000,8 +1000,8 @@
         }
 
         .toast {
-            background: #0B1320;
-            border: 1px solid var(--card-border);
+            background: #06190e;
+            border: 1px solid var(--accent-mint);
             color: #FFFFFF;
             padding: 12px 18px;
             border-radius: 10px;
@@ -1036,7 +1036,7 @@
             </div>
         </div>
         <div class="nav-actions">
-            <button class="btn btn-cyan" onclick="openSqlLabModal()" title="Inspect the Advanced SQL queries powering this dashboard">
+            <button class="btn btn-mint" onclick="openSqlLabModal()" title="Inspect the Advanced SQL queries powering this dashboard">
                 <i class="fa-solid fa-code"></i> SQL Analytics Lab
             </button>
             <a href="{{ url_for('admin_orders') }}" class="btn btn-primary" title="View Customer Orders & Delivery Tracking">
@@ -1106,7 +1106,7 @@
                 </div>
 
                 <a href="{{ url_for('admin_orders') }}" class="stat-card" style="text-decoration: none; color: inherit;" title="Open Orders Page">
-                    <div class="stat-icon cyan">
+                    <div class="stat-icon mint">
                         <i class="fa-solid fa-cart-shopping"></i>
                     </div>
                     <div class="stat-content">
@@ -1119,7 +1119,7 @@
                 </a>
 
                 <div class="stat-card">
-                    <div class="stat-icon cyan">
+                    <div class="stat-icon mint">
                         <i class="fa-solid fa-users"></i>
                     </div>
                     <div class="stat-content">
@@ -1230,7 +1230,7 @@
                             <strong>35 users (38% GMV)</strong>
                         </div>
                         <div class="legend-row">
-                            <span class="legend-label"><span class="legend-dot" style="background: #38BDF8;"></span> Loyal Regulars</span>
+                            <span class="legend-label"><span class="legend-dot" style="background: #34D399;"></span> Loyal Regulars</span>
                             <strong>68 users (Steady)</strong>
                         </div>
                         <div class="legend-row">
@@ -1244,10 +1244,10 @@
                 <div class="trio-card">
                     <div class="chart-header">
                         <h3>
-                            <i class="fa-solid fa-boxes-stacked" style="color: var(--warning);"></i>
+                            <i class="fa-solid fa-boxes-stacked" style="color: var(--accent-mint);"></i>
                             Pareto ABC Inventory (80/20)
                         </h3>
-                        <span class="chart-meta-pill" style="border-color: rgba(245, 158, 11, 0.3); color: var(--warning); background: rgba(245, 158, 11, 0.1);">
+                        <span class="chart-meta-pill" style="border-color: rgba(52, 211, 153, 0.3); color: var(--accent-mint); background: rgba(16, 185, 129, 0.1);">
                             241 Catalog SKUs
                         </span>
                     </div>
@@ -1260,11 +1260,11 @@
                             <strong>120 SKUs (80% GMV)</strong>
                         </div>
                         <div class="legend-row">
-                            <span class="legend-label"><span class="legend-dot" style="background: #38BDF8;"></span> Class B (Moderate)</span>
+                            <span class="legend-label"><span class="legend-dot" style="background: #34D399;"></span> Class B (Moderate)</span>
                             <strong>68 SKUs (15% GMV)</strong>
                         </div>
                         <div class="legend-row">
-                            <span class="legend-label"><span class="legend-dot" style="background: #EF4444;"></span> Class C (Slow Movers)</span>
+                            <span class="legend-label"><span class="legend-dot" style="background: #059669;"></span> Class C (Slow Movers)</span>
                             <strong>54 SKUs (5% GMV)</strong>
                         </div>
                     </div>
@@ -1274,10 +1274,10 @@
                 <div class="trio-card">
                     <div class="chart-header">
                         <h3>
-                            <i class="fa-solid fa-bolt" style="color: var(--cyber-cyan);"></i>
+                            <i class="fa-solid fa-bolt" style="color: var(--accent-mint);"></i>
                             Hourly Rush Heatmap
                         </h3>
-                        <span class="chart-meta-pill" style="border-color: rgba(56, 189, 248, 0.3); color: var(--cyber-cyan); background: rgba(56, 189, 248, 0.1);">
+                        <span class="chart-meta-pill" style="border-color: rgba(52, 211, 153, 0.3); color: var(--accent-mint); background: rgba(16, 185, 129, 0.1);">
                             24-Hour Cycle
                         </span>
                     </div>
@@ -1290,11 +1290,11 @@
                             <strong>08:00 - 10:00 AM (Peak)</strong>
                         </div>
                         <div class="legend-row">
-                            <span class="legend-label"><span class="legend-dot" style="background: #38BDF8;"></span> Evening Grocery Rush</span>
+                            <span class="legend-label"><span class="legend-dot" style="background: #10B981;"></span> Evening Grocery Rush</span>
                             <strong>18:00 - 21:00 PM (Surge)</strong>
                         </div>
                         <div class="legend-row">
-                            <span class="legend-label"><span class="legend-dot" style="background: #64748B;"></span> Afternoon Lull</span>
+                            <span class="legend-label"><span class="legend-dot" style="background: #064E3B;"></span> Afternoon Lull</span>
                             <strong>12:00 - 15:00 PM (Off-Peak)</strong>
                         </div>
                     </div>
@@ -1450,8 +1450,8 @@
                 <div class="catalog-toolbar">
                     <div>
                         <h2 style="font-size: 1.25rem; font-weight: 700; color: #FFFFFF; display: flex; align-items: center; gap: 10px;">
-                            <i class="fa-solid fa-envelope-open-text" style="color: var(--cyber-cyan);"></i> Customer Contact Submissions
-                            <span class="tab-badge" style="background: rgba(56, 189, 248, 0.2); color: var(--cyber-cyan);">
+                            <i class="fa-solid fa-envelope-open-text" style="color: var(--accent-mint);"></i> Customer Contact Submissions
+                            <span class="tab-badge" style="background: rgba(16, 185, 129, 0.2); color: var(--accent-mint);">
                                 <span id="inquiriesTableCount">{{ contact_messages|default([])|length }}</span> Total
                             </span>
                         </h2>
@@ -1483,7 +1483,7 @@
                                 <td style="color: var(--text-muted); font-weight: 700; font-family: 'JetBrains Mono', monospace;">#{{ loop.index }}</td>
                                 <td>
                                     <div style="display: flex; align-items: center; gap: 10px;">
-                                        <div style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, rgba(56, 189, 248, 0.25), rgba(16, 185, 129, 0.1)); border: 1px solid rgba(56, 189, 248, 0.3); display: flex; align-items: center; justify-content: center; color: var(--cyber-cyan); font-weight: 700; font-size: 0.85rem; flex-shrink: 0;">
+                                        <div style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, rgba(52, 211, 153, 0.25), rgba(16, 185, 129, 0.1)); border: 1px solid rgba(52, 211, 153, 0.35); display: flex; align-items: center; justify-content: center; color: var(--accent-mint); font-weight: 700; font-size: 0.85rem; flex-shrink: 0;">
                                             {{ msg.name[:1]|upper if msg.name else 'U' }}
                                         </div>
                                         <div>
@@ -1500,7 +1500,7 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <span style="display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; background: rgba(56, 189, 248, 0.1); color: var(--cyber-cyan); border: 1px solid rgba(56, 189, 248, 0.25);">
+                                    <span style="display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; background: rgba(16, 185, 129, 0.12); color: var(--accent-mint); border: 1px solid rgba(16, 185, 129, 0.25);">
                                         {{ msg.subject }}
                                     </span>
                                 </td>
@@ -1524,7 +1524,7 @@
                             {% else %}
                             <tr id="emptyMsgRow">
                                 <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-muted);">
-                                    <i class="fa-regular fa-comments" style="font-size: 2.2rem; color: rgba(56, 189, 248, 0.3); display: block; margin-bottom: 10px;"></i>
+                                    <i class="fa-regular fa-comments" style="font-size: 2.2rem; color: rgba(16, 185, 129, 0.3); display: block; margin-bottom: 10px;"></i>
                                     No customer contact inquiries received yet.
                                 </td>
                             </tr>
@@ -1803,7 +1803,7 @@
                             fill: true,
                             tension: 0.38,
                             pointBackgroundColor: '#34D399',
-                            pointBorderColor: '#030712',
+                            pointBorderColor: '#020805',
                             pointBorderWidth: 1.5,
                             pointRadius: 3,
                             pointHoverRadius: 6
@@ -1816,7 +1816,7 @@
                         plugins: {
                             legend: { display: false },
                             tooltip: {
-                                backgroundColor: '#0B1320',
+                                backgroundColor: '#06190e',
                                 titleColor: '#FFFFFF',
                                 bodyColor: '#34D399',
                                 borderColor: 'rgba(52, 211, 153, 0.3)',
@@ -1860,8 +1860,8 @@
                         labels: labels,
                         datasets: [{
                             data: values,
-                            backgroundColor: ['#10B981', '#38BDF8', '#F59E0B', '#EF4444', '#A78BFA', '#64748B'],
-                            borderColor: '#0B1320',
+                            backgroundColor: ['#10B981', '#34D399', '#F59E0B', '#EF4444', '#059669', '#047857'],
+                            borderColor: '#020805',
                             borderWidth: 2
                         }]
                     },
@@ -1872,7 +1872,7 @@
                         plugins: {
                             legend: { display: false },
                             tooltip: {
-                                backgroundColor: '#0B1320',
+                                backgroundColor: '#06190e',
                                 borderColor: 'rgba(52, 211, 153, 0.3)',
                                 borderWidth: 1,
                                 callbacks: {
@@ -1899,8 +1899,8 @@
                         labels: labels,
                         datasets: [{
                             data: values,
-                            backgroundColor: ['#10B981', '#38BDF8', '#EF4444'],
-                            borderColor: '#0B1320',
+                            backgroundColor: ['#10B981', '#34D399', '#059669'],
+                            borderColor: '#020805',
                             borderWidth: 2
                         }]
                     },
@@ -1911,8 +1911,8 @@
                         plugins: {
                             legend: { display: false },
                             tooltip: {
-                                backgroundColor: '#0B1320',
-                                borderColor: 'rgba(245, 158, 11, 0.3)',
+                                backgroundColor: '#06190e',
+                                borderColor: 'rgba(52, 211, 153, 0.3)',
                                 borderWidth: 1,
                                 callbacks: {
                                     label: (ctx) => ` ${ctx.label}: ₹${parseFloat(ctx.raw).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`
@@ -1934,9 +1934,9 @@
                 const colors = labels.map(h => {
                     const hourInt = parseInt(h.split(':')[0]) || 0;
                     if ((hourInt >= 8 && hourInt <= 10) || (hourInt >= 18 && hourInt <= 21)) {
-                        return 'rgba(52, 211, 153, 0.85)';
+                        return 'rgba(52, 211, 153, 0.9)';
                     }
-                    return 'rgba(56, 189, 248, 0.45)';
+                    return 'rgba(16, 185, 129, 0.35)';
                 });
 
                 window.hourlyChartInstance = new Chart(hourlyCanvas, {
@@ -1957,7 +1957,7 @@
                         plugins: {
                             legend: { display: false },
                             tooltip: {
-                                backgroundColor: '#0B1320',
+                                backgroundColor: '#06190e',
                                 borderColor: 'rgba(52, 211, 153, 0.3)',
                                 borderWidth: 1,
                                 callbacks: {

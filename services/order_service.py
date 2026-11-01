@@ -28,7 +28,8 @@ class OrderService:
                      products: Any, total_amount: float,
                      payment_method: str = 'COD',
                      payment_id: Optional[str] = None,
-                     status: str = 'Processing') -> Tuple[bool, str, Optional[int]]:
+                     status: str = 'Processing',
+                     city: Optional[str] = None) -> Tuple[bool, str, Optional[int]]:
         """
         Validate and save a customer order by orchestrating modular domain services:
           1. CatalogValidationService: Validates catalog products & computes authoritative pricing
@@ -42,6 +43,42 @@ class OrderService:
         """
         full_name = sanitize_string(full_name)
         address = sanitize_string(address)
+
+        # Resolve delivery city: explicit param, or intelligent extraction from address string
+        resolved_city = (city or '').strip()
+        if not resolved_city:
+            addr_lower = (address or '').lower()
+            if any(k in addr_lower for k in ['delhi', 'noida', 'gurugram', 'gurgaon', 'faridabad', 'ghaziabad', 'ncr']):
+                resolved_city = 'Delhi NCR'
+            elif any(k in addr_lower for k in ['mumbai', 'navi mumbai', 'thane', 'bombay']):
+                resolved_city = 'Mumbai'
+            elif any(k in addr_lower for k in ['hyderabad', 'secunderabad', 'cyberabad']):
+                resolved_city = 'Hyderabad'
+            elif any(k in addr_lower for k in ['pune', 'pcmc']):
+                resolved_city = 'Pune'
+            elif any(k in addr_lower for k in ['chennai', 'madras']):
+                resolved_city = 'Chennai'
+            elif any(k in addr_lower for k in ['kolkata', 'calcutta']):
+                resolved_city = 'Kolkata'
+            elif any(k in addr_lower for k in ['ahmedabad', 'amdavad']):
+                resolved_city = 'Ahmedabad'
+            elif any(k in addr_lower for k in ['bangalore', 'bengaluru', 'blr']):
+                resolved_city = 'Bangalore'
+            else:
+                resolved_city = 'Bangalore'
+
+        # Quick-Commerce Metro SLA duration assignment based on darkstore cluster density
+        city_durations = {
+            'Bangalore': 7.2,
+            'Delhi NCR': 7.8,
+            'Mumbai': 8.1,
+            'Hyderabad': 7.9,
+            'Pune': 8.4,
+            'Chennai': 8.2,
+            'Kolkata': 8.5,
+            'Ahmedabad': 8.3
+        }
+        delivery_duration = city_durations.get(resolved_city, 7.5)
 
         is_valid, error_msg = validate_order_data(full_name, phone_number, address, products)
         if not is_valid:
@@ -105,7 +142,9 @@ class OrderService:
                         authoritative_total=authoritative_total,
                         status=status,
                         payment_method=payment_method,
-                        payment_id=payment_id
+                        payment_id=payment_id,
+                        city=resolved_city,
+                        delivery_duration_minutes=delivery_duration
                     )
 
                     OrderPersistenceService.persist_order_items(
@@ -120,6 +159,9 @@ class OrderService:
                         'user_id': user_id,
                         'full_name': full_name,
                         'phone_number': phone_number,
+                        'address': address,
+                        'city': resolved_city,
+                        'delivery_duration_minutes': delivery_duration,
                         'total_amount': authoritative_total,
                         'payment_method': payment_method,
                         'payment_id': payment_id,

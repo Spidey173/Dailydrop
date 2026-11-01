@@ -456,18 +456,51 @@
         <h3 class="checkout-section-title"><i class="fas fa-map-marked-alt" style="color: var(--accent);"></i> Shipping & Delivery</h3>
         <form id="checkoutForm" onsubmit="placeOrder(event)">
           <div class="form-group">
-            <label for="fullName">Full Name</label>
+            <label for="fullName"><i class="fas fa-user" style="color: var(--accent);"></i> Full Name</label>
             <input type="text" class="form-input" id="fullName" required placeholder="John Doe">
           </div>
 
           <div class="form-group">
-            <label for="address">Delivery Address</label>
-            <textarea class="form-input" id="address" rows="4" required placeholder="Apartment / House No, Street, Landmark, City - Pincode"></textarea>
+            <label for="phone"><i class="fas fa-phone-alt" style="color: var(--accent);"></i> Mobile Number (10 digits)</label>
+            <input type="tel" class="form-input" id="phone" required placeholder="9876543210" pattern="[6-9][0-9]{9}" maxlength="10">
+          </div>
+
+          <!-- Quick-Commerce Metro City Selection -->
+          <div class="form-group">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <label for="citySelector" style="margin-bottom: 0; font-weight: 600; color: var(--text-secondary);">
+                <i class="fas fa-city" style="color: var(--accent);"></i> Delivery City (10-Minute Darkstore Hub)
+              </label>
+              <span id="citySlaBadge" style="font-size: 0.78rem; font-weight: 700; color: #10B981; background: rgba(16, 185, 129, 0.15); padding: 3px 10px; border-radius: 6px; border: 1px solid rgba(16, 185, 129, 0.3);">
+                ⚡ Avg 7.2m Dispatch
+              </span>
+            </div>
+            <select class="form-input" id="citySelector" required onchange="updateCitySlaBadge(this.value)" style="cursor: pointer;">
+              <option value="Bangalore" data-sla="7.2m" selected>📍 Bangalore (Koramangala, Indiranagar, HSR, Bellandur, Whitefield)</option>
+              <option value="Delhi NCR" data-sla="7.8m">📍 Delhi NCR (South Delhi, Gurugram, Noida, Greater Noida)</option>
+              <option value="Mumbai" data-sla="8.1m">📍 Mumbai (Bandra, Andheri, Powai, BKC, Lower Parel)</option>
+              <option value="Hyderabad" data-sla="7.9m">📍 Hyderabad (Hitec City, Gachibowli, Madhapur, Jubilee Hills)</option>
+              <option value="Pune" data-sla="8.4m">📍 Pune (Viman Nagar, Baner, Kothrud, Hinjewadi)</option>
+              <option value="Chennai" data-sla="8.2m">📍 Chennai (OMR, Anna Nagar, T. Nagar, Adyar)</option>
+              <option value="Kolkata" data-sla="8.5m">📍 Kolkata (Salt Lake, New Town, Park Street, Ballygunge)</option>
+              <option value="Ahmedabad" data-sla="8.3m">📍 Ahmedabad (Bodakdev, SG Highway, Prahlad Nagar, Satellite)</option>
+            </select>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+            <div class="form-group">
+              <label for="flatNo"><i class="fas fa-building" style="color: var(--accent);"></i> Flat / House No.</label>
+              <input type="text" class="form-input" id="flatNo" required placeholder="e.g. Flat 302, Tower B">
+            </div>
+            <div class="form-group">
+              <label for="pincode"><i class="fas fa-map-pin" style="color: var(--accent);"></i> 6-Digit PIN Code</label>
+              <input type="text" class="form-input" id="pincode" required maxlength="6" pattern="[1-9][0-9]{5}" placeholder="e.g. 560034">
+            </div>
           </div>
 
           <div class="form-group">
-            <label for="phone">Phone Number</label>
-            <input type="tel" class="form-input" id="phone" required placeholder="9876543210">
+            <label for="streetArea"><i class="fas fa-road" style="color: var(--accent);"></i> Society / Street & Landmark</label>
+            <input type="text" class="form-input" id="streetArea" required placeholder="e.g. 12th Main Road, Koramangala 4th Block">
           </div>
 
           <div class="payment-method-selector">
@@ -622,13 +655,42 @@
         if (el) el.textContent = count;
     }
 
+    function updateCitySlaBadge(cityVal) {
+        const slaMap = {
+            'Bangalore': '⚡ Avg 7.2m Dispatch • Darkstore Ready',
+            'Delhi NCR': '⚡ Avg 7.8m Dispatch • Darkstore Ready',
+            'Mumbai': '⚡ Avg 8.1m Dispatch • Darkstore Ready',
+            'Hyderabad': '⚡ Avg 7.9m Dispatch • Darkstore Ready',
+            'Pune': '⚡ Avg 8.4m Dispatch • Darkstore Ready',
+            'Chennai': '⚡ Avg 8.2m Dispatch • Darkstore Ready',
+            'Kolkata': '⚡ Avg 8.5m Dispatch • Darkstore Ready',
+            'Ahmedabad': '⚡ Avg 8.3m Dispatch • Darkstore Ready'
+        };
+        const badge = document.getElementById('citySlaBadge');
+        if (badge) {
+            badge.textContent = slaMap[cityVal] || '⚡ 10-Min SLA Active';
+        }
+    }
+
     async function placeOrder(event) {
         event.preventDefault();
 
         // Get form values
         const fullName = document.getElementById('fullName').value.trim();
-        const address = document.getElementById('address').value.trim();
         const phone = document.getElementById('phone').value.trim();
+        const citySelector = document.getElementById('citySelector');
+        const city = (citySelector ? citySelector.value.trim() : '') || 'Bangalore';
+        const flatNo = document.getElementById('flatNo') ? document.getElementById('flatNo').value.trim() : '';
+        const streetArea = document.getElementById('streetArea') ? document.getElementById('streetArea').value.trim() : '';
+        const pincode = document.getElementById('pincode') ? document.getElementById('pincode').value.trim() : '';
+        
+        let address = '';
+        if (flatNo || streetArea || pincode) {
+            address = `${flatNo}, ${streetArea}, ${city} - ${pincode}`.trim();
+        } else if (document.getElementById('address')) {
+            address = document.getElementById('address').value.trim();
+        }
+
         const cart = JSON.parse(localStorage.getItem('cart')) || [];
 
         // Validation
@@ -638,13 +700,21 @@
             return;
         }
 
-        if (!fullName || !address || !phone) {
-            alert('Please fill in all required delivery fields.');
+        if (!fullName || !phone) {
+            alert('Please provide your full name and mobile number.');
             return;
         }
 
-        if (address.length < 3) {
-            alert('Please provide a valid delivery address (at least 3 characters).');
+        if (pincode) {
+            const pinRegex = /^[1-9]\d{5}$/;
+            if (!pinRegex.test(pincode)) {
+                alert('Please provide a valid 6-digit Indian postal PIN code.');
+                return;
+            }
+        }
+
+        if (!address || address.length < 5) {
+            alert('Please fill in complete delivery address details.');
             return;
         }
 
@@ -676,6 +746,7 @@
                         full_name: fullName,
                         phone_number: phone,
                         address: address,
+                        city: city,
                         products: cart
                     })
                 });
@@ -703,7 +774,8 @@
                         email: "{{ session.get('email', '') }}"
                     },
                     notes: {
-                        address: address
+                        address: address,
+                        city: city
                     },
                     theme: {
                         color: "#0c831f"
@@ -725,6 +797,7 @@
                                     full_name: fullName,
                                     phone_number: phone,
                                     address: address,
+                                    city: city,
                                     products: cart
                                 })
                             });
@@ -769,6 +842,7 @@
                                         full_name: fullName,
                                         phone_number: phone,
                                         address: address,
+                                        city: city,
                                         products: cart
                                     })
                                 });
@@ -820,6 +894,7 @@
                         full_name: fullName,
                         phone_number: phone,
                         address: address,
+                        city: city,
                         products: cart
                     })
                 });
