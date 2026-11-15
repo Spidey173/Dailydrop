@@ -44,7 +44,8 @@ class InventoryReservationService:
         redis_decrements: Dict[int, int] = {}
 
         # 1. Distributed Redis Lua Script (< 1ms fast-fail)
-        for r_pid, required_qty in item_quantities.items():
+        for r_pid in sorted(item_quantities.keys()):
+            required_qty = item_quantities[r_pid]
             cursor.execute("SELECT name, stock FROM products WHERE product_id = %s", (r_pid,))
             p_info = cursor.fetchone()
             avail_stock = (p_info['stock'] if isinstance(p_info, dict) else p_info[1]) if p_info else None
@@ -64,7 +65,8 @@ class InventoryReservationService:
 
         # 2. Relational PostgreSQL Atomic Update (Authoritative Source of Truth):
         # UPDATE products SET stock = stock - %s WHERE product_id = %s AND stock >= %s
-        for r_pid, required_qty in item_quantities.items():
+        for r_pid in sorted(item_quantities.keys()):
+            required_qty = item_quantities[r_pid]
             cursor.execute(
                 "UPDATE products SET stock = stock - %s WHERE product_id = %s AND stock >= %s",
                 (required_qty, r_pid, required_qty)
