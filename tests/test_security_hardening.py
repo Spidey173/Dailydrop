@@ -97,7 +97,12 @@ def test_serverless_dev_uses_random_key_when_missing():
     """Verify that in dev/test, a missing SECRET_KEY falls back to a random per-process key."""
     import os
     from api.index import _init_serverless_app
+    from config import Config, ProductionConfig
     old_env = dict(os.environ)
+    orig_cfg_secret = Config.SECRET_KEY
+    orig_prod_secret = ProductionConfig.SECRET_KEY
+    orig_cfg_redis = Config.REDIS_ENABLED
+    orig_prod_redis = ProductionConfig.REDIS_ENABLED
     try:
         os.environ['VERCEL'] = '1'
         os.environ['FLASK_ENV'] = 'development'
@@ -109,6 +114,10 @@ def test_serverless_dev_uses_random_key_when_missing():
     finally:
         os.environ.clear()
         os.environ.update(old_env)
+        Config.SECRET_KEY = orig_cfg_secret
+        ProductionConfig.SECRET_KEY = orig_prod_secret
+        Config.REDIS_ENABLED = orig_cfg_redis
+        ProductionConfig.REDIS_ENABLED = orig_prod_redis
 
 
 # =========================================================================

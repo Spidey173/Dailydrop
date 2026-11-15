@@ -33,15 +33,33 @@ def test_redis_service_unmocked_methods_have_no_name_error():
 
     orig_enabled = Config.REDIS_ENABLED
     orig_url = Config.REDIS_URL
+    orig_client = RedisService._client
+    orig_raw_client = RedisService._raw_client
+    orig_pool = RedisService._pool
+    orig_raw_pool = RedisService._raw_pool
+    orig_fail = RedisService._last_failure_time
     try:
+        RedisService._client = None
+        RedisService._raw_client = None
+        RedisService._pool = None
+        RedisService._raw_pool = None
+        RedisService._last_failure_time = 0.0
         Config.REDIS_ENABLED = True
         Config.REDIS_URL = 'redis://127.0.0.1:9999/0'
+
         # Pointed at unreachable port; must return None or fail with connection error, NEVER NameError
         client = RedisService._real_get_client()
         assert client is None
+
+        RedisService._last_failure_time = 0.0
         raw_client = RedisService._real_get_raw_client()
         assert raw_client is None
     finally:
+        RedisService._client = orig_client
+        RedisService._raw_client = orig_raw_client
+        RedisService._pool = orig_pool
+        RedisService._raw_pool = orig_raw_pool
+        RedisService._last_failure_time = orig_fail
         Config.REDIS_ENABLED = orig_enabled
         Config.REDIS_URL = orig_url
 
