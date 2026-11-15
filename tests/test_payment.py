@@ -58,6 +58,31 @@ def test_payment_signature_verification():
     assert PaymentService.verify_payment_signature(order_id, payment_id, "invalid_tampered_sig") is False
 
 
+def test_demo_payment_signature_flag_gating(monkeypatch):
+    """Verify demo_auto_verified signature is gated by DEMO_PAYMENTS env var."""
+    key_secret = "test_key_secret_flag_gating_777"
+    Config.RAZORPAY_KEY_SECRET = key_secret
+    order_id = "order_demo_flag_123"
+    payment_id = "pay_demo_flag_123"
+    demo_sig = f"demo_auto_verified_{order_id}"
+
+    # Compute valid real HMAC signature
+    msg = f"{order_id}|{payment_id}".encode("utf-8")
+    real_sig = hmac.new(key_secret.encode("utf-8"), msg, hashlib.sha256).hexdigest()
+
+    # 1. With DEMO_PAYMENTS off (default)
+    monkeypatch.setenv("DEMO_PAYMENTS", "false")
+    Config.DEMO_PAYMENTS = False
+    assert PaymentService.verify_payment_signature(order_id, payment_id, demo_sig) is False
+    assert PaymentService.verify_payment_signature(order_id, payment_id, real_sig) is True
+
+    # 2. With DEMO_PAYMENTS on
+    monkeypatch.setenv("DEMO_PAYMENTS", "true")
+    Config.DEMO_PAYMENTS = True
+    assert PaymentService.verify_payment_signature(order_id, payment_id, demo_sig) is True
+    assert PaymentService.verify_payment_signature(order_id, payment_id, real_sig) is True
+
+
 def test_payment_routes_require_login():
     """Test payment endpoints reject unauthenticated users."""
     app = create_app('testing')

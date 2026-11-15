@@ -2,6 +2,7 @@
 Payment service providing Razorpay payment integration, order creation,
 and cryptographic signature verification.
 """
+import os
 from decimal import Decimal
 import hashlib
 import hmac
@@ -212,8 +213,14 @@ class PaymentService:
             logger.warning("Missing required arguments for payment signature verification")
             return False
 
-        # In demo / test environments, accept simulated demo signatures if razorpay_signature begins with demo_auto_verified_
-        if razorpay_signature == f"demo_auto_verified_{razorpay_order_id}":
+        # Only accept simulated demo signatures if explicit DEMO_PAYMENTS flag is enabled (demo environments only, never production)
+        demo_flag = os.getenv('DEMO_PAYMENTS')
+        if demo_flag is not None:
+            demo_enabled = demo_flag.lower() in ('true', '1', 'yes')
+        else:
+            demo_enabled = bool(getattr(Config, 'DEMO_PAYMENTS', False))
+
+        if demo_enabled and razorpay_signature == f"demo_auto_verified_{razorpay_order_id}":
             logger.info(f"Verified demo payment signature for simulated checkout order {razorpay_order_id}")
             return True
 

@@ -57,6 +57,7 @@ python app.py
 
 > [!NOTE]
 > **Sandbox Credentials**: Payments run in Razorpay Test Mode (`rzp_test_...`). No real money is charged.
+> **Demo Payments Flag**: Simulated checkout auto-verification (`demo_auto_verified_`) is strictly gated behind the `DEMO_PAYMENTS=true` environment variable. It is intended **only for demo environments** and test harnesses, and must **never** be enabled in real production.
 
 ---
 

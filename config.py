@@ -111,6 +111,7 @@ class Config:
     RAZORPAY_KEY_ID = os.getenv('RAZORPAY_KEY_ID', '')
     RAZORPAY_KEY_SECRET = os.getenv('RAZORPAY_KEY_SECRET', '')
     RAZORPAY_WEBHOOK_SECRET = os.getenv('RAZORPAY_WEBHOOK_SECRET', os.getenv('RAZORPAY_KEY_SECRET', ''))
+    DEMO_PAYMENTS = os.getenv('DEMO_PAYMENTS', 'false').lower() in ('true', '1', 'yes')
 
     @classmethod
     def validate_config(cls, env_name: Optional[str] = None) -> bool:
@@ -161,6 +162,7 @@ class TestingConfig(Config):
     TESTING = True
     WTF_CSRF_ENABLED = False
     RATELIMIT_ENABLED = False
+    DEMO_PAYMENTS = True
     SECRET_KEY = os.getenv('SECRET_KEY', 'test-mock-secret-key-32bytes-secure-pytest')
     DATABASE_URL = os.getenv('DATABASE_URL') or 'sqlite:///:memory:'
 
