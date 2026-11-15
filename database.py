@@ -11,7 +11,7 @@ import time
 import json
 import logging
 from typing import Optional, List, Dict, Any, Tuple
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from contextlib import contextmanager
 
 from psycopg2 import pool
@@ -735,7 +735,7 @@ def _get_fallback_rfm_customers() -> List[Dict[str, Any]]:
         orders = get_all_orders_with_user_info()
         if len(orders) >= 5:
             users_map: Dict[int, Dict[str, Any]] = {}
-            now = datetime(2026, 11, 1)
+            now = datetime.now(timezone.utc)
             for o in orders:
                 uid = o.get('user_id')
                 if not uid:
@@ -764,6 +764,8 @@ def _get_fallback_rfm_customers() -> List[Dict[str, Any]]:
                     dt = odate
                 else:
                     dt = now
+                if dt.tzinfo is None:
+                    dt = dt.replace(tzinfo=timezone.utc)
                 if u['last_order_date'] is None or dt > u['last_order_date']:
                     u['last_order_date'] = dt
 
@@ -936,7 +938,7 @@ def get_unified_analytics(days: int = 30) -> Dict[str, Any]:
                                 o.user_id,
                                 COUNT(o.order_id) AS total_orders,
                                 SUM(o.total_amount) AS total_spend,
-                                EXTRACT(DAY FROM ('2026-11-01'::timestamp - MAX(o.order_date)))::integer AS recency_days
+                                EXTRACT(DAY FROM (CURRENT_TIMESTAMP - MAX(o.order_date)))::integer AS recency_days
                             FROM orders o
                             WHERE o.status = 'Delivered'
                             GROUP BY o.user_id
@@ -979,7 +981,7 @@ def get_unified_analytics(days: int = 30) -> Dict[str, Any]:
                                 COUNT(o.order_id) AS total_orders,
                                 SUM(o.total_amount) AS total_spend,
                                 MAX(o.order_date) as last_order_date,
-                                EXTRACT(DAY FROM ('2026-11-01'::timestamp - MAX(o.order_date)))::integer AS recency_days
+                                EXTRACT(DAY FROM (CURRENT_TIMESTAMP - MAX(o.order_date)))::integer AS recency_days
                             FROM orders o
                             WHERE o.status = 'Delivered'
                             GROUP BY o.user_id

@@ -3288,7 +3288,7 @@ WITH customer_aggregates AS (
         COUNT(o.order_id) AS total_orders,
         SUM(o.total_amount) AS total_spend,
         ROUND(AVG(o.total_amount), 2) AS avg_basket_size,
-        EXTRACT(DAY FROM ('2026-11-01'::timestamp - MAX(o.order_date)))::integer AS recency_days
+        EXTRACT(DAY FROM (CURRENT_TIMESTAMP - MAX(o.order_date)))::integer AS recency_days
     FROM orders o
     WHERE o.status = 'Delivered'
     GROUP BY o.user_id, o.full_name, o.city
