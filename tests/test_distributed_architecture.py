@@ -8,6 +8,7 @@ Tests for DailyDrop Distributed Architecture & Production Upgrades:
 """
 
 import uuid
+from datetime import datetime, timezone, timedelta
 import pytest
 from services.redis_service import RedisService
 from services.idempotency_service import IdempotencyService
@@ -255,3 +256,42 @@ class TestTransactionalOutboxAndAsyncQueue:
 
         enqueued_stock = TaskService.enqueue_low_stock_check([1, 2])
         assert enqueued_stock is True
+
+    def test_outbox_stale_claim_recovery(self):
+        """
+        Verify that claim_pending_events re-claims stale IN_PROGRESS events
+        whose claimed_at is older than 10 minutes, but ignores fresh IN_PROGRESS events.
+        """
+        now = datetime.now(timezone.utc)
+        stale_time = now - timedelta(minutes=15)
+        fresh_time = now - timedelta(minutes=2)
+
+        stale_event_id = f"evt_stale_{uuid.uuid4().hex[:8]}"
+        fresh_event_id = f"evt_fresh_{uuid.uuid4().hex[:8]}"
+
+        with get_db_connection() as conn:
+            with conn.cursor() as cursor:
+                # Insert stale IN_PROGRESS event (claimed 15m ago)
+                cursor.execute(
+                    """
+                    INSERT INTO outbox_events (event_id, event_type, aggregate_type, aggregate_id, payload, status, claimed_at)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                    """,
+                    (stale_event_id, 'TEST_EVENT', 'order', '101', '{"test": 1}', 'IN_PROGRESS', stale_time)
+                )
+                # Insert fresh IN_PROGRESS event (claimed 2m ago)
+                cursor.execute(
+                    """
+                    INSERT INTO outbox_events (event_id, event_type, aggregate_type, aggregate_id, payload, status, claimed_at)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                    """,
+                    (fresh_event_id, 'TEST_EVENT', 'order', '102', '{"test": 2}', 'IN_PROGRESS', fresh_time)
+                )
+
+        # Claim events
+        claimed = OutboxService.claim_pending_events(limit=50)
+        claimed_ids = [e['event_id'] for e in claimed]
+
+        # Stale event MUST be re-claimed; fresh event MUST NOT be re-claimed
+        assert stale_event_id in claimed_ids, "Stale IN_PROGRESS event was not re-claimed!"
+        assert fresh_event_id not in claimed_ids, "Fresh IN_PROGRESS event was incorrectly re-claimed!"

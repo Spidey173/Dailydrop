@@ -255,8 +255,10 @@ def init_database() -> None:
                         retry_count INTEGER DEFAULT 0,
                         error_message TEXT,
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        processed_at TIMESTAMP
+                        processed_at TIMESTAMP,
+                        claimed_at TIMESTAMP
                     );
+                    ALTER TABLE outbox_events ADD COLUMN IF NOT EXISTS claimed_at TIMESTAMP;
                 ''')
 
                 # Performance indexes for fast lookups
@@ -272,6 +274,7 @@ def init_database() -> None:
                     CREATE INDEX IF NOT EXISTS idx_wishlist_product_id ON wishlist(product_id);
                     CREATE INDEX IF NOT EXISTS idx_outbox_status_created ON outbox_events(status, created_at);
                     CREATE INDEX IF NOT EXISTS idx_outbox_event_id ON outbox_events(event_id);
+                    CREATE INDEX IF NOT EXISTS idx_outbox_claimed_at ON outbox_events(status, claimed_at);
                 ''')
 
                 # Seed admin user if needed

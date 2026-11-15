@@ -83,6 +83,10 @@ def translate_query(query: str) -> str:
     q = re.sub(r'::[a-zA-Z0-9_]+', '', q)
     # Convert CURRENT_DATE - INTERVAL 'x days'
     q = re.sub(r"CURRENT_DATE\s*-\s*INTERVAL\s*'(\d+)\s*days'", r"date('now', '-\1 days')", q, flags=re.IGNORECASE)
+    # Convert NOW() / CURRENT_TIMESTAMP - INTERVAL 'x minutes'
+    q = re.sub(r"(?:NOW\(\)|CURRENT_TIMESTAMP)\s*-\s*INTERVAL\s*'(\d+)\s*minutes'", r"datetime('now', '-\1 minutes')", q, flags=re.IGNORECASE)
+    # Convert NOW() -> datetime('now')
+    q = re.sub(r"\bNOW\(\)", "datetime('now')", q, flags=re.IGNORECASE)
     # Parameter placeholders: %s -> ?
     q = q.replace("%s", "?")
     return q
@@ -302,7 +306,8 @@ def _seed_test_database():
             retry_count INTEGER DEFAULT 0,
             error_message TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            processed_at TIMESTAMP
+            processed_at TIMESTAMP,
+            claimed_at TIMESTAMP
         );
     ''')
 

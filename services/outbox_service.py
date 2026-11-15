@@ -117,6 +117,7 @@ class OutboxService:
                             '''
                             SELECT * FROM outbox_events
                             WHERE status = 'PENDING'
+                               OR (status = 'IN_PROGRESS' AND claimed_at < NOW() - INTERVAL '10 minutes')
                             ORDER BY created_at ASC
                             LIMIT %s
                             FOR UPDATE SKIP LOCKED
@@ -129,6 +130,7 @@ class OutboxService:
                             '''
                             SELECT * FROM outbox_events
                             WHERE status = 'PENDING'
+                               OR (status = 'IN_PROGRESS' AND claimed_at < NOW() - INTERVAL '10 minutes')
                             ORDER BY created_at ASC
                             LIMIT %s
                             ''',
@@ -143,7 +145,7 @@ class OutboxService:
                     cursor.execute(
                         f'''
                         UPDATE outbox_events
-                        SET status = 'IN_PROGRESS'
+                        SET status = 'IN_PROGRESS', claimed_at = CURRENT_TIMESTAMP
                         WHERE event_id IN ({format_strings})
                         ''',
                         tuple(event_ids)
