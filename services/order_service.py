@@ -113,9 +113,10 @@ class OrderService:
             with get_db_connection() as conn:
                 with conn.cursor() as cursor:
                     # 1. Catalog Validation & Authoritative Pricing
-                    valid, err, resolved_items, item_quantities, authoritative_total = (
-                        CatalogValidationService.validate_and_resolve_cart(cursor, items_list)
-                    )
+                    cart_res = CatalogValidationService.validate_and_resolve_cart(cursor, items_list)
+                    valid, err, resolved_items, item_quantities, authoritative_total = cart_res[:5]
+                    item_stocks = getattr(cart_res, 'item_stocks', {})
+                    item_names = getattr(cart_res, 'item_names', {})
                     if not valid:
                         conn.rollback()
                         return False, err or 'Catalog validation failed', None
@@ -124,7 +125,9 @@ class OrderService:
                     res_ok, res_err, redis_decrements = InventoryReservationService.reserve_inventory(
                         cursor=cursor,
                         conn=conn,
-                        item_quantities=item_quantities
+                        item_quantities=item_quantities,
+                        item_stocks=item_stocks,
+                        item_names=item_names
                     )
                     if not res_ok:
                         return False, res_err or 'Inventory reservation failed', None

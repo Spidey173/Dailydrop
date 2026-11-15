@@ -32,11 +32,13 @@ class InventoryReservationService:
         cls,
         cursor: Any,
         conn: Any,
-        item_quantities: Dict[int, int]
+        item_quantities: Dict[int, int],
+        item_stocks: Optional[Dict[int, int]] = None,
+        item_names: Optional[Dict[int, str]] = None
     ) -> Tuple[bool, Optional[str], Dict[int, int]]:
         """
         Reserves inventory across Redis memory (sub-millisecond fast fail)
-        and ACID relational PostgreSQL.
+        and ACID relational PostgreSQL. Avoids redundant SELECT queries when item_stocks is provided.
 
         Returns:
             Tuple of (success, error_message, redis_decrements)
@@ -46,10 +48,14 @@ class InventoryReservationService:
         # 1. Distributed Redis Lua Script (< 1ms fast-fail)
         for r_pid in sorted(item_quantities.keys()):
             required_qty = item_quantities[r_pid]
-            cursor.execute("SELECT name, stock FROM products WHERE product_id = %s", (r_pid,))
-            p_info = cursor.fetchone()
-            avail_stock = (p_info['stock'] if isinstance(p_info, dict) else p_info[1]) if p_info else None
-            p_name = (p_info['name'] if isinstance(p_info, dict) else p_info[0]) if p_info else f"Product #{r_pid}"
+            if item_stocks is not None and r_pid in item_stocks:
+                avail_stock = item_stocks[r_pid]
+                p_name = item_names.get(r_pid, f"Product #{r_pid}") if item_names else f"Product #{r_pid}"
+            else:
+                cursor.execute("SELECT name, stock FROM products WHERE product_id = %s", (r_pid,))
+                p_info = cursor.fetchone()
+                avail_stock = (p_info['stock'] if isinstance(p_info, dict) else p_info[1]) if p_info else None
+                p_name = (p_info['name'] if isinstance(p_info, dict) else p_info[0]) if p_info else f"Product #{r_pid}"
 
             success, msg, rem = RedisService.atomic_decrement_stock(
                 product_id=r_pid,

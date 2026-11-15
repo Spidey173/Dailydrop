@@ -16,6 +16,19 @@ DELIVERY_FEE = Decimal('30.00')
 FREE_FEE = Decimal('0.00')
 
 
+class ValidationResult(tuple):
+    """
+    Tuple-compatible result preserving 5-element unpacking:
+        (valid, error_message, resolved_items, item_quantities, authoritative_total)
+    while carrying pre-fetched item_stocks and item_names to avoid N+1 queries.
+    """
+    def __new__(cls, valid, err, resolved_items, item_quantities, authoritative_total, item_stocks=None, item_names=None):
+        inst = super().__new__(cls, (valid, err, resolved_items, item_quantities, authoritative_total))
+        inst.item_stocks = item_stocks or {}
+        inst.item_names = item_names or {}
+        return inst
+
+
 class CatalogValidationService:
     """Handles catalog resolution, item validation, and authoritative price calculation."""
 
@@ -27,18 +40,47 @@ class CatalogValidationService:
     ) -> Tuple[bool, Optional[str], List[Dict[str, Any]], Dict[int, int], float]:
         """
         Inspect cart items and strictly resolve against real catalog products using Decimal calculations.
+        Batches product ID lookups using product_id = ANY(%s) to eliminate N+1 queries.
         Returns:
-            (success, error_message, resolved_items, item_quantities, authoritative_total)
+            ValidationResult compatible with (success, error_message, resolved_items, item_quantities, authoritative_total)
         """
         resolved_items = []
         item_quantities = defaultdict(int)
+        item_stocks = {}
+        item_names = {}
 
+        # 1. Collect all numeric product IDs for batch lookup
+        numeric_pids = []
         for item in items_list:
             if not isinstance(item, dict):
-                return False, 'Invalid cart item structure', [], {}, 0.0
+                return ValidationResult(False, 'Invalid cart item structure', [], {}, 0.0)
+            pid = item.get('product_id') or item.get('id')
+            if pid is not None:
+                try:
+                    numeric_pids.append(int(pid))
+                except (ValueError, TypeError):
+                    pass
+
+        # 2. Batch query products by ID using product_id = ANY(%s) to eliminate N+1 roundtrips
+        products_by_id = {}
+        if numeric_pids:
+            try:
+                unique_pids = list(set(numeric_pids))
+                cursor.execute(
+                    "SELECT product_id, name, stock, price, image_path FROM products WHERE product_id = ANY(%s)",
+                    (unique_pids,)
+                )
+                for r in cursor.fetchall():
+                    pid_val = r['product_id'] if isinstance(r, dict) else r[0]
+                    products_by_id[pid_val] = r
+            except Exception as db_err:
+                logger.error(f"Database error during batch product lookup: {db_err}")
+                return ValidationResult(False, 'Database error during catalog lookup', [], {}, 0.0)
+
+        for item in items_list:
             qty = int(item.get('quantity', 1))
             if qty <= 0:
-                return False, 'Product quantity must be at least 1', [], {}, 0.0
+                return ValidationResult(False, 'Product quantity must be at least 1', [], {}, 0.0)
 
             name = item.get('name', '')
             img = item.get('image') or item.get('image_path') or '/static/logo1.webp'
@@ -47,13 +89,9 @@ class CatalogValidationService:
             prod_row = None
             if pid is not None:
                 try:
-                    cursor.execute("SELECT product_id, name, stock, price, image_path FROM products WHERE product_id = %s", (int(pid),))
-                    prod_row = cursor.fetchone()
+                    prod_row = products_by_id.get(int(pid))
                 except (ValueError, TypeError):
                     prod_row = None
-                except Exception as db_err:
-                    logger.error(f"Database error during product lookup #{pid}: {db_err}")
-                    return False, 'Database error during catalog lookup', [], {}, 0.0
 
             if not prod_row and name:
                 try:
@@ -61,7 +99,7 @@ class CatalogValidationService:
                     prod_row = cursor.fetchone()
                 except Exception as db_err:
                     logger.error(f"Database error during product name lookup '{name}': {db_err}")
-                    return False, 'Database error during catalog lookup', [], {}, 0.0
+                    return ValidationResult(False, 'Database error during catalog lookup', [], {}, 0.0)
 
             if not prod_row and name:
                 try:
@@ -69,25 +107,29 @@ class CatalogValidationService:
                     prod_row = cursor.fetchone()
                 except Exception as db_err:
                     logger.error(f"Database error during product pattern lookup '{name}': {db_err}")
-                    return False, 'Database error during catalog lookup', [], {}, 0.0
+                    return ValidationResult(False, 'Database error during catalog lookup', [], {}, 0.0)
 
             if not prod_row:
                 identifier = name or (f"ID #{pid}" if pid else "item")
                 logger.warning(f"Rejected checkout: Product '{identifier}' not found in catalog database.")
-                return False, f"Product '{identifier}' not found in catalog", [], {}, 0.0
+                return ValidationResult(False, f"Product '{identifier}' not found in catalog", [], {}, 0.0)
 
             r_pid = prod_row['product_id'] if isinstance(prod_row, dict) else prod_row[0]
             r_name = prod_row['name'] if isinstance(prod_row, dict) else prod_row[1]
+            raw_stock = prod_row.get('stock') if isinstance(prod_row, dict) else prod_row[2]
             raw_price = prod_row.get('price') if isinstance(prod_row, dict) else prod_row[3]
+
+            item_stocks[r_pid] = raw_stock
+            item_names[r_pid] = r_name
 
             try:
                 dec_price = CurrencyService.to_decimal(raw_price)
                 if dec_price <= Decimal('0.00'):
                     logger.error(f"Non-positive authoritative price in catalog item #{r_pid} ('{r_name}')")
-                    return False, f"Pricing error for product '{r_name}'. Order cannot proceed.", [], {}, 0.0
+                    return ValidationResult(False, f"Pricing error for product '{r_name}'. Order cannot proceed.", [], {}, 0.0)
             except (ValueError, InvalidOperation):
                 logger.error(f"Missing or invalid authoritative price for catalog item #{r_pid} ('{r_name}')")
-                return False, f"Pricing error for product '{r_name}'. Order cannot proceed.", [], {}, 0.0
+                return ValidationResult(False, f"Pricing error for product '{r_name}'. Order cannot proceed.", [], {}, 0.0)
 
             r_price = float(dec_price)
             r_img = (prod_row['image_path'] if isinstance(prod_row, dict) else prod_row[4]) or img
@@ -116,4 +158,7 @@ class CatalogValidationService:
             i.pop('_subtotal_dec', None)
 
         authoritative_total = float(authoritative_total_dec)
-        return True, None, resolved_items, item_quantities, authoritative_total
+        return ValidationResult(
+            True, None, resolved_items, item_quantities, authoritative_total,
+            item_stocks=item_stocks, item_names=item_names
+        )

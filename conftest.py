@@ -103,6 +103,20 @@ class SQLiteCursorWrapper:
     def execute(self, sql: str, params=None):
         with _SQLITE_LOCK:
             translated = translate_query(sql)
+            if '= ANY(?)' in translated and params:
+                new_params = []
+                for p in params:
+                    if isinstance(p, (list, tuple)):
+                        if len(p) == 0:
+                            translated = translated.replace('= ANY(?)', 'IN (NULL)')
+                        else:
+                            placeholders = ', '.join(['?'] * len(p))
+                            translated = translated.replace('= ANY(?)', f'IN ({placeholders})')
+                            new_params.extend(p)
+                    else:
+                        new_params.append(p)
+                params = tuple(new_params)
+
             statements = [s.strip() for s in translated.split(';') if s.strip()]
             if not statements:
                 return self
