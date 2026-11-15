@@ -92,23 +92,55 @@ def test_payment_routes_require_login():
         assert resp.status_code == 302
         assert '/login' in resp.headers.get('Location', '')
 
-        # POST /api/v1/payment/create-order requires login
+        # POST /api/v1/payment/create-order requires login (without products payload)
         resp = client.post('/api/v1/payment/create-order', json={})
-        assert resp.status_code in [302, 401]
+        assert resp.status_code == 401
+
+        # POST /api/v1/payment/create-order requires login (with products payload)
+        resp_products = client.post('/api/v1/payment/create-order', json={
+            'products': [{'id': 1, 'name': 'Milk', 'price': 50.0, 'quantity': 1}]
+        })
+        assert resp_products.status_code == 401
 
         # POST /api/v1/payment/verify requires login
         resp = client.post('/api/v1/payment/verify', json={})
-        assert resp.status_code in [302, 401]
+        assert resp.status_code == 401
 
 
 def test_api_create_order_minimum_amount():
     """Test /api/create-order rejects amounts under 100 paise (HTTP 400)."""
     app = create_app('testing')
     with app.test_client() as client:
+        with client.session_transaction() as sess:
+            sess['user_id'] = 1
+            sess['user_role'] = 'customer'
         resp = client.post('/api/create-order', json={'amount': 50, 'currency': 'INR'})
         assert resp.status_code == 400
         data = resp.get_json()
         assert "100 paise" in (data.get('message', '') or data.get('error', ''))
+
+
+def test_api_create_order_authenticated_succeeds(monkeypatch):
+    """Test /api/create-order succeeds when user is authenticated."""
+    from unittest.mock import MagicMock
+    from services.payment_service import PaymentService
+    app = create_app('testing')
+    with app.test_client() as client:
+        with client.session_transaction() as sess:
+            sess['user_id'] = 1
+            sess['name'] = 'Auth Tester'
+            sess['user_role'] = 'customer'
+
+        mock_create = MagicMock(return_value=(True, 'Order created', {'id': 'order_auth_test_123', 'amount': 25000, 'currency': 'INR'}, 200))
+        monkeypatch.setattr(PaymentService, 'create_order', mock_create)
+
+        resp = client.post('/api/v1/payment/create-order', json={
+            'amount': 25000,
+            'currency': 'INR'
+        })
+        assert resp.status_code == 200
+        assert resp.get_json().get('success') is True
+        assert resp.get_json().get('order_id') == 'order_auth_test_123'
 
 
 def test_api_verify_payment_validation():

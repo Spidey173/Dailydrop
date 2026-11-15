@@ -29,6 +29,8 @@ def require_login(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
+            if request.path.startswith('/api/') or request.is_json or request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return jsonify({'success': False, 'error': 'Unauthorized', 'message': 'Authentication required. Please log in.'}), 401
             return redirect(url_for('auth.login', next=request.url))
         return f(*args, **kwargs)
 

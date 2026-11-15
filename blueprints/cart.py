@@ -34,6 +34,7 @@ def payment() -> str:
 
 @cart_bp.route('/api/create-order', methods=['POST'], endpoint='api_create_order')
 @cart_bp.route('/api/v1/payment/create-order', methods=['POST'], endpoint='api_create_razorpay_order')
+@require_login
 def api_create_order() -> Tuple[Any, int]:
     """
     Initialize a Razorpay order.
@@ -54,12 +55,6 @@ def api_create_order() -> Tuple[Any, int]:
             return jsonify(cached_resp), (status_code or 200)
 
     data = request.get_json(silent=True) or {}
-
-    # Check unauthenticated access when no order data or products
-    if 'user_id' not in session and 'amount' not in data and 'products' not in data:
-        if idempotency_key:
-            IdempotencyService.release(idempotency_key)
-        return jsonify({'success': False, 'error': 'Unauthorized', 'message': 'Authentication required. Please log in.'}), 401
 
     products = data.get('products')
     currency = data.get('currency', 'INR')
@@ -176,6 +171,7 @@ def api_create_order() -> Tuple[Any, int]:
 
 @cart_bp.route('/api/verify-payment', methods=['POST'], endpoint='api_verify_payment')
 @cart_bp.route('/api/v1/payment/verify', methods=['POST'], endpoint='api_verify_razorpay_payment')
+@require_login
 def api_verify_payment() -> Tuple[Any, int]:
     """
     Cryptographically verify Razorpay payment signature and persist order.
