@@ -13,6 +13,7 @@ from database import get_db_connection
 from services.redis_service import RedisService
 from services.inventory_reservation_service import InventoryReservationService
 from services.order_service import OrderService
+from services.order_persistence_service import OrderPersistenceService
 
 
 @pytest.fixture
@@ -137,3 +138,54 @@ def test_active_reconciliation_syncs_cache_to_authoritative_database(app_client)
 
     # Verify Redis is now re-synchronized with PostgreSQL source of truth
     assert RedisService.get_stock(target_pid) == actual_stocks[target_pid]
+
+
+def test_order_persistence_fallback_preserves_stock_decrements(app_client):
+    """
+    Simulate the first INSERT in OrderPersistenceService.persist_order failing
+    (e.g., column mismatch on older schema). The fallback INSERT should succeed
+    AND previous stock decrements in the same transaction MUST NOT be undone.
+    """
+    with get_db_connection() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT product_id, stock FROM products WHERE stock >= 10 LIMIT 1")
+            prod = cursor.fetchone()
+            pid = prod['product_id'] if isinstance(prod, dict) else prod[0]
+            initial_stock = prod['stock'] if isinstance(prod, dict) else prod[1]
+
+    cart = [{"product_id": pid, "quantity": 2}]
+
+    real_persist = OrderPersistenceService.persist_order
+
+    def failing_first_insert_persist(cls, cursor, conn, *args, **kwargs):
+        real_exec = cursor.execute
+        first_called = [False]
+
+        def mock_exec(sql, params=None):
+            if not first_called[0] and "INSERT INTO orders" in sql:
+                first_called[0] = True
+                raise Exception("Simulated column missing: delivery_duration_minutes")
+            return real_exec(sql, params)
+
+        cursor.execute = mock_exec
+        return real_persist(cursor, conn, *args, **kwargs)
+
+    with patch.object(OrderPersistenceService, "persist_order", classmethod(failing_first_insert_persist)):
+        success, msg, order_id = OrderService.create_order(
+            user_id=1,
+            full_name="Fallback Tester",
+            phone_number="9876543210",
+            address="123 Test St",
+            products=cart,
+            total_amount=50.0
+        )
+        assert success is True
+        assert order_id is not None
+
+    with get_db_connection() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT stock FROM products WHERE product_id = %s", (pid,))
+            final_stock = cursor.fetchone()['stock']
+
+    assert final_stock == initial_stock - 2
+
