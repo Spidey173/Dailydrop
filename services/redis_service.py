@@ -8,6 +8,7 @@ Provides:
 4. Graceful fallbacks when Redis is offline or unavailable.
 """
 
+import os
 import json
 import logging
 import time

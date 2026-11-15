@@ -25,6 +25,26 @@ def client():
         yield c
 
 
+def test_redis_service_unmocked_methods_have_no_name_error():
+    """Verify that unmocked get_client() and get_raw_client() do not raise NameError due to missing imports."""
+    from config import Config
+    from services.redis_service import RedisService
+
+    orig_enabled = Config.REDIS_ENABLED
+    orig_url = Config.REDIS_URL
+    try:
+        Config.REDIS_ENABLED = True
+        Config.REDIS_URL = 'redis://127.0.0.1:9999/0'
+        # Pointed at unreachable port; must return None or fail with connection error, NEVER NameError
+        client = RedisService._real_get_client()
+        assert client is None
+        raw_client = RedisService._real_get_raw_client()
+        assert raw_client is None
+    finally:
+        Config.REDIS_ENABLED = orig_enabled
+        Config.REDIS_URL = orig_url
+
+
 class TestFlashSaleConcurrency:
     """Tests for distributed Lua stock decrements and fast out-of-stock rejection."""
 

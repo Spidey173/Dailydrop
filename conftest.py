@@ -514,6 +514,8 @@ from services.redis_service import RedisService, _LUA_DECREMENT_STOCK, _LUA_ROLL
 from services.task_service import TaskService
 
 _MOCK_REDIS = MockRedisClient()
+RedisService._real_get_client = RedisService.get_client
+RedisService._real_get_raw_client = RedisService.get_raw_client
 RedisService._client = _MOCK_REDIS
 RedisService._raw_client = _MOCK_REDIS
 RedisService._decr_script = _MOCK_REDIS.register_script(_LUA_DECREMENT_STOCK)
