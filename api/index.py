@@ -19,20 +19,20 @@ from flask import Flask, render_template_string, jsonify
 
 def _init_serverless_app():
     # Secure serverless initialization: DATABASE_URL is injected via Vercel Environment Variables
-    import hashlib
     import secrets
     from config import INSECURE_SECRET_KEYS, Config, ProductionConfig
 
+    target_env = os.getenv('FLASK_ENV', 'production').lower()
+    is_production = bool(os.getenv('VERCEL')) and target_env not in ('development', 'testing')
+
     current_key = os.getenv('SECRET_KEY', '')
     if not current_key or len(current_key) < 16 or current_key in INSECURE_SECRET_KEYS:
-        # If SECRET_KEY is not explicitly defined in Vercel settings (or is an insecure placeholder),
-        # derive a strong, deployment-specific persistent key from the deployment's private DATABASE_URL
-        # so all serverless lambdas share the same key without dropping sessions or exposing secrets.
-        db_url = os.getenv('DATABASE_URL', '')
-        if db_url:
-            os.environ['SECRET_KEY'] = hashlib.sha256((db_url + ':dailydrop-app-secret-salt-2026').encode('utf-8')).hexdigest()
-        else:
-            os.environ['SECRET_KEY'] = secrets.token_hex(32)
+        if is_production:
+            raise ValueError(
+                "CRITICAL SECURITY CONFIGURATION ERROR: Production on Vercel requires a strong, unique SECRET_KEY environment variable. "
+                "Deriving keys from DATABASE_URL or using placeholder keys is prohibited."
+            )
+        os.environ['SECRET_KEY'] = secrets.token_hex(32)
     
     if os.getenv('SECRET_KEY'):
         Config.SECRET_KEY = os.environ['SECRET_KEY']

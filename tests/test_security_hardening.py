@@ -76,6 +76,41 @@ def test_insecure_secret_key_rejection_in_production():
         ProductionConfig.DATABASE_URL = orig_db
 
 
+def test_serverless_production_fails_fast_on_missing_secret_key():
+    """Verify that in Vercel production, missing SECRET_KEY fails fast and does not derive from DATABASE_URL."""
+    import os
+    from api.index import _init_serverless_app
+    old_env = dict(os.environ)
+    try:
+        os.environ['VERCEL'] = '1'
+        os.environ['FLASK_ENV'] = 'production'
+        os.environ['DATABASE_URL'] = 'postgresql://user:pass@localhost:5432/testdb'
+        os.environ.pop('SECRET_KEY', None)
+        with pytest.raises(ValueError, match="SECRET_KEY"):
+            _init_serverless_app()
+    finally:
+        os.environ.clear()
+        os.environ.update(old_env)
+
+
+def test_serverless_dev_uses_random_key_when_missing():
+    """Verify that in dev/test, a missing SECRET_KEY falls back to a random per-process key."""
+    import os
+    from api.index import _init_serverless_app
+    old_env = dict(os.environ)
+    try:
+        os.environ['VERCEL'] = '1'
+        os.environ['FLASK_ENV'] = 'development'
+        os.environ['DATABASE_URL'] = 'postgresql://user:pass@localhost:5432/testdb'
+        os.environ.pop('SECRET_KEY', None)
+        app = _init_serverless_app()
+        assert app is not None
+        assert len(os.environ.get('SECRET_KEY', '')) >= 32
+    finally:
+        os.environ.clear()
+        os.environ.update(old_env)
+
+
 # =========================================================================
 # 2. CSRF Enforcement Tests
 # =========================================================================
