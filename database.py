@@ -705,35 +705,14 @@ def get_product_by_name(name: str) -> Optional[Dict[str, Any]]:
 _ANALYTICS_CACHE: Dict[str, Tuple[float, Dict[str, Any]]] = {}
 _ANALYTICS_TTL_SECONDS = 300.0  # 5 minutes in-memory cache for ultra-fast, responsive dashboard
 
-_DEFAULT_CUSTOMER_PROFILES = [
-    {'user_id': 101, 'name': 'Aditya Sharma', 'email': 'aditya.sharma@gmail.com', 'phone': '+91 98201 44521', 'city': 'Bangalore', 'total_orders': 28, 'total_spend': 14850.00, 'avg_order_value': 530.36, 'recency_days': 24, 'last_order_str': '2026-10-08 18:42', 'segment': 'At Risk (High Value Churn)'},
-    {'user_id': 102, 'name': 'Priya Sundaram', 'email': 'priya.sundaram@outlook.com', 'phone': '+91 98450 12903', 'city': 'Bangalore', 'total_orders': 22, 'total_spend': 11920.00, 'avg_order_value': 541.82, 'recency_days': 26, 'last_order_str': '2026-10-06 20:15', 'segment': 'At Risk (High Value Churn)'},
-    {'user_id': 103, 'name': 'Vikram Malhotra', 'email': 'vikram.m@gmail.com', 'phone': '+91 99100 87234', 'city': 'Delhi NCR', 'total_orders': 19, 'total_spend': 10450.00, 'avg_order_value': 550.00, 'recency_days': 22, 'last_order_str': '2026-10-10 19:30', 'segment': 'At Risk (High Value Churn)'},
-    {'user_id': 104, 'name': 'Sneha Kulkarni', 'email': 'sneha.k@yahoo.com', 'phone': '+91 98220 54312', 'city': 'Pune', 'total_orders': 25, 'total_spend': 13200.00, 'avg_order_value': 528.00, 'recency_days': 28, 'last_order_str': '2026-10-04 11:20', 'segment': 'At Risk (High Value Churn)'},
-    {'user_id': 105, 'name': 'Rajesh Iyer', 'email': 'rajesh.iyer@gmail.com', 'phone': '+91 98400 32190', 'city': 'Mumbai', 'total_orders': 31, 'total_spend': 16750.00, 'avg_order_value': 540.32, 'recency_days': 25, 'last_order_str': '2026-10-07 14:10', 'segment': 'At Risk (High Value Churn)'},
-    {'user_id': 106, 'name': 'Ananya Verma', 'email': 'ananya.v@gmail.com', 'phone': '+91 98111 23456', 'city': 'Delhi NCR', 'total_orders': 34, 'total_spend': 18900.00, 'avg_order_value': 555.88, 'recency_days': 2, 'last_order_str': '2026-10-30 19:12', 'segment': 'Champions (VIP)'},
-    {'user_id': 107, 'name': 'Kavya Nair', 'email': 'kavya.nair@gmail.com', 'phone': '+91 97400 56789', 'city': 'Bangalore', 'total_orders': 30, 'total_spend': 16400.00, 'avg_order_value': 546.67, 'recency_days': 3, 'last_order_str': '2026-10-29 18:05', 'segment': 'Champions (VIP)'},
-    {'user_id': 108, 'name': 'Arjun Mehta', 'email': 'arjun.mehta@corp.in', 'phone': '+91 98210 98765', 'city': 'Mumbai', 'total_orders': 29, 'total_spend': 15600.00, 'avg_order_value': 537.93, 'recency_days': 1, 'last_order_str': '2026-10-31 21:00', 'segment': 'Champions (VIP)'},
-    {'user_id': 109, 'name': 'Rohan Deshmukh', 'email': 'rohan.d@gmail.com', 'phone': '+91 98811 44321', 'city': 'Pune', 'total_orders': 27, 'total_spend': 14200.00, 'avg_order_value': 525.93, 'recency_days': 4, 'last_order_str': '2026-10-28 20:30', 'segment': 'Champions (VIP)'},
-    {'user_id': 110, 'name': 'Siddharth Reddy', 'email': 'siddharth.r@tech.com', 'phone': '+91 99890 12345', 'city': 'Hyderabad', 'total_orders': 26, 'total_spend': 13950.00, 'avg_order_value': 536.54, 'recency_days': 2, 'last_order_str': '2026-10-30 17:45', 'segment': 'Champions (VIP)'},
-    {'user_id': 111, 'name': 'Divya Krishnan', 'email': 'divya.k@gmail.com', 'phone': '+91 98412 87654', 'city': 'Bangalore', 'total_orders': 18, 'total_spend': 9300.00, 'avg_order_value': 516.67, 'recency_days': 5, 'last_order_str': '2026-10-27 12:15', 'segment': 'Loyal Regulars'},
-    {'user_id': 112, 'name': 'Manish Gupta', 'email': 'manish.g@gmail.com', 'phone': '+91 98105 67890', 'city': 'Delhi NCR', 'total_orders': 16, 'total_spend': 8400.00, 'avg_order_value': 525.00, 'recency_days': 7, 'last_order_str': '2026-10-25 19:20', 'segment': 'Loyal Regulars'},
-    {'user_id': 113, 'name': 'Meera Joshi', 'email': 'meera.joshi@gmail.com', 'phone': '+91 98230 45678', 'city': 'Pune', 'total_orders': 15, 'total_spend': 7950.00, 'avg_order_value': 530.00, 'recency_days': 6, 'last_order_str': '2026-10-26 15:30', 'segment': 'Loyal Regulars'},
-    {'user_id': 114, 'name': 'Varun Hegde', 'email': 'varun.h@gmail.com', 'phone': '+91 99001 23456', 'city': 'Hyderabad', 'total_orders': 6, 'total_spend': 3250.00, 'avg_order_value': 541.67, 'recency_days': 3, 'last_order_str': '2026-10-29 14:10', 'segment': 'Recent / Promising'},
-    {'user_id': 115, 'name': 'Nikhil Saxena', 'email': 'nikhil.s@gmail.com', 'phone': '+91 98188 77665', 'city': 'Delhi NCR', 'total_orders': 4, 'total_spend': 2100.00, 'avg_order_value': 525.00, 'recency_days': 35, 'last_order_str': '2026-09-27 10:05', 'segment': 'Hibernating / Lost'},
-    {'user_id': 116, 'name': 'Tanvi Sethi', 'email': 'tanvi.sethi@gmail.com', 'phone': '+91 98100 45612', 'city': 'Delhi NCR', 'total_orders': 23, 'total_spend': 12100.00, 'avg_order_value': 526.09, 'recency_days': 23, 'last_order_str': '2026-10-09 16:45', 'segment': 'At Risk (High Value Churn)'},
-    {'user_id': 117, 'name': 'Harish Patel', 'email': 'harish.patel@gmail.com', 'phone': '+91 98250 88990', 'city': 'Mumbai', 'total_orders': 21, 'total_spend': 11400.00, 'avg_order_value': 542.86, 'recency_days': 27, 'last_order_str': '2026-10-05 13:20', 'segment': 'At Risk (High Value Churn)'},
-    {'user_id': 118, 'name': 'Shalini Nair', 'email': 'shalini.nair@gmail.com', 'phone': '+91 98470 66554', 'city': 'Bangalore', 'total_orders': 27, 'total_spend': 14900.00, 'avg_order_value': 551.85, 'recency_days': 2, 'last_order_str': '2026-10-30 20:45', 'segment': 'Champions (VIP)'},
-    {'user_id': 119, 'name': 'Amitabh Roy', 'email': 'amitabh.roy@gmail.com', 'phone': '+91 98300 22110', 'city': 'Bangalore', 'total_orders': 14, 'total_spend': 7400.00, 'avg_order_value': 528.57, 'recency_days': 8, 'last_order_str': '2026-10-24 11:30', 'segment': 'Loyal Regulars'},
-    {'user_id': 120, 'name': 'Deepak Choudhary', 'email': 'deepak.c@gmail.com', 'phone': '+91 98290 33445', 'city': 'Hyderabad', 'total_orders': 5, 'total_spend': 2650.00, 'avg_order_value': 530.00, 'recency_days': 4, 'last_order_str': '2026-10-28 17:15', 'segment': 'Recent / Promising'},
-]
+_DEFAULT_CUSTOMER_PROFILES: List[Dict[str, Any]] = []
 
 
 def _get_fallback_rfm_customers() -> List[Dict[str, Any]]:
-    """Compute customer RFM segments in Python over existing orders, falling back to rich demo profiles."""
+    """Compute customer RFM segments in Python over existing orders, returning empty list if insufficient data."""
     try:
         orders = get_all_orders_with_user_info()
-        if len(orders) >= 5:
+        if len(orders) >= 3:
             users_map: Dict[int, Dict[str, Any]] = {}
             now = datetime.now(timezone.utc)
             for o in orders:
@@ -743,9 +722,9 @@ def _get_fallback_rfm_customers() -> List[Dict[str, Any]]:
                 if uid not in users_map:
                     users_map[uid] = {
                         'user_id': uid,
-                        'name': str(o.get('full_name') or 'Valued Customer'),
-                        'email': str(o.get('user_email') or 'customer@dailydrop.com'),
-                        'phone': str(o.get('phone_number') or '+91 98765 00000'),
+                        'name': str(o.get('full_name') or 'Customer'),
+                        'email': str(o.get('user_email') or ''),
+                        'phone': str(o.get('phone_number') or ''),
                         'city': str(o.get('city') or 'Bangalore'),
                         'total_orders': 0,
                         'total_spend': 0.0,
@@ -769,7 +748,7 @@ def _get_fallback_rfm_customers() -> List[Dict[str, Any]]:
                 if u['last_order_date'] is None or dt > u['last_order_date']:
                     u['last_order_date'] = dt
 
-            if len(users_map) >= 3:
+            if len(users_map) >= 1:
                 cust_list = list(users_map.values())
                 for c in cust_list:
                     c['total_spend'] = round(c['total_spend'], 2)
@@ -789,7 +768,7 @@ def _get_fallback_rfm_customers() -> List[Dict[str, Any]]:
                 return cust_list
     except Exception as e:
         logger.debug(f"Fallback customer segmentation: {e}")
-    return list(_DEFAULT_CUSTOMER_PROFILES)
+    return []
 
 
 def clear_analytics_cache() -> None:
@@ -1179,24 +1158,10 @@ def get_unified_analytics(days: int = 30) -> Dict[str, Any]:
                     pass
 
                 if not market_basket:
-                    market_basket = [
-                        {'product_a': 'Pepsi Refreshing Soda Can (300 ml)', 'product_b': 'Sprite Clear Lemon-Lime Bottle (750 ml)', 'pair_orders': 17, 'lift': 7.62},
-                        {'product_a': 'Coca-Cola Refreshing Soda Can (300 ml)', 'product_b': 'Fanta Orange Soda Bottle (750 ml)', 'pair_orders': 17, 'lift': 6.47},
-                        {'product_a': "Cavin's Badam Flavoured Milk (200 ml)", 'product_b': 'Sting Energy Drink Pet Bottle (250 ml)', 'pair_orders': 17, 'lift': 5.82},
-                        {'product_a': 'Amul Rose Flavour Sweet Lassi (200 ml)', 'product_b': 'Real Lychee Fruit Lassi (200 ml)', 'pair_orders': 16, 'lift': 7.42},
-                        {'product_a': 'Fresh Mango Sweet Lassi (250 ml)', 'product_b': 'Sprite Lemon & Lime Can (300 ml)', 'pair_orders': 16, 'lift': 6.34},
-                        {'product_a': "Cavin's Badam Flavoured Milk (200 ml)", 'product_b': 'Pepsi Cola Soft Drink Bottle (750 ml)', 'pair_orders': 15, 'lift': 4.91}
-                    ]
+                    market_basket = []
 
                 if not cohort_matrix:
-                    cohort_matrix = [
-                        {'cohort': '2026-10', 'total_users': 44, 'm0': 100.0, 'm1': None, 'm2': None, 'm3': None, 'm4': None, 'm5': None},
-                        {'cohort': '2026-09', 'total_users': 27, 'm0': 100.0, 'm1': 81.5, 'm2': None, 'm3': None, 'm4': None, 'm5': None},
-                        {'cohort': '2026-08', 'total_users': 24, 'm0': 100.0, 'm1': 83.3, 'm2': 87.5, 'm3': None, 'm4': None, 'm5': None},
-                        {'cohort': '2026-07', 'total_users': 26, 'm0': 100.0, 'm1': 76.9, 'm2': 73.1, 'm3': 73.1, 'm4': None, 'm5': None},
-                        {'cohort': '2026-06', 'total_users': 24, 'm0': 100.0, 'm1': 95.8, 'm2': 95.8, 'm3': 95.8, 'm4': 91.7, 'm5': None},
-                        {'cohort': '2026-05', 'total_users': 27, 'm0': 100.0, 'm1': 66.7, 'm2': 66.7, 'm3': 70.4, 'm4': 66.7, 'm5': 59.3}
-                    ]
+                    cohort_matrix = []
 
                 at_risk_list = [c for c in rfm_customers if 'At Risk' in c.get('segment', '')]
                 vip_list = [c for c in rfm_customers if 'Champions' in c.get('segment', '')]
@@ -1330,22 +1295,8 @@ def get_unified_analytics(days: int = 30) -> Dict[str, Any]:
                         'at_risk_spend': sum(float(c.get('total_spend', 0.0)) for c in at_risk_fb),
                         'vip_spend': sum(float(c.get('total_spend', 0.0)) for c in vip_fb),
                         'abc_summary': [],
-                        'cohort_matrix': [
-                            {'cohort': '2026-10', 'total_users': 44, 'm0': 100.0, 'm1': None, 'm2': None, 'm3': None, 'm4': None, 'm5': None},
-                            {'cohort': '2026-09', 'total_users': 27, 'm0': 100.0, 'm1': 81.5, 'm2': None, 'm3': None, 'm4': None, 'm5': None},
-                            {'cohort': '2026-08', 'total_users': 24, 'm0': 100.0, 'm1': 83.3, 'm2': 87.5, 'm3': None, 'm4': None, 'm5': None},
-                            {'cohort': '2026-07', 'total_users': 26, 'm0': 100.0, 'm1': 76.9, 'm2': 73.1, 'm3': 73.1, 'm4': None, 'm5': None},
-                            {'cohort': '2026-06', 'total_users': 24, 'm0': 100.0, 'm1': 95.8, 'm2': 95.8, 'm3': 95.8, 'm4': 91.7, 'm5': None},
-                            {'cohort': '2026-05', 'total_users': 27, 'm0': 100.0, 'm1': 66.7, 'm2': 66.7, 'm3': 70.4, 'm4': 66.7, 'm5': 59.3}
-                        ],
-                        'market_basket': [
-                            {'product_a': 'Pepsi Refreshing Soda Can (300 ml)', 'product_b': 'Sprite Clear Lemon-Lime Bottle (750 ml)', 'pair_orders': 17, 'lift': 7.62},
-                            {'product_a': 'Coca-Cola Refreshing Soda Can (300 ml)', 'product_b': 'Fanta Orange Soda Bottle (750 ml)', 'pair_orders': 17, 'lift': 6.47},
-                            {'product_a': "Cavin's Badam Flavoured Milk (200 ml)", 'product_b': 'Sting Energy Drink Pet Bottle (250 ml)', 'pair_orders': 17, 'lift': 5.82},
-                            {'product_a': 'Amul Rose Flavour Sweet Lassi (200 ml)', 'product_b': 'Real Lychee Fruit Lassi (200 ml)', 'pair_orders': 16, 'lift': 7.42},
-                            {'product_a': 'Fresh Mango Sweet Lassi (250 ml)', 'product_b': 'Sprite Lemon & Lime Can (300 ml)', 'pair_orders': 16, 'lift': 6.34},
-                            {'product_a': "Cavin's Badam Flavoured Milk (200 ml)", 'product_b': 'Pepsi Cola Soft Drink Bottle (750 ml)', 'pair_orders': 15, 'lift': 4.91}
-                        ]
+                        'cohort_matrix': [],
+                        'market_basket': []
                     }
                     _ANALYTICS_CACHE[cache_key] = (now, analytics_result)
                     return analytics_result
