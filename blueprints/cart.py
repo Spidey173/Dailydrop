@@ -356,7 +356,39 @@ def api_verify_payment() -> Tuple[Any, int]:
     if not success:
         if idempotency_key:
             IdempotencyService.release(idempotency_key)
-        return jsonify({'success': False, 'error': message, 'message': message}), 500
+
+        # Payment was captured, but order could not be fulfilled (e.g. stock exhausted).
+        # Atomically record a REFUND_REQUIRED event in the outbox so financial reconciliation
+        # can process the refund reliably.
+        from services.outbox_service import OutboxService
+        try:
+            with get_db_connection() as conn:
+                with conn.cursor() as cursor:
+                    OutboxService.record_event(
+                        cursor=cursor,
+                        event_type='REFUND_REQUIRED',
+                        aggregate_type='payment',
+                        aggregate_id=razorpay_payment_id,
+                        payload={
+                            'payment_id': razorpay_payment_id,
+                            'razorpay_order_id': razorpay_order_id,
+                            'user_id': user_id,
+                            'amount': final_total,
+                            'reason': message or 'Post-payment order persistence failed',
+                            'products': products
+                        }
+                    )
+        except Exception as outbox_err:
+            logger.error(f"Failed to record REFUND_REQUIRED outbox event for payment {razorpay_payment_id}: {outbox_err}")
+
+        return jsonify({
+            'success': False,
+            'refund_status': 'INITIATED',
+            'payment_id': razorpay_payment_id,
+            'razorpay_order_id': razorpay_order_id,
+            'error': message,
+            'message': f"Payment captured, but order could not be fulfilled: {message}. An automated full refund has been requested."
+        }), 422
 
     try:
         delete_pending_order(razorpay_order_id)
@@ -486,8 +518,28 @@ def api_razorpay_webhook() -> Tuple[Any, int]:
                         logger.info(f"Webhook: Successfully recovered disconnected customer order #{rec_order_id} for user #{u_id}")
                         return jsonify({'status': 'order_recovered', 'order_id': rec_order_id}), 200
                     else:
-                        logger.error(f"Webhook: Failed to recover order from pending: {rec_msg}")
-                        return jsonify({'status': 'recovery_failed', 'error': rec_msg}), 500
+                        from services.outbox_service import OutboxService
+                        try:
+                            with get_db_connection() as conn:
+                                with conn.cursor() as cursor:
+                                    OutboxService.record_event(
+                                        cursor=cursor,
+                                        event_type='REFUND_REQUIRED',
+                                        aggregate_type='payment',
+                                        aggregate_id=rzp_payment_id or rzp_order_id,
+                                        payload={
+                                            'payment_id': rzp_payment_id or rzp_order_id,
+                                            'razorpay_order_id': rzp_order_id,
+                                            'user_id': u_id,
+                                            'amount': float(pending.get('total_amount', 0.0)),
+                                            'reason': rec_msg or 'Webhook order creation failed',
+                                            'products': pending.get('products_data')
+                                        }
+                                    )
+                        except Exception as outbox_err:
+                            logger.error(f"Webhook: Failed to record REFUND_REQUIRED event: {outbox_err}")
+                        logger.error(f"Webhook: Failed to recover order from pending: {rec_msg}. Recorded REFUND_REQUIRED event.")
+                        return jsonify({'status': 'recovery_failed', 'refund_required': True, 'error': rec_msg}), 500
 
     elif event_type == 'payment.failed':
         # Safely log payment failure without regressing completed orders
