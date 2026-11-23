@@ -155,19 +155,11 @@ ensure_env() {
 
 # Initialize / Seed Database
 init_db() {
-    log_info "Initializing Neon PostgreSQL database..."
-    if $PYTHON_CMD -c "
-from database import init_database
-try:
-    init_database()
-    print('Neon PostgreSQL database checked & initialized successfully.')
-except Exception as e:
-    print(f'Database initialization note: {e}')
-    exit(1)
-"; then
-        log_success "Neon PostgreSQL Database is ready."
+    log_info "Applying database migrations and seeding..."
+    if $PYTHON_CMD -m migrations.runner && $PYTHON_CMD seed.py; then
+        log_success "Database migrations and seeding completed successfully."
     else
-        log_warn "Database initialization had a warning. Proceeding with application startup..."
+        log_warn "Database migration/seed had a warning. Proceeding with application startup..."
     fi
 }
 

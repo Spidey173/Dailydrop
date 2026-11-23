@@ -109,282 +109,33 @@ _IS_DB_INITIALIZED = False
 
 def init_database() -> None:
     """
-    Initialize database schema and indexes on Neon PostgreSQL once.
-    Uses an ultra-fast check to skip heavy DDL/seeding if already initialized.
+    Validate database connection pool health and warm runtime caches.
+    Schema migrations are managed strictly through migrations.runner.
     """
     global _IS_DB_INITIALIZED
     if _IS_DB_INITIALIZED:
         return
 
-    # Fast-path: Check if database tables already exist and are populated
     try:
         with get_db_connection() as conn:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT 1 FROM products LIMIT 1")
-                row = cursor.fetchone()
-                if row:
-                    _IS_DB_INITIALIZED = True
-                    try:
-                        get_all_products()
-                    except Exception:
-                        pass
-                    logger.info("⚡ Neon database schema and catalog verified. Fast-path startup active.")
-                    return
-    except Exception as check_err:
-        logger.info(f"Schema verification note ({check_err}). Performing full schema initialization...")
-
-    try:
-        with get_db_connection() as conn:
-            with conn.cursor(cursor_factory=RealDictCursor) as cursor:
-                # 1. users table
-                cursor.execute('''
-                    CREATE TABLE IF NOT EXISTS users (
-                        id SERIAL PRIMARY KEY,
-                        name VARCHAR(255) NOT NULL,
-                        email VARCHAR(255) UNIQUE NOT NULL,
-                        password TEXT NOT NULL,
-                        role VARCHAR(50) DEFAULT 'customer',
-                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                    );
-                ''')
-
-                # 2. products table
-                cursor.execute('''
-                    CREATE TABLE IF NOT EXISTS products (
-                        product_id SERIAL PRIMARY KEY,
-                        name VARCHAR(255) NOT NULL,
-                        price NUMERIC(10, 2) NOT NULL,
-                        category VARCHAR(100) NOT NULL,
-                        subcategory VARCHAR(100),
-                        image_path TEXT NOT NULL,
-                        description TEXT,
-                        stock INTEGER DEFAULT 50
-                    );
-                ''')
-
-                # 3. orders table
-                cursor.execute('''
-                    CREATE TABLE IF NOT EXISTS orders (
-                        order_id SERIAL PRIMARY KEY,
-                        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-                        full_name VARCHAR(255) NOT NULL,
-                        phone_number VARCHAR(50) NOT NULL,
-                        address TEXT NOT NULL,
-                        city VARCHAR(100) DEFAULT 'Bangalore',
-                        delivery_duration_minutes NUMERIC(4, 1) DEFAULT 7.5,
-                        products_ordered TEXT NOT NULL,
-                        total_amount NUMERIC(10, 2) NOT NULL,
-                        status VARCHAR(50) DEFAULT 'Processing',
-                        payment_method VARCHAR(50) DEFAULT 'COD',
-                        payment_id VARCHAR(255),
-                        order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                    );
-                    ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_method VARCHAR(50) DEFAULT 'COD';
-                    ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_id VARCHAR(255);
-                    ALTER TABLE orders ADD COLUMN IF NOT EXISTS city VARCHAR(100) DEFAULT 'Bangalore';
-                    ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_duration_minutes NUMERIC(4, 1) DEFAULT 7.5;
-                ''')
-
-                # 3b. order_items table (Normalized relational items)
-                cursor.execute('''
-                    CREATE TABLE IF NOT EXISTS order_items (
-                        id SERIAL PRIMARY KEY,
-                        order_id INTEGER NOT NULL REFERENCES orders(order_id) ON DELETE CASCADE,
-                        product_id INTEGER REFERENCES products(product_id) ON DELETE SET NULL,
-                        product_name VARCHAR(255) NOT NULL,
-                        price NUMERIC(10, 2) NOT NULL,
-                        quantity INTEGER NOT NULL DEFAULT 1,
-                        image_path TEXT,
-                        subtotal NUMERIC(10, 2) NOT NULL
-                    );
-                ''')
-
-                # 3c. pending_orders table (Webhook recovery for client disconnects)
-                cursor.execute('''
-                    CREATE TABLE IF NOT EXISTS pending_orders (
-                        id SERIAL PRIMARY KEY,
-                        razorpay_order_id VARCHAR(255) UNIQUE NOT NULL,
-                        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-                        full_name VARCHAR(255) NOT NULL,
-                        phone_number VARCHAR(50) NOT NULL,
-                        address TEXT NOT NULL,
-                        city VARCHAR(100) DEFAULT 'Bangalore',
-                        products_data TEXT NOT NULL,
-                        total_amount NUMERIC(10, 2) NOT NULL,
-                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                    );
-                    ALTER TABLE pending_orders ADD COLUMN IF NOT EXISTS city VARCHAR(100) DEFAULT 'Bangalore';
-                ''')
-
-                # 4. contact_messages table
-                cursor.execute('''
-                    CREATE TABLE IF NOT EXISTS contact_messages (
-                        id SERIAL PRIMARY KEY,
-                        user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
-                        name VARCHAR(255) NOT NULL,
-                        email VARCHAR(255) NOT NULL,
-                        phone VARCHAR(50),
-                        subject VARCHAR(255) NOT NULL,
-                        message TEXT NOT NULL,
-                        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                    );
-                ''')
-
-                # 5. wishlist table
-                cursor.execute('''
-                    CREATE TABLE IF NOT EXISTS wishlist (
-                        id SERIAL PRIMARY KEY,
-                        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-                        product_id INTEGER NOT NULL REFERENCES products(product_id) ON DELETE CASCADE,
-                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        UNIQUE(user_id, product_id)
-                    );
-                ''')
-
-                # 6. outbox_events table (Transactional Outbox Pattern)
-                cursor.execute('''
-                    CREATE TABLE IF NOT EXISTS outbox_events (
-                        id SERIAL PRIMARY KEY,
-                        event_id VARCHAR(64) UNIQUE NOT NULL,
-                        event_type VARCHAR(100) NOT NULL,
-                        aggregate_type VARCHAR(100) NOT NULL,
-                        aggregate_id VARCHAR(100) NOT NULL,
-                        payload TEXT NOT NULL,
-                        status VARCHAR(50) DEFAULT 'PENDING',
-                        retry_count INTEGER DEFAULT 0,
-                        error_message TEXT,
-                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        processed_at TIMESTAMP,
-                        claimed_at TIMESTAMP
-                    );
-                    ALTER TABLE outbox_events ADD COLUMN IF NOT EXISTS claimed_at TIMESTAMP;
-                ''')
-
-                # Performance indexes for fast lookups
-                cursor.execute('''
-                    CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);
-                    CREATE INDEX IF NOT EXISTS idx_orders_user_id ON orders(user_id);
-                    CREATE INDEX IF NOT EXISTS idx_orders_date ON orders(order_date);
-                    CREATE INDEX IF NOT EXISTS idx_order_items_order_id ON order_items(order_id);
-                    CREATE INDEX IF NOT EXISTS idx_order_items_product_id ON order_items(product_id);
-                    CREATE INDEX IF NOT EXISTS idx_pending_orders_rzp_id ON pending_orders(razorpay_order_id);
-                    CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
-                    CREATE INDEX IF NOT EXISTS idx_wishlist_user_id ON wishlist(user_id);
-                    CREATE INDEX IF NOT EXISTS idx_wishlist_product_id ON wishlist(product_id);
-                    CREATE INDEX IF NOT EXISTS idx_outbox_status_created ON outbox_events(status, created_at);
-                    CREATE INDEX IF NOT EXISTS idx_outbox_event_id ON outbox_events(event_id);
-                    CREATE INDEX IF NOT EXISTS idx_outbox_claimed_at ON outbox_events(status, claimed_at);
-                ''')
-
-                # Seed admin user if needed
-                admin_hashed_password = generate_password_hash('Dailydrop@173')
-                cursor.execute(
-                    "SELECT id FROM users WHERE role = 'admin' OR email = %s OR email = %s",
-                    ('admin_dailydrop@gmail.com', 'admin@dailydrop.com')
-                )
-                admin_user = cursor.fetchone()
-                if not admin_user:
-                    cursor.execute('''
-                        INSERT INTO users (name, email, password, role)
-                        VALUES ('Admin User', 'admin_dailydrop@gmail.com', %s, 'admin')
-                    ''', (admin_hashed_password,))
-
-                # Seed demo customer if needed
-                demo_hashed_password = generate_password_hash('Demouser@123')
-                cursor.execute("SELECT id FROM users WHERE email = %s", ('demo_dailydrop@gmail.com',))
-                demo_user = cursor.fetchone()
-                if not demo_user:
-                    cursor.execute('''
-                        INSERT INTO users (name, email, password, role)
-                        VALUES ('Demo Customer', 'demo_dailydrop@gmail.com', %s, 'customer')
-                    ''', (demo_hashed_password,))
-
-                # Seed products catalog if empty
-                cursor.execute("SELECT COUNT(*) as count FROM products")
-                row = cursor.fetchone()
-                product_count = row['count'] if row else 0
-                if product_count == 0:
-                    js_file_path = os.path.join(os.path.dirname(__file__), 'static', 'js', 'products.js')
-                    if os.path.exists(js_file_path):
-                        try:
-                            with open(js_file_path, 'r', encoding='utf-8') as f:
-                                content = f.read()
-                            start = content.find('[')
-                            end = content.rfind(']') + 1
-                            if start != -1 and end != -1:
-                                raw_products = json.loads(content[start:end])
-                                for pid, p in enumerate(raw_products, start=1):
-                                    unique_stock = 30 + ((pid * 7) % 65)
-                                    cursor.execute('''
-                                        INSERT INTO products (product_id, name, price, category, subcategory, image_path, description, stock)
-                                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-                                        ON CONFLICT (product_id) DO NOTHING
-                                    ''', (
-                                        pid,
-                                        p.get('title', 'Product'),
-                                        float(p.get('price', 0)),
-                                        p.get('category', 'Grocery'),
-                                        p.get('subcategory', ''),
-                                        p.get('image', '/static/product-placeholder.svg'),
-                                        p.get('description', ''),
-                                        unique_stock
-                                    ))
-                                try:
-                                    cursor.execute("SELECT setval(pg_get_serial_sequence('products', 'product_id'), COALESCE(MAX(product_id), 1)) FROM products;")
-                                except Exception:
-                                    pass
-                                logger.info(f"Seeded {len(raw_products)} products into Neon PostgreSQL from products.js")
-                        except Exception as e:
-                            logger.error(f"Error seeding products from products.js: {e}")
-
-                # Backfill legacy orders into normalized order_items table if empty
-                try:
-                    cursor.execute("SELECT COUNT(*) as count FROM order_items")
-                    oi_row = cursor.fetchone()
-                    oi_count = (oi_row['count'] if isinstance(oi_row, dict) else oi_row[0]) if oi_row else 0
-                    if oi_count == 0:
-                        cursor.execute("SELECT order_id, products_ordered FROM orders")
-                        legacy_orders = cursor.fetchall()
-                        for cord in legacy_orders:
-                            oid = cord['order_id'] if isinstance(cord, dict) else cord[0]
-                            raw_p = cord['products_ordered'] if isinstance(cord, dict) else cord[1]
-                            try:
-                                p_list = json.loads(raw_p) if isinstance(raw_p, str) else raw_p
-                                if isinstance(p_list, list):
-                                    for item in p_list:
-                                        p_name = item.get('name', 'Product')
-                                        p_price = float(item.get('price', 0))
-                                        p_qty = int(item.get('quantity', 1))
-                                        p_sub = round(p_price * p_qty, 2)
-                                        p_img = item.get('image') or item.get('image_path') or '/static/logo1.webp'
-                                        p_id = item.get('product_id') or item.get('id')
-                                        cursor.execute('''
-                                            INSERT INTO order_items (order_id, product_id, product_name, price, quantity, image_path, subtotal)
-                                            VALUES (%s, %s, %s, %s, %s, %s, %s)
-                                        ''', (oid, p_id, p_name, p_price, p_qty, p_img, p_sub))
-                            except Exception:
-                                pass
-                        logger.info("Backfilled legacy order items into normalized order_items table.")
-                except Exception as oi_err:
-                    logger.warning(f"Note on order_items table backfill check: {oi_err}")
-
-        # Pre-warm product master cache and demo/admin user accounts (skip expensive analytics on serverless cold starts)
-        try:
-            get_all_products()
-            get_user_by_email('admin_dailydrop@gmail.com')
-            get_user_by_email('demo_dailydrop@gmail.com')
-            if not os.getenv('VERCEL'):
-                get_unified_analytics(days=30)
-            logger.info("Product and user cache pre-warmed for fast responses.")
-        except Exception as e:
-            logger.warning(f"Could not pre-warm cache: {e}")
-
-        _IS_DB_INITIALIZED = True
-        logger.info("Neon PostgreSQL initialized successfully with schema, indexes, and catalog products.")
+                cursor.execute("SELECT 1")
     except Exception as e:
-        logger.error(f"Failed to initialize Neon database: {e}")
-        raise DatabaseError(f"Failed to initialize database: {e}") from e
+        logger.error(f"Database connection pool check failed: {e}")
+        raise DatabaseError(f"Database connection pool check failed: {e}") from e
+
+    # Pre-warm runtime product and user cache
+    try:
+        get_all_products()
+        get_user_by_email('admin_dailydrop@gmail.com')
+        get_user_by_email('demo_dailydrop@gmail.com')
+        if not os.getenv('VERCEL'):
+            get_unified_analytics(days=30)
+    except Exception as e:
+        logger.warning(f"Could not pre-warm runtime cache: {e}")
+
+    _IS_DB_INITIALIZED = True
+    logger.info("Database connection and runtime cache verified.")
 
 
 _USER_EMAIL_CACHE: Dict[str, Tuple[float, Dict[str, Any]]] = {}

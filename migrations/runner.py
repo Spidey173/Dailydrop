@@ -91,5 +91,11 @@ def run_migrations() -> Tuple[int, List[str]]:
 
 
 if __name__ == "__main__":
-    count, versions = run_migrations()
-    print(f"Migration run complete: {count} applied ({versions})")
+    import sys
+    try:
+        count, versions = run_migrations()
+        print(f"Migration run complete: {count} applied ({versions})")
+        sys.exit(0)
+    except Exception as exc:
+        logger.error(f"Migration execution failed: {exc}")
+        sys.exit(1)
