@@ -137,7 +137,7 @@ python seed.py
 ```
 
 * Migrations reside under `migrations/*.sql` and execute in strict alphabetical order.
-* Executed automatically as a one-shot container in `docker-compose.yml`, before web startup in CI, and as a release phase in `Procfile` (`release: python -m migrations.runner`).
+* Executed automatically as a one-shot container in `docker-compose.yml` and before web startup in CI.
 
 ---
 
@@ -188,8 +188,7 @@ DailyDrop/
 ├── worker.py                   # Background RQ worker for transactional outbox events
 ├── Dockerfile                  # Production container image (python:3.11-slim, non-root user)
 ├── docker-compose.yml          # Multi-container stack (web, worker, postgres, redis, migrate)
-├── render.yaml                 # Persistent PaaS deployment configuration
-├── Procfile                    # Process manifest (release: migrations, web: gunicorn, worker: rq)
+├── vercel.json                 # Vercel serverless production deployment configuration
 ├── pytest.ini                  # Pytest configuration and markers
 ├── blueprints/                 # Flask route controllers
 │   ├── auth.py                 # Authentication & session management
