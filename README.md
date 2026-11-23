@@ -1,7 +1,7 @@
 # DailyDrop 🛒 — Full-Stack Quick-Commerce Web Application
 
 [![CI Pipeline](https://github.com/Spidey173/Dailydrop/actions/workflows/ci.yml/badge.svg)](https://github.com/Spidey173/Dailydrop/actions)
-[![Tests](https://img.shields.io/badge/Pytest-105%20Passed-brightgreen?style=flat-square&logo=pytest)](tests/)
+[![Tests](https://img.shields.io/badge/Pytest-107%20Passed-brightgreen?style=flat-square&logo=pytest)](tests/)
 [![Backend](https://img.shields.io/badge/Backend-Python%203.11%20%7C%20Flask%203-blue?style=flat-square&logo=python)](app.py)
 [![Database](https://img.shields.io/badge/Database-PostgreSQL%20(Neon%20%7C%20Docker)-336791?style=flat-square&logo=postgresql&logoColor=white)](database.py)
 [![Cache](https://img.shields.io/badge/Cache-Redis%20(Fallback%20Safe)-DC382D?style=flat-square&logo=redis&logoColor=white)](services/redis_service.py)
@@ -122,6 +122,41 @@ python seed.py
 python app.py
 ```
 
+### Option C: Deploy to Vercel (Production Target)
+
+DailyDrop is optimized for serverless production deployment on Vercel Serverless Functions (`@vercel/python` runtime) backed by Neon PostgreSQL and Upstash Redis. The live application is hosted at [https://dailydrop17.vercel.app/](https://dailydrop17.vercel.app/).
+
+#### 1. Required Environment Variables on Vercel
+Set the following environment variables in your Vercel Project Settings (`Settings -> Environment Variables`):
+
+| Variable | Required | Description | Example / Recommended Value |
+| :--- | :--- | :--- | :--- |
+| `DATABASE_URL` | **Yes** | Neon PostgreSQL Pooled Connection URL | `postgresql://user:pass@ep-xyz-pooler.us-east-2.aws.neon.tech/neondb?sslmode=require` |
+| `SECRET_KEY` | **Yes** | Strong, unique 32-byte hex key for sessions & CSRF | Generate: `python -c "import secrets; print(secrets.token_hex(32))"` |
+| `FLASK_ENV` | **Yes** | Application environment | `production` |
+| `REDIS_URL` | Optional | Upstash Redis connection string (`rediss://`) | `rediss://default:xxx@host.upstash.io:6379` (Graceful in-memory fallback if omitted) |
+| `REDIS_ENABLED` | Optional | Enable or disable Redis integration | `true` |
+| `RAZORPAY_KEY_ID` | Optional | Razorpay merchant API key ID | `rzp_live_...` or test key `rzp_test_...` |
+| `RAZORPAY_KEY_SECRET` | Optional | Razorpay merchant secret | Keep confidential |
+| `RAZORPAY_WEBHOOK_SECRET` | Optional | Razorpay webhook verification secret | For validating payment signatures |
+| `DEMO_PAYMENTS` | Optional | Simulated payment bypass toggle | `false` (enforces server HMAC signature validation) |
+| `DISABLE_FILE_UPLOADS` | Optional | Serverless read-only filesystem guard | Automatically set to `true` on Vercel |
+
+#### 2. Run Database Migrations and Seed Catalog Before Deploy
+Vercel serverless invocations are ephemeral and stateless; they do **not** run DDL migrations at request time. Run migrations and catalog seed from your local workstation pointing at your Neon database:
+
+```bash
+# 1. Apply all versioned migrations (idempotent; records in schema_migrations)
+DATABASE_URL="postgresql://user:pass@ep-xyz.us-east-2.aws.neon.tech/neondb?sslmode=require" python -m migrations.runner
+
+# 2. Seed initial catalog (241 items) and accounts (idempotent)
+DATABASE_URL="postgresql://user:pass@ep-xyz.us-east-2.aws.neon.tech/neondb?sslmode=require" python seed.py
+```
+
+#### 3. Architecture Note: Outbox Execution on Vercel vs. Docker Compose
+* **Vercel Serverless**: Ephemeral serverless functions do not host persistent worker daemons. When running on Vercel (`VERCEL=1`), transactional outbox tasks (such as order confirmation dispatch and inventory alert checks) execute **inline immediately after the database transaction commits** within the request lifecycle. Because these tasks are lightweight (< 50ms), execution remains well under Vercel's 10-second serverless execution ceiling.
+* **Docker Compose / Persistent Hosting**: Executes a separate, dedicated `worker` container (`python worker.py`) running an RQ worker that continuously claims pending outbox events from PostgreSQL.
+
 ---
 
 ## 🗄️ Database Migrations
@@ -143,7 +178,7 @@ python seed.py
 
 ## 🧪 Testing Suite: Fast Offline Tests vs. Native PostgreSQL
 
-The test suite contains **105 automated Pytests** covering unit logic, financial precision, domain repositories, payment FSM, and high-concurrency race protection.
+The test suite contains **107 automated Pytests** covering unit logic, financial precision, domain repositories, payment FSM, and high-concurrency race protection.
 
 ### Fast Offline Unit Tests (In-Memory SQLite)
 Runs 102 offline tests in ~2.5s using a thread-safe, in-memory SQLite wrapper in `conftest.py`:
@@ -224,7 +259,7 @@ DailyDrop/
 │   └── js/admin/               # Feature-split admin JS (tabs, charts, catalog, sqllab, etc.)
 ├── templates/                  # Jinja2 HTML templates
 │   └── admin/partials/         # Admin dashboard modular Jinja partials
-└── tests/                      # 105 automated Pytests
+└── tests/                      # 107 automated Pytests
 ```
 
 ---
