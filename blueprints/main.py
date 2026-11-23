@@ -171,7 +171,7 @@ def health_check():
         health_status['status'] = 'degraded'
         health_status['components']['database'] = {
             'status': 'disconnected',
-            'error': str(dbe)
+            'error': 'Database connection failed'
         }
 
     # 2. Check Redis Cache
@@ -184,10 +184,10 @@ def health_check():
                 'status': 'connected' if is_ready else 'degraded',
                 'latency_ms': redis_latency_ms
             }
-        except Exception as rerr:
+        except Exception:
             health_status['components']['redis'] = {
                 'status': 'error',
-                'error': str(rerr)
+                'error': 'Redis connection failed'
             }
     else:
         health_status['components']['redis'] = {

@@ -155,6 +155,19 @@ def create_app(config_name: Optional[str] = None) -> Flask:
         except DatabaseError as e:
             logger.error(f"Failed to initialize Neon PostgreSQL database: {e}")
 
+        # Check Redis connection or report in-memory fallback
+        if app.config.get('REDIS_ENABLED', False):
+            try:
+                from services.redis_service import RedisService
+                if RedisService.is_available():
+                    logger.info("Redis cache and inventory reservation connected successfully.")
+                else:
+                    logger.warning("Redis is enabled but unreachable; falling back gracefully to in-memory fallback cache/reservations.")
+            except Exception as _r_err:
+                logger.warning(f"Redis check encountered error: {_r_err}; continuing with in-memory fallback.")
+        else:
+            logger.info("Redis is disabled; using in-memory fallback cache/reservations.")
+
     return app
 
 

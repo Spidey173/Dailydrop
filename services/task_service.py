@@ -20,6 +20,11 @@ class TaskService:
     @classmethod
     def get_queue(cls):
         """Get or initialize the RQ queue using the shared Redis connection."""
+        import os
+        if bool(os.getenv('VERCEL')):
+            # On Vercel serverless, there is no persistent background worker daemon;
+            # bypass queue and execute tasks inline under the 10s function timeout.
+            return None
         try:
             from rq import Queue
             client = RedisService.get_raw_client()
