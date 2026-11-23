@@ -8,7 +8,7 @@
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=flat-square&logo=docker&logoColor=white)](docker-compose.yml)
 [![License](https://img.shields.io/badge/License-MIT-lightgrey?style=flat-square)](LICENSE)
 
-🔗 **[Live Storefront](https://dailydrop17.vercel.app/)** | 🛡️ **[Admin Portal](https://dailydrop17.vercel.app/admin_login)** | 🩺 **[Health Status](https://dailydrop17.vercel.app/healthz)** | 📦 **[GitHub Repository](https://github.com/Spidey173/Dailydrop)**
+🔗 **[Live Storefront](https://dailydrop18.vercel.app/)** | 🛡️ **[Admin Portal](https://dailydrop18.vercel.app/admin_login)** | 🩺 **[Health Status](https://dailydrop18.vercel.app/healthz)** | 📦 **[GitHub Repository](https://github.com/Spidey173/Dailydrop)**
 
 ---
 
@@ -124,7 +124,7 @@ python app.py
 
 ### Option C: Deploy to Vercel (Production Target)
 
-DailyDrop is optimized for serverless production deployment on Vercel Serverless Functions (`@vercel/python` runtime) backed by Neon PostgreSQL and Upstash Redis. The live application is hosted at [https://dailydrop17.vercel.app/](https://dailydrop17.vercel.app/).
+DailyDrop is optimized for serverless production deployment on Vercel Serverless Functions (`@vercel/python` runtime) backed by Neon PostgreSQL and Upstash Redis. The live application is hosted at [https://dailydrop18.vercel.app/](https://dailydrop18.vercel.app/).
 
 #### 1. Required Environment Variables on Vercel
 Set the following environment variables in your Vercel Project Settings (`Settings -> Environment Variables`):
