@@ -1,149 +1,232 @@
 # DailyDrop 🛒 — Full-Stack Quick-Commerce Web Application
 
 [![CI Pipeline](https://github.com/Spidey173/Dailydrop/actions/workflows/ci.yml/badge.svg)](https://github.com/Spidey173/Dailydrop/actions)
-[![Tests](https://img.shields.io/badge/Pytest-76%20Passed-brightgreen?style=flat-square&logo=pytest)](tests/)
-[![Backend](https://img.shields.io/badge/Backend-Python%20%7C%20Flask-blue?style=flat-square&logo=python)](app.py)
-[![Database](https://img.shields.io/badge/Database-PostgreSQL%20(Neon)-336791?style=flat-square&logo=postgresql&logoColor=white)](database.py)
+[![Tests](https://img.shields.io/badge/Pytest-105%20Passed-brightgreen?style=flat-square&logo=pytest)](tests/)
+[![Backend](https://img.shields.io/badge/Backend-Python%203.11%20%7C%20Flask%203-blue?style=flat-square&logo=python)](app.py)
+[![Database](https://img.shields.io/badge/Database-PostgreSQL%20(Neon%20%7C%20Docker)-336791?style=flat-square&logo=postgresql&logoColor=white)](database.py)
 [![Cache](https://img.shields.io/badge/Cache-Redis%20(Fallback%20Safe)-DC382D?style=flat-square&logo=redis&logoColor=white)](services/redis_service.py)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=flat-square&logo=docker&logoColor=white)](docker-compose.yml)
 [![License](https://img.shields.io/badge/License-MIT-lightgrey?style=flat-square)](LICENSE)
 
 🔗 **[Live Storefront](https://dailydrop17.vercel.app/)** | 🛡️ **[Admin Portal](https://dailydrop17.vercel.app/admin_login)** | 🩺 **[Health Status](https://dailydrop17.vercel.app/healthz)** | 📦 **[GitHub Repository](https://github.com/Spidey173/Dailydrop)**
 
 ---
 
-## ⚡ At A Glance: Problem, Architecture, Proof & Scope
+## ⚡ System Architecture
 
-| Dimension | Specification |
-| :--- | :--- |
-| **Problem** | High-concurrency checkout spikes cause negative stock counts (overselling), while forged client cart payloads risk price and discount tampering. |
-| **Architecture** | **Server-authoritative cart reconciliation**, atomic conditional SQL decrements inside ACID transactions, cryptographic Razorpay HMAC-SHA256 signature verification FSM, and adaptive Neon PostgreSQL connection pooling. |
-| **Evidence & Benchmarks** | **76 automated Pytests** passing in CI across Python 3.10–3.12, sub-second search filtering across 200+ grocery SKUs, and zero overselling verified across multi-threaded checkout race test fixtures. |
-| **Scope & Boundaries** | **Synthetic Data**: Seeded synthetic catalog of 200+ grocery SKUs across 10 categories; 3 PostgreSQL schemas (`core`, `auth_mgmt`, `audit_logs`). **Local Benchmark Environment**: Atomic conditional SQL decrements tested under multi-threaded simulated race conditions in local test harness. **Live Cloud Deployment**: Hosted on Vercel Serverless with cloud Neon PostgreSQL; simulated 10-minute order dispatch lifecycle. |
-| **Verified Test Suite** | **76 / 76 Pytests passing** (unit, integration, concurrency, payment FSM, security). |
+DailyDrop implements an enterprise-grade quick-commerce architecture designed to handle high-concurrency flash drops, prevent overselling, guarantee financial correctness, and isolate asynchronous background workers.
+
+```mermaid
+flowchart TD
+    Client["Client Browser / Mobile Web"]
+
+    subgraph Gateway["Ingress & Container Platform"]
+        Gunicorn["Gunicorn WSGI Server (python:3.11-slim, gthread)"]
+    end
+
+    subgraph AppCore["Flask 3 Application Layer"]
+        Blueprints["Blueprints (main, products, cart, auth, admin)"]
+        Services["Domain Services (OrderService, PaymentService, AuthService)"]
+        CatalogVal["CatalogValidationService (Server-Authoritative Pricing)"]
+        InvSvc["InventoryReservationService (Two-Tier Decrement)"]
+        OutboxSvc["OutboxService (Transactional Outbox)"]
+        Repos["Domain Repositories (product, order, user, analytics)"]
+    end
+
+    subgraph FastTier["Tier 1: In-Memory / Distributed Cache"]
+        Redis["Redis (Atomic Lua Stock Script, Idempotency Locks, Catalog L2)"]
+    end
+
+    subgraph Persistence["Tier 2: Relational ACID Persistence"]
+        Postgres[("PostgreSQL 16 (Neon Serverless / Docker)")]
+        Tables["products | orders | order_items | pending_orders | outbox_events"]
+    end
+
+    subgraph WorkerTier["Asynchronous Execution Tier"]
+        RQ["RQ Worker (python worker.py)"]
+        Tasks["Payment Capture, Notification Dispatch, Order Fulfillment"]
+    end
+
+    Client -->|HTTP / JSON| Gunicorn
+    Gunicorn --> Blueprints
+    Blueprints --> Services
+    Services --> CatalogVal
+    Services --> InvSvc
+    Services --> OutboxSvc
+    Services --> Repos
+    InvSvc -->|Fast Reject Lua Check| Redis
+    Repos -->|Connection Pool| Postgres
+    OutboxSvc -->|Atomic Single Transaction Event Write| Postgres
+    Redis -->|Job Queue| RQ
+    RQ -->|Process Claimed Events| Postgres
+```
 
 ---
 
-[![Architecture diagram of spidey173/dailydrop](https://gitdiagram.com/spidey173/dailydrop/diagram.png)](https://gitdiagram.com/spidey173/dailydrop?utm_source=readme&utm_medium=picture)
+## 💡 Key Design Decisions & Concurrency Guarantees
+
+### 1. Two-Tier Inventory Reservation (Redis Fast Reject + PostgreSQL ACID Lock)
+* **Tier 1 (Redis Lua)**: Under sudden traffic spikes, checkout requests first execute an atomic Lua script (`_LUA_DECREMENT_STOCK`) in Redis. If stock is insufficient, the request is rejected immediately at sub-millisecond latency (< 1ms) without burdening the relational database connection pool.
+* **Tier 2 (PostgreSQL Conditional Row Update)**: During order creation inside an ACID transaction, stock is decremented using an atomic conditional update:
+  ```sql
+  UPDATE products SET stock = stock - %s WHERE product_id = %s AND stock >= %s
+  ```
+  If another transaction depleted stock in the microsecond window between Redis and PostgreSQL, `cursor.rowcount` is 0, causing immediate rollback and zero overselling.
+
+### 2. Server-Authoritative Pricing & Strict Catalog Resolution
+* **Anti-Tampering Guarantee**: Client payloads specifying cart prices, discounts, or delivery fees are completely ignored.
+* **Exact Decimal Financial Arithmetic**: Subtotals and fees are calculated using Python's `Decimal` with standard `ROUND_HALF_UP` banking rules (`CurrencyService`), preventing IEEE-754 floating-point drift.
+* **Strict Primary Key Resolution**: Products in cart must specify an explicit `product_id`. Fuzzy `ILIKE` name matching has been eliminated; unknown IDs return an immediate HTTP 400 rejection.
+* **Deterministic Fee Boundary**: Orders $\ge$ ₹500 receive free delivery; orders < ₹500 incur a ₹30 delivery fee.
+
+### 3. End-to-End Idempotency & State Machine Integrity
+* **Idempotency Keys**: Mutating operations accept client-provided `Idempotency-Key` headers stored in Redis with atomic `SET NX EX`. Concurrent duplicate requests are rejected or served cached responses.
+* **Database Unique Constraints**: `orders.payment_id` and `pending_orders.razorpay_order_id` enforce uniqueness at the storage engine level.
+* **Payment FSM & Webhook Protection**: Orders advance linearly through states: `Created -> Paid -> Processing -> Packed -> Shipped -> Delivered`. Terminal states cannot regress; delayed or replayed Razorpay webhooks detect existing orders and exit cleanly without duplicate execution.
+
+### 4. Transactional Outbox Pattern
+* Order placement and domain event dispatch are coupled into **one atomic PostgreSQL transaction**.
+* When an order is created, an event row is written to `outbox_events` in the same commit. If the database crashes or network fails, the event is guaranteed to persist alongside the order.
+* The independent background worker (`worker.py` via RQ) claims pending events (`claimed_at`) and dispatches notifications, refunds, and analytics updates asynchronously.
 
 ---
 
-## 🚀 Quickstart: Reproduce in 30 Seconds
+## 🚀 Quickstart & Deployment Guide
 
+### Option A: Run with Docker Compose (Recommended)
+Spawns PostgreSQL, Redis, one-shot migration runner, Gunicorn web server, and the RQ worker:
 ```bash
-# 1. Clone repository & setup virtual environment
-git clone https://github.com/Spidey173/Dailydrop.git
-cd Dailydrop
-python3 -m venv venv && source venv/bin/activate
+# 1. Clone repository
+git clone https://github.com/Spidey173/Dailydrop.git && cd Dailydrop
 
-# 2. Install dependencies
+# 2. Copy environment template
+cp .env.example .env
+
+# 3. Build and launch all services
+docker-compose up --build
+```
+* Storefront: [http://localhost:5000](http://localhost:5000)
+* Health Check: [http://localhost:5000/healthz](http://localhost:5000/healthz)
+
+### Option B: Local Virtual Environment
+```bash
+# 1. Setup virtual environment
+python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 
-# 3. Run verified test suite (76 automated Pytests)
-pytest -v
+# 2. Run versioned migrations & seed catalog
+python -m migrations.runner
+python seed.py
 
-# 4. Run local development server
+# 3. Start development server
 python app.py
 ```
-*Open [http://localhost:5000](http://localhost:5000) in your browser.*
 
 ---
 
-## 🔑 Demo Access Accounts
+## 🗄️ Database Migrations
+
+DailyDrop uses an idempotent, version-controlled migration runner that tracks applied versions in a `schema_migrations` audit table.
+
+```bash
+# Apply pending migrations
+python -m migrations.runner
+
+# Seed catalog products and demo accounts (idempotent)
+python seed.py
+```
+
+* Migrations reside under `migrations/*.sql` and execute in strict alphabetical order.
+* Executed automatically as a one-shot container in `docker-compose.yml`, before web startup in CI, and as a release phase in `Procfile` (`release: python -m migrations.runner`).
+
+---
+
+## 🧪 Testing Suite: Fast Offline Tests vs. Native PostgreSQL
+
+The test suite contains **105 automated Pytests** covering unit logic, financial precision, domain repositories, payment FSM, and high-concurrency race protection.
+
+### Fast Offline Unit Tests (In-Memory SQLite)
+Runs 102 offline tests in ~2.5s using a thread-safe, in-memory SQLite wrapper in `conftest.py`:
+```bash
+pytest -m "not postgres" -v
+```
+
+### PostgreSQL Concurrency Tests
+Runs the concurrency and atomic decrement tests against a real PostgreSQL instance:
+```bash
+# Ensure PostgreSQL is running on port 5432 and migrated
+TEST_USE_REAL_POSTGRES=true DATABASE_URL="postgresql://test_user:test_password@localhost:5432/dailydrop_test" pytest -m "postgres" -v
+```
+
+### Run Entire Suite
+```bash
+pytest -v
+```
+
+---
+
+## 🔑 Demo Access Credentials
 
 | Role | Email | Password | Access URL |
 | :--- | :--- | :--- | :--- |
-| **Customer** | `demo_dailydrop@gmail.com` | `Demouser@123` | [`/login`](https://dailydrop17.vercel.app/login) |
-| **Admin** | `admin_dailydrop@gmail.com` | `Dailydrop@173` | [`/admin_login`](https://dailydrop17.vercel.app/admin_login) |
+| **Customer** | `demo_dailydrop@gmail.com` | `Demouser@123` | [`/login`](http://localhost:5000/login) |
+| **Admin** | `admin_dailydrop@gmail.com` | `Dailydrop@173` | [`/admin_login`](http://localhost:5000/admin_login) |
 
 > [!NOTE]
-> **Sandbox Credentials**: Payments run in Razorpay Test Mode (`rzp_test_...`). No real money is charged.
-> **Demo Payments Flag**: Simulated checkout auto-verification (`demo_auto_verified_`) is strictly gated behind the `DEMO_PAYMENTS=true` environment variable. It is intended **only for demo environments** and test harnesses, and must **never** be enabled in real production.
->
-> dev_tools/ contains local demo-data generators, never run in production.
+> `dev_tools/` contains local demo-data generators, never run in production.
 
 ---
 
-## 🧪 Testing Architecture: Deterministic CI vs. Native PostgreSQL
-
-The test suite covers authentication, cart calculations, forged price rejection, unknown product blocking, atomic checkout, stock race conditions, payment signature verification, webhook idempotency, and session security.
-
-### Tier 1: Fast Deterministic CI Suite (76 Automated Pytests)
-* Runs in **GitHub Actions CI** on `ubuntu-latest` against Python 3.10, 3.11, and 3.12.
-* Uses an in-memory SQLite fixture (`_SHARED_SQLITE_CONN`) in `conftest.py` for hermetic, sub-2s execution without external network latency.
-* Concurrency safety is verified via multi-threaded race simulation against conditional SQL updates (`UPDATE products SET stock = stock - %s WHERE product_id = %s AND stock >= %s`).
-
-### Tier 2: Native PostgreSQL Row-Locking Verification
-* Reviewers can verify native row locking (`FOR UPDATE` / `SKIP LOCKED`) against live PostgreSQL:
-```bash
-# Start local PostgreSQL container
-docker run -d --name dailydrop-pg -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=dailydrop -p 5432:5432 postgres:16-alpine
-
-# Run migrations
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/dailydrop" python -m migrations.runner
-
-# Run Pytest against live PostgreSQL
-TEST_USE_REAL_POSTGRES=true DATABASE_URL="postgresql://postgres:postgres@localhost:5432/dailydrop" pytest tests/ -v
-```
-
----
-
-## 📚 Appendices & Deep Design Rationale
-
-<details>
-<summary><strong>1. Service-Oriented Layer Architecture</strong></summary>
-
-Routes in Flask **Blueprints** (`auth`, `cart`, `products`, `admin`) delegate all business logic to dedicated domain services:
-- `order_service.py`: Checkout orchestration, delivery progression, and order history.
-- `catalog_validation_service.py`: Catalog resolution and authoritative price recomputation.
-- `inventory_reservation_service.py`: Atomic stock decrement and reservation logic.
-- `payment_service.py`: Razorpay order generation and HMAC-SHA256 signature verification.
-- `idempotency_service.py`: Distributed Redis idempotency tokens and replay defense.
-- `outbox_service.py`: Transactional outbox pattern for reliable event persistence.
-- `auth_service.py`: Password hashing (Werkzeug Scrypt) and session management.
-</details>
-
-<details>
-<summary><strong>2. Project Directory Tree</strong></summary>
+## 📁 Repository Structure
 
 ```
-Daily-Drop/
-├── app.py                  # Application factory (create_app), health routes & security headers
-├── extensions.py           # Extensions (CSRFProtect, Redis-backed distributed Limiter)
-├── database.py             # Database connection pooling, SAVEPOINT isolation & schema execution
-├── config.py               # Central environment configuration & fail-fast validation
-├── worker.py               # Background transactional outbox worker (RQ with SimpleWorker)
-├── Procfile                # Production process specification (web + worker)
-├── blueprints/             # Route controllers (auth, cart, products, admin, main)
-├── services/               # Single-responsibility domain services
-├── migrations/             # Versioned SQL migrations & runner
-├── static/                 # Stylesheets, UI icons, and product images
-├── templates/              # Jinja2 HTML templates, error templates (404.html, 500.html)
-└── tests/                  # 76 automated Pytest tests
+DailyDrop/
+├── app.py                      # Application factory (create_app), blueprints & health probes
+├── config.py                   # Central environment configuration & validation
+├── database.py                 # Threaded connection pool & transaction context manager
+├── seed.py                     # Idempotent catalog & user seed script
+├── worker.py                   # Background RQ worker for transactional outbox events
+├── Dockerfile                  # Production container image (python:3.11-slim, non-root user)
+├── docker-compose.yml          # Multi-container stack (web, worker, postgres, redis, migrate)
+├── render.yaml                 # Persistent PaaS deployment configuration
+├── Procfile                    # Process manifest (release: migrations, web: gunicorn, worker: rq)
+├── pytest.ini                  # Pytest configuration and markers
+├── blueprints/                 # Flask route controllers
+│   ├── auth.py                 # Authentication & session management
+│   ├── cart.py                 # Cart checkout, Razorpay payment & webhooks
+│   ├── products.py             # Products catalog & GET /api/v1/products API
+│   ├── admin.py                # Executive analytics & administrative controls
+│   └── main.py                 # Core storefront views & health check
+├── repositories/               # Decoupled domain data access repositories
+│   ├── product_repository.py   # Catalog queries, tiered caching & stock updates
+│   ├── order_repository.py     # Orders, order_items & pending_orders queries
+│   ├── user_repository.py      # User authentication & caching
+│   └── analytics_repository.py # Executive metrics, RFM segmentation & cohort analysis
+├── services/                   # Single-responsibility business services
+│   ├── order_service.py        # Order workflow orchestration & FSM transitions
+│   ├── order_persistence_service.py # Deterministic single INSERT order persistence
+│   ├── catalog_validation_service.py # Server-authoritative Decimal price validation
+│   ├── inventory_reservation_service.py # Atomic stock reservation logic
+│   ├── payment_service.py      # Razorpay payment verification & HMAC signatures
+│   ├── idempotency_service.py  # Distributed idempotency tokens
+│   ├── outbox_service.py       # Reliable transactional outbox dispatch
+│   └── redis_service.py        # Redis client, Lua scripts & catalog caching
+├── migrations/                 # Versioned SQL migrations & runner
+│   ├── 001_initial_schema.sql
+│   ├── ...
+│   ├── 007_sync_missing_indexes_and_pending_orders_city.sql
+│   └── runner.py               # CLI & container migration runner
+├── seeds/                      # Canonical seed data
+│   └── products.json           # 241 canonical grocery catalog items
+├── dev_tools/                  # Local demo generators & simulation (excluded from prod)
+│   └── traffic_simulator_service.py
+├── static/                     # CSS, JS, images, and brand assets
+│   ├── css/admin.css           # Modularized admin dashboard stylesheet
+│   └── js/admin/               # Feature-split admin JS (tabs, charts, catalog, sqllab, etc.)
+├── templates/                  # Jinja2 HTML templates
+│   └── admin/partials/         # Admin dashboard modular Jinja partials
+└── tests/                      # 105 automated Pytests
 ```
-</details>
-
-<details>
-<summary><strong>3. Defensive Security & Observability</strong></summary>
-
-- **CSRF & Session Security**: Flask-WTF CSRF tokens validated on all mutating requests. Sessions regenerated on login/logout to prevent fixation.
-- **Distributed Rate Limiting**: Flask-Limiter backed by Redis with thread-safe in-memory fallback.
-- **Structured Sanitized Logging**: `SanitizingLogFormatter` scrubs passwords, API keys, webhook signatures, and payment details from logs.
-- **Defensive Headers**: `X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`, and strict cookie flags (`HttpOnly`, `SameSite=Lax`).
-- **Health Probes**: `/healthz` provides real-time diagnostics on database connectivity, query latency, and Redis status.
-</details>
-
-<details>
-<summary><strong>4. Live Demo vs. Production Infrastructure Matrix</strong></summary>
-
-| Capability | 🌐 Live Demo (`dailydrop17.vercel.app`) | 🚀 Full Production Setup |
-| :--- | :--- | :--- |
-| **Compute** | Vercel Serverless WSGI (Stateless) | Persistent Container PaaS (`gunicorn app:app -w 4 -k gthread`) |
-| **Database** | Neon Cloud PostgreSQL (Serverless pooling) | Neon / AWS RDS PostgreSQL |
-| **Pricing & Inventory** | Native server-authoritative recompute & atomic decrements | Native |
-| **Payment Verification** | Native Razorpay HMAC-SHA256 & FSM | Live webhook listener with Redis idempotency |
-| **Media Storage** | Base64 Data URLs in PostgreSQL (`products.image_path`) | Cloud Object Storage (AWS S3 / Cloudflare R2) with presigned URLs |
-| **Background Tasks** | Synchronous inline execution fallback | Dedicated RQ background worker (`python worker.py`) |
-</details>
 
 ---
 
