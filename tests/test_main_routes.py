@@ -48,3 +48,37 @@ def test_contact_service_submission():
     with get_db_connection() as conn:
         with conn.cursor() as cur:
             cur.execute("DELETE FROM contact_messages WHERE id = %s", (msg_id,))
+
+
+def test_verification_endpoints(client):
+    """
+    Verify core application endpoints required for production verification:
+    /healthz, /, /api/v1/products, and /admin/login.
+    """
+    # 1. /healthz
+    res_health = client.get('/healthz')
+    assert res_health.status_code == 200
+    health_data = res_health.get_json()
+    assert health_data['status'] == 'healthy'
+    assert 'database' in health_data['components']
+    assert 'redis' in health_data['components']
+
+    # 2. Storefront root /
+    res_root = client.get('/')
+    assert res_root.status_code == 200
+    assert b'DailyDrop' in res_root.data or b'Daily Drop' in res_root.data
+
+    # 3. GET /api/v1/products
+    res_products = client.get('/api/v1/products?per_page=12')
+    assert res_products.status_code == 200
+    prods_data = res_products.get_json()
+    assert prods_data['success'] is True
+    assert len(prods_data['products']) == 12
+    assert prods_data['total'] > 100
+
+    # 4. Admin login page /admin/login (and /admin_login)
+    for path in ['/admin/login', '/admin_login']:
+        res_admin = client.get(path)
+        assert res_admin.status_code == 200
+        assert b'Admin' in res_admin.data
+

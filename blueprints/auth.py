@@ -94,6 +94,7 @@ def login():
 
 
 @auth_bp.route('/admin_login', methods=['GET', 'POST'], endpoint='admin_login')
+@auth_bp.route('/admin/login', methods=['GET', 'POST'], endpoint='admin_login_alias')
 @limiter.limit("100 per minute")
 def admin_login() -> str:
     """Handle dedicated administrator authentication."""
