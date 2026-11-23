@@ -162,6 +162,7 @@ def test_insufficient_stock_rollback():
 
 # ==================== 4. Concurrent Checkout Atomicity ====================
 
+@pytest.mark.postgres
 def test_concurrent_checkout_stock_protection():
     """Simulate two racing threads buying the last unit of stock: exactly one succeeds."""
     prod_id = add_product(

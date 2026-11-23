@@ -24,6 +24,19 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: dailydrop_test
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - name: Checkout Code
@@ -48,14 +61,27 @@ jobs:
           # Exit-zero treats all errors as warnings
           flake8 . --count --exit-zero --max-complexity=15 --max-line-length=140 --statistics --exclude=venv,.venv,docs
 
-      - name: Run Pytest Suite (76 Offline Tests)
+      - name: Run Fast Offline Unit Tests (SQLite in-memory)
         env:
           FLASK_ENV: testing
-          # Note: Pytest executes against the deterministic in-memory SQLite fixture (74 tests in ~2s).
-          # CI does not provision a PostgreSQL service container to maintain fast, hermetic PR runs.
-          # To run against native PostgreSQL locally or in integration, pass TEST_USE_REAL_POSTGRES=true.
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
           REDIS_URL: redis://127.0.0.1:6379/0
           REDIS_ENABLED: "true"
         run: |
-          pytest -v --color=yes
+          pytest -m "not postgres" -v --color=yes
+
+      - name: Run Database Migrations on PostgreSQL
+        env:
+          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/dailydrop_test
+        run: |
+          python -m migrations.runner
+          python seed.py
+
+      - name: Run Real PostgreSQL Concurrency Tests
+        env:
+          FLASK_ENV: testing
+          TEST_USE_REAL_POSTGRES: "true"
+          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/dailydrop_test
+          REDIS_URL: redis://127.0.0.1:6379/0
+          REDIS_ENABLED: "true"
+        run: |
+          pytest -m "postgres" -v --color=yes

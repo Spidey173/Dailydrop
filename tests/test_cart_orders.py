@@ -129,6 +129,7 @@ def test_normalized_order_items(test_user):
     assert matching['products'][0]['name'] == "Farm Fresh Red Hybrid Tomatoes (1 kg)"
 
 
+@pytest.mark.postgres
 def test_atomic_inventory_decrement_and_race_prevention(test_user):
     """Verify UPDATE products SET stock = stock - %s WHERE stock >= %s atomically decrements and prevents overselling."""
     from repositories.product_repository import add_product, get_product_by_id, delete_product
