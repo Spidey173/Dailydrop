@@ -11,8 +11,8 @@ from config import Config
 def test_payment_authoritative_calculation_free_delivery():
     """Test order above Rs. 500 gets free delivery (fee = 0)."""
     items = [
-        {"name": "Basmati Rice 5kg", "price": 450.0, "quantity": 1},
-        {"name": "Olive Oil 1L", "price": 600.0, "quantity": 1}
+        {"product_id": 247, "name": "Basmati Rice 5kg", "price": 450.0, "quantity": 1},
+        {"product_id": 248, "name": "Olive Oil 1L", "price": 600.0, "quantity": 1}
     ]
     success, msg, subtotal, fee, total = PaymentService.calculate_authoritative_total(items)
     assert success is True
@@ -24,7 +24,7 @@ def test_payment_authoritative_calculation_free_delivery():
 def test_payment_authoritative_calculation_with_delivery_fee():
     """Test order below Rs. 500 incurs Rs. 30 delivery fee."""
     items = [
-        {"name": "Organic Apples 1kg", "price": 120.0, "quantity": 2}
+        {"product_id": 249, "name": "Organic Apples 1kg", "price": 120.0, "quantity": 2}
     ]
     success, msg, subtotal, fee, total = PaymentService.calculate_authoritative_total(items)
     assert success is True
@@ -201,7 +201,7 @@ def test_api_verify_payment_validation():
             full_name='Payment Tester',
             phone_number='9876543210',
             address='123 Test St',
-            products=[{"name": "Tea", "price": 50.0, "quantity": 1}],
+            products=[{"product_id": 250, "name": "Tea", "price": 50.0, "quantity": 1}],
             total_amount=80.0
         )
 
@@ -260,7 +260,7 @@ def test_razorpay_webhook_signature_and_idempotency():
             full_name='Existing Customer',
             phone_number='9876543210',
             address='123 Main St',
-            products=[{"name": "Tea", "price": 50.0, "quantity": 1}],
+            products=[{"product_id": 250, "name": "Tea", "price": 50.0, "quantity": 1}],
             total_amount=50.0,
             payment_method='Razorpay',
             payment_id='pay_test_idempotent_123',
@@ -297,7 +297,7 @@ def test_razorpay_webhook_client_disconnect_recovery():
         full_name='Disconnected Customer',
         phone_number='9123456780',
         address='456 Disconnect Rd',
-        products=[{"name": "Brown Bread", "price": 40.0, "quantity": 2, "image": "/static/dairy-breakfast/bread.jpg"}],
+        products=[{"product_id": 251, "name": "Brown Bread", "price": 40.0, "quantity": 2, "image": "/static/dairy-breakfast/bread.jpg"}],
         total_amount=80.0
     )
     assert get_pending_order(rzp_order_id) is not None

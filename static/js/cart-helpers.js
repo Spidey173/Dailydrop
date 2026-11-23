@@ -116,18 +116,11 @@ function reconcileCartWithCatalog() {
   return changed;
 }
 
-// Background asynchronous catalog fetch to guarantee client-side healing if productsDB not in DOM
+// Background asynchronous catalog fetch from API to guarantee client-side healing
 async function ensureCatalogAndReconcileCart() {
-  if (reconcileCartWithCatalog()) {
-    updateCartCount();
-    if (typeof loadCart === 'function') loadCart();
-    if (typeof updateProductButtons === 'function') updateProductButtons();
-    return;
-  }
-
   if (!window.productsDB || window.productsDB.length === 0) {
     try {
-      const res = await fetch('/api/v1/products/list');
+      const res = await fetch('/api/v1/products?per_page=100');
       if (res.ok) {
         const data = await res.json();
         const prods = (data && (data.products || (Array.isArray(data) ? data : []))) || [];
@@ -143,6 +136,7 @@ async function ensureCatalogAndReconcileCart() {
             image: p.image_path || p.image || '/static/product-placeholder.svg',
             description: p.description || ''
           }));
+          document.dispatchEvent(new CustomEvent('productsSynced', { detail: window.productsDB }));
           if (reconcileCartWithCatalog()) {
             updateCartCount();
             if (typeof loadCart === 'function') loadCart();
@@ -153,11 +147,17 @@ async function ensureCatalogAndReconcileCart() {
     } catch (e) {
       // offline / deferred fallback
     }
+  } else {
+    if (reconcileCartWithCatalog()) {
+      updateCartCount();
+      if (typeof loadCart === 'function') loadCart();
+      if (typeof updateProductButtons === 'function') updateProductButtons();
+    }
   }
 }
 
 // Initial immediate sync pass
-reconcileCartWithCatalog();
+ensureCatalogAndReconcileCart();
 
 
 window.addEventListener('storage', () => {

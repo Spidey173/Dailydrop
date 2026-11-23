@@ -1,4 +1,4 @@
-window.productsDB = [
+[
   {
     "id": 1,
     "title": "Aashirvaad Iodised Salt (1 kg)",
@@ -2168,4 +2168,4 @@ window.productsDB = [
     "image": "/static/dairy-breakfast/yippee.jpeg",
     "description": "Non-sticky round noodles infused with a blend of 5 veggies & spices."
   }
-];
+]

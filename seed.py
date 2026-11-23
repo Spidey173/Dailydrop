@@ -62,14 +62,16 @@ def seed_users() -> None:
         raise DatabaseError(f"Failed to seed users: {e}") from e
 
 
-def seed_products(js_file_path: Optional[str] = None) -> int:
-    """Seed catalog products from static/js/products.js if products table is empty."""
-    if js_file_path is None:
+def seed_products(seed_file_path: Optional[str] = None) -> int:
+    """Seed catalog products from seeds/products.json if products table is empty."""
+    if seed_file_path is None:
         base_dir = os.path.dirname(os.path.abspath(__file__))
-        js_file_path = os.path.join(base_dir, 'static', 'js', 'products.js')
+        json_path = os.path.join(base_dir, 'seeds', 'products.json')
+        js_path = os.path.join(base_dir, 'static', 'js', 'products.js')
+        seed_file_path = json_path if os.path.exists(json_path) else js_path
 
-    if not os.path.exists(js_file_path):
-        logger.warning(f"Products seed file not found at: {js_file_path}")
+    if not os.path.exists(seed_file_path):
+        logger.warning(f"Products seed file not found at: {seed_file_path}")
         return 0
 
     try:
@@ -82,16 +84,19 @@ def seed_products(js_file_path: Optional[str] = None) -> int:
                     logger.info(f"Products catalog already contains {product_count} items. Skipping product seed.")
                     return product_count
 
-                with open(js_file_path, 'r', encoding='utf-8') as f:
+                with open(seed_file_path, 'r', encoding='utf-8') as f:
                     content = f.read()
 
-                start = content.find('[')
-                end = content.rfind(']') + 1
-                if start == -1 or end == 0:
-                    logger.warning("No JSON array found in products.js")
-                    return 0
+                if seed_file_path.endswith('.json'):
+                    raw_products = json.loads(content)
+                else:
+                    start = content.find('[')
+                    end = content.rfind(']') + 1
+                    if start == -1 or end == 0:
+                        logger.warning("No JSON array found in seed file")
+                        return 0
+                    raw_products = json.loads(content[start:end])
 
-                raw_products = json.loads(content[start:end])
                 for pid, p in enumerate(raw_products, start=1):
                     unique_stock = 30 + ((pid * 7) % 65)
                     cursor.execute(
@@ -141,3 +146,4 @@ if __name__ == "__main__":
     except Exception as exc:
         logger.error(f"Seeding failed: {exc}")
         sys.exit(1)
+

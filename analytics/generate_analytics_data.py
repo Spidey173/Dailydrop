@@ -27,8 +27,12 @@ os.makedirs(DATA_DIR, exist_ok=True)
 # 1. Load Products Catalog from Official Catalog
 # -----------------------------------------------------------------------------
 def load_catalog():
+    json_path = os.path.join(PROJECT_ROOT, 'seeds', 'products.json')
     js_path = os.path.join(PROJECT_ROOT, 'static', 'js', 'products.js')
-    if os.path.exists(js_path):
+    if os.path.exists(json_path):
+        with open(json_path, 'r', encoding='utf-8') as f:
+            raw_products = json.load(f)
+    elif os.path.exists(js_path):
         with open(js_path, 'r', encoding='utf-8') as f:
             text = f.read()
         start = text.find('[')

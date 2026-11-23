@@ -399,6 +399,49 @@ def delete_product(product_id: int) -> bool:
         raise DatabaseError(f"Failed to delete product: {e}") from e
 
 
+def get_products_paginated(
+    page: int = 1,
+    per_page: int = 12,
+    category: Optional[str] = None,
+    search: Optional[str] = None
+) -> Dict[str, Any]:
+    """
+    Retrieve products with pagination, optional category filtering, and keyword search.
+
+    Returns:
+        Dict with keys: success, products, total, page, per_page, pages
+    """
+    import math
+    page = max(1, int(page))
+    per_page = max(1, min(100, int(per_page)))
+
+    all_products = get_all_products(category=category)
+    if search:
+        s = search.lower().strip()
+        all_products = [
+            p for p in all_products
+            if s in (p.get('name') or p.get('title') or '').lower()
+            or s in (p.get('description') or '').lower()
+            or s in (p.get('subcategory') or '').lower()
+            or s in (p.get('category') or '').lower()
+        ]
+
+    total = len(all_products)
+    pages = math.ceil(total / per_page) if total > 0 else 1
+    start_idx = (page - 1) * per_page
+    end_idx = start_idx + per_page
+    products = all_products[start_idx:end_idx]
+
+    return {
+        'success': True,
+        'products': products,
+        'total': total,
+        'page': page,
+        'per_page': per_page,
+        'pages': pages
+    }
+
+
 def get_low_stock_products(threshold: int = 10) -> List[Dict[str, Any]]:
     """Retrieve products where stock is equal to or below the given threshold using in-memory catalog."""
     try:
@@ -407,3 +450,4 @@ def get_low_stock_products(threshold: int = 10) -> List[Dict[str, Any]]:
     except Exception as e:
         logger.error(f"Error retrieving low stock products: {e}")
         return []
+

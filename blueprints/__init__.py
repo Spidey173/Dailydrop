@@ -44,6 +44,7 @@ ENDPOINT_ALIASES = {
     'dairy_breakfast': 'products.dairy_breakfast',
     'beverages': 'products.beverages',
     'frozen_foods': 'products.frozen_foods',
+    'api_get_products': 'products.api_get_products',
     'api_list_products': 'products.api_list_products',
     # Cart & Orders & Wishlist
     'cart': 'cart.cart',

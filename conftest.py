@@ -337,31 +337,35 @@ def _seed_test_database():
         ('Demo Customer', 'demo_dailydrop@gmail.com', demo_pass, 'customer')
     )
 
-    # Seed catalog products from static/js/products.js
+    # Seed catalog products from seeds/products.json
+    json_seed = os.path.join(ROOT_DIR, 'seeds', 'products.json')
     js_file = os.path.join(ROOT_DIR, 'static', 'js', 'products.js')
-    if os.path.exists(js_file):
+    seed_file = json_seed if os.path.exists(json_seed) else js_file
+    if os.path.exists(seed_file):
         try:
-            with open(js_file, 'r', encoding='utf-8') as f:
+            with open(seed_file, 'r', encoding='utf-8') as f:
                 c = f.read()
-            start = c.find('[')
-            end = c.rfind(']') + 1
-            if start != -1 and end != -1:
-                raw_prods = json.loads(c[start:end])
-                for pid, p in enumerate(raw_prods, start=1):
-                    unique_stock = 30 + ((pid * 7) % 65)
-                    cur.execute('''
-                        INSERT OR IGNORE INTO products (product_id, name, price, category, subcategory, image_path, description, stock)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                    ''', (
-                        pid,
-                        p.get('title', 'Product'),
-                        float(p.get('price', 0)),
-                        p.get('category', 'Grocery'),
-                        p.get('subcategory', ''),
-                        p.get('image', '/static/product-placeholder.svg'),
-                        p.get('description', ''),
-                        unique_stock
-                    ))
+            if seed_file.endswith('.json'):
+                raw_prods = json.loads(c)
+            else:
+                start = c.find('[')
+                end = c.rfind(']') + 1
+                raw_prods = json.loads(c[start:end]) if (start != -1 and end != -1) else []
+            for pid, p in enumerate(raw_prods, start=1):
+                unique_stock = 30 + ((pid * 7) % 65)
+                cur.execute('''
+                    INSERT OR IGNORE INTO products (product_id, name, price, category, subcategory, image_path, description, stock)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    pid,
+                    p.get('title', 'Product'),
+                    float(p.get('price', 0)),
+                    p.get('category', 'Grocery'),
+                    p.get('subcategory', ''),
+                    p.get('image', '/static/product-placeholder.svg'),
+                    p.get('description', ''),
+                    unique_stock
+                ))
         except Exception as e:
             print(f"Warning: could not seed catalog products in SQLite: {e}")
 

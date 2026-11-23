@@ -71,3 +71,69 @@ def test_api_products_search(client):
     assert res_limit.status_code == 200
     assert len(res_limit.get_json()['results']) <= 3
 
+
+def test_api_v1_products_paginated(client):
+    """Verify GET /api/v1/products pagination and metadata."""
+    res = client.get('/api/v1/products?page=1&per_page=12')
+    assert res.status_code == 200
+    data = res.get_json()
+    assert data['success'] is True
+    assert len(data['products']) == 12
+    assert data['page'] == 1
+    assert data['per_page'] == 12
+    assert data['total'] > 200
+    assert data['pages'] >= 17
+
+    # Verify second page returns different slice
+    res_p2 = client.get('/api/v1/products?page=2&per_page=12')
+    assert res_p2.status_code == 200
+    data_p2 = res_p2.get_json()
+    assert len(data_p2['products']) == 12
+    assert data_p2['page'] == 2
+    assert data['products'][0]['product_id'] != data_p2['products'][0]['product_id']
+
+
+def test_api_v1_products_filters(client):
+    """Verify GET /api/v1/products category and search query filters."""
+    # Filter by category
+    res_cat = client.get('/api/v1/products?category=Grocery&per_page=50')
+    assert res_cat.status_code == 200
+    data_cat = res_cat.get_json()
+    assert data_cat['success'] is True
+    assert data_cat['total'] > 0
+    for p in data_cat['products']:
+        assert p['category'] == 'Grocery'
+
+    # Filter by search
+    res_search = client.get('/api/v1/products?search=milk')
+    assert res_search.status_code == 200
+    data_search = res_search.get_json()
+    assert data_search['success'] is True
+    assert data_search['total'] > 0
+    assert any('milk' in (p.get('name') or '').lower() for p in data_search['products'])
+
+
+def test_strict_product_id_resolution():
+    """Verify CatalogValidationService rejects missing or unknown product IDs with 400-level error."""
+    from services.catalog_validation_service import CatalogValidationService
+    from database import get_db_connection
+
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            # 1. Missing product_id
+            valid, err, _, _, _ = CatalogValidationService.validate_and_resolve_cart(
+                cur,
+                [{"name": "Mysterious Floating Item", "price": 99.0, "quantity": 1}]
+            )
+            assert valid is False
+            assert "missing product_id" in err or "not found in catalog" in err
+
+            # 2. Unknown numeric product_id
+            valid, err, _, _, _ = CatalogValidationService.validate_and_resolve_cart(
+                cur,
+                [{"product_id": 888888, "name": "Fake Product", "price": 99.0, "quantity": 1}]
+            )
+            assert valid is False
+            assert "not found in catalog" in err
+
+

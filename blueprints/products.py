@@ -4,6 +4,7 @@ Products blueprint handling catalog listings, categories, and product query APIs
 import logging
 from flask import Blueprint, render_template, request, jsonify, redirect, url_for
 from services.product_service import ProductService
+from repositories.product_repository import get_products_paginated
 
 logger = logging.getLogger(__name__)
 
@@ -250,6 +251,41 @@ def beverages() -> str:
 def frozen_foods() -> str:
     """Display Frozen Foods category products."""
     return render_category_page('frozen_foods')
+
+
+@products_bp.route('/api/v1/products', methods=['GET'], endpoint='api_get_products')
+def api_get_products():
+    """
+    GET /api/v1/products
+    Paginated, filterable by category and search query. Backed by product_repository.
+    Query parameters:
+        - page: int (default 1)
+        - per_page: int (default 12)
+        - category: str (optional)
+        - search / q: str (optional)
+    """
+    page = request.args.get('page', 1)
+    per_page = request.args.get('per_page', request.args.get('limit', 12))
+    category = request.args.get('category')
+    search = request.args.get('search') or request.args.get('q')
+
+    try:
+        page = int(page)
+    except (TypeError, ValueError):
+        page = 1
+
+    try:
+        per_page = int(per_page)
+    except (TypeError, ValueError):
+        per_page = 12
+
+    result = get_products_paginated(
+        page=page,
+        per_page=per_page,
+        category=category,
+        search=search
+    )
+    return jsonify(result), 200
 
 
 @products_bp.route('/api/v1/products/list', methods=['GET'], endpoint='api_list_products')

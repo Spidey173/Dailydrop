@@ -11,6 +11,7 @@ from .product_repository import (
     get_all_products,
     get_product_by_id,
     get_product_by_name,
+    get_products_paginated,
     add_product,
     update_product,
     update_product_price,
@@ -47,6 +48,7 @@ __all__ = [
     'get_all_products',
     'get_product_by_id',
     'get_product_by_name',
+    'get_products_paginated',
     'add_product',
     'update_product',
     'update_product_price',
@@ -71,3 +73,4 @@ __all__ = [
     'clear_analytics_cache',
     '_get_fallback_rfm_customers'
 ]
+

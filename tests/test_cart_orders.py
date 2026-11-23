@@ -50,8 +50,8 @@ def test_cart_and_payment_views(client):
 
 def test_order_creation_and_history(client, test_user):
     items = [
-        {"name": "Organic Tomatoes", "price": 3.99, "quantity": 2},
-        {"name": "Whole Milk", "price": 4.50, "quantity": 1}
+        {"product_id": 242, "name": "Organic Tomatoes", "price": 3.99, "quantity": 2},
+        {"product_id": 243, "name": "Whole Milk", "price": 4.50, "quantity": 1}
     ]
 
     # 1. Place order via OrderService
@@ -83,7 +83,7 @@ def test_place_order_endpoint(client):
         'full_name': 'Cart Tester',
         'phone_number': '1234567890',
         'address': '456 Test Blvd',
-        'products': [{'name': 'Apple', 'price': 1.50, 'quantity': 3}],
+        'products': [{'product_id': 244, 'name': 'Apple', 'price': 1.50, 'quantity': 3}],
         'total_amount': 4.50
     }
     res = client.post('/place_order', json=order_payload)
@@ -96,8 +96,8 @@ def test_normalized_order_items(test_user):
     """Verify orders persist normalized relational rows into order_items table."""
     from repositories.order_repository import get_order_items
     items = [
-        {"name": "Farm Fresh Red Hybrid Tomatoes (1 kg)", "price": 35.0, "quantity": 2, "image": "/static/fruits-vegetables/tomato.jpg"},
-        {"name": "Amul Taaza Homogenised Toned Milk (1 L)", "price": 54.0, "quantity": 1, "image": "/static/dairy-breakfast/milk.jpg"}
+        {"product_id": 229, "name": "Farm Fresh Red Hybrid Tomatoes (1 kg)", "price": 35.0, "quantity": 2, "image": "/static/fruits-vegetables/tomato.jpg"},
+        {"product_id": 161, "name": "Amul Taaza Homogenised Toned Milk (1 L)", "price": 54.0, "quantity": 1, "image": "/static/dairy-breakfast/milk.jpg"}
     ]
     success, msg, order_id = OrderService.create_order(
         user_id=test_user,

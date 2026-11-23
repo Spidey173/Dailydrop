@@ -240,7 +240,7 @@ def test_verify_payment_mismatched_user(test_app):
         full_name='Victim User',
         phone_number='9876543210',
         address='Victim Rd',
-        products=[{"name": "Tea", "price": 50.0, "quantity": 1}],
+        products=[{"product_id": 250, "name": "Tea", "price": 50.0, "quantity": 1}],
         total_amount=50.0
     )
 
@@ -301,7 +301,7 @@ def test_webhook_does_not_regress_shipped_order(test_app):
         full_name='Shipped Customer',
         phone_number='9876543210',
         address='Shipped Lane',
-        products=[{"name": "Tea", "price": 50.0, "quantity": 1}],
+        products=[{"product_id": 250, "name": "Tea", "price": 50.0, "quantity": 1}],
         total_amount=50.0,
         payment_method='Razorpay',
         payment_id='pay_already_shipped_111',
@@ -353,7 +353,7 @@ def test_order_status_state_machine():
         full_name='FSM Tester',
         phone_number='9876543210',
         address='FSM Way',
-        products=[{"name": "Tea", "price": 50.0, "quantity": 1}],
+        products=[{"product_id": 250, "name": "Tea", "price": 50.0, "quantity": 1}],
         total_amount=50.0,
         payment_method='COD',
         status='Processing'

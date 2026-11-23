@@ -86,33 +86,22 @@ class CatalogValidationService:
             img = item.get('image') or item.get('image_path') or '/static/logo1.webp'
             pid = item.get('product_id') or item.get('id')
 
-            prod_row = None
-            if pid is not None:
-                try:
-                    prod_row = products_by_id.get(int(pid))
-                except (ValueError, TypeError):
-                    prod_row = None
+            if pid is None:
+                identifier = name or "item"
+                logger.warning(f"Rejected checkout: Item '{identifier}' is missing product_id.")
+                return ValidationResult(False, f"Product '{identifier}' not found in catalog: missing product_id", [], {}, 0.0)
 
-            if not prod_row and name:
-                try:
-                    cursor.execute("SELECT product_id, name, stock, price, image_path FROM products WHERE LOWER(name) = LOWER(%s)", (name.strip(),))
-                    prod_row = cursor.fetchone()
-                except Exception as db_err:
-                    logger.error(f"Database error during product name lookup '{name}': {db_err}")
-                    return ValidationResult(False, 'Database error during catalog lookup', [], {}, 0.0)
+            try:
+                numeric_pid = int(pid)
+            except (ValueError, TypeError):
+                logger.warning(f"Rejected checkout: Invalid product_id format '{pid}'.")
+                return ValidationResult(False, f"Product ID #{pid} not found in catalog", [], {}, 0.0)
 
-            if not prod_row and name:
-                try:
-                    cursor.execute("SELECT product_id, name, stock, price, image_path FROM products WHERE name ILIKE %s ORDER BY LENGTH(name) ASC LIMIT 1", (f"%{name.strip()}%",))
-                    prod_row = cursor.fetchone()
-                except Exception as db_err:
-                    logger.error(f"Database error during product pattern lookup '{name}': {db_err}")
-                    return ValidationResult(False, 'Database error during catalog lookup', [], {}, 0.0)
-
+            prod_row = products_by_id.get(numeric_pid)
             if not prod_row:
-                identifier = name or (f"ID #{pid}" if pid else "item")
-                logger.warning(f"Rejected checkout: Product '{identifier}' not found in catalog database.")
-                return ValidationResult(False, f"Product '{identifier}' not found in catalog", [], {}, 0.0)
+                identifier = f"ID #{numeric_pid}" + (f" ('{name}')" if name else "")
+                logger.warning(f"Rejected checkout: Product {identifier} not found in catalog database.")
+                return ValidationResult(False, f"Product {identifier} not found in catalog", [], {}, 0.0)
 
             r_pid = prod_row['product_id'] if isinstance(prod_row, dict) else prod_row[0]
             r_name = prod_row['name'] if isinstance(prod_row, dict) else prod_row[1]
