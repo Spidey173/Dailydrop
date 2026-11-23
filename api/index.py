@@ -1,15 +1,6 @@
 """
-DEMO-ONLY / SERVERLESS PREVIEW ENTRYPOINT.
-
-IMPORTANT ARCHITECTURAL NOTICE:
-DailyDrop's production architecture relies on persistent compute (Docker / Render / Compose)
-to support:
-1. Long-running Python RQ worker daemon (worker.py) for transactional outbox & async jobs.
-2. Continuous Redis streaming connections and sub-millisecond stock lock arbitration.
-3. Persistent PostgreSQL connection pool management without cold-start reconnection storms.
-
-This file and vercel.json are maintained solely for public front-end demo previews.
-Do NOT use Vercel Serverless for production deployments requiring the asynchronous background worker.
+DailyDrop Vercel Serverless WSGI Production Entrypoint.
+Handles serverless request routing, environment bootstrapping, and WSGI application handling.
 """
 import sys
 import os
