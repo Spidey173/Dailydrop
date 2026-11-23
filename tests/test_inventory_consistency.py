@@ -6,6 +6,7 @@ Validates:
 3. Database constraint / abort triggers Redis compensation rollback.
 4. Active reconciliation re-aligns drifted Redis cache values to match PostgreSQL.
 """
+import json
 import pytest
 from unittest.mock import patch, MagicMock
 from app import create_app
@@ -140,11 +141,10 @@ def test_active_reconciliation_syncs_cache_to_authoritative_database(app_client)
     assert RedisService.get_stock(target_pid) == actual_stocks[target_pid]
 
 
-def test_order_persistence_fallback_preserves_stock_decrements(app_client):
+def test_order_persistence_single_insert_and_atomic_outbox(app_client):
     """
-    Simulate the first INSERT in OrderPersistenceService.persist_order failing
-    (e.g., column mismatch on older schema). The fallback INSERT should succeed
-    AND previous stock decrements in the same transaction MUST NOT be undone.
+    Verify persist_order issues exactly ONE deterministic INSERT without savepoints,
+    and the outbox event is written in the exact same transaction.
     """
     with get_db_connection() as conn:
         with conn.cursor() as cursor:
@@ -153,39 +153,54 @@ def test_order_persistence_fallback_preserves_stock_decrements(app_client):
             pid = prod['product_id'] if isinstance(prod, dict) else prod[0]
             initial_stock = prod['stock'] if isinstance(prod, dict) else prod[1]
 
-    cart = [{"product_id": pid, "quantity": 2}]
+    cart = [{"product_id": pid, "quantity": 1}]
+    executed_statements = []
 
     real_persist = OrderPersistenceService.persist_order
 
-    def failing_first_insert_persist(cls, cursor, conn, *args, **kwargs):
+    def spy_persist(cls, cursor, conn, *args, **kwargs):
         real_exec = cursor.execute
-        first_called = [False]
 
-        def mock_exec(sql, params=None):
-            if not first_called[0] and "INSERT INTO orders" in sql:
-                first_called[0] = True
-                raise Exception("Simulated column missing: delivery_duration_minutes")
+        def tracking_exec(sql, params=None):
+            executed_statements.append(str(sql))
             return real_exec(sql, params)
 
-        cursor.execute = mock_exec
+        cursor.execute = tracking_exec
         return real_persist(cursor, conn, *args, **kwargs)
 
-    with patch.object(OrderPersistenceService, "persist_order", classmethod(failing_first_insert_persist)):
+    with patch.object(OrderPersistenceService, "persist_order", classmethod(spy_persist)):
         success, msg, order_id = OrderService.create_order(
             user_id=1,
-            full_name="Fallback Tester",
+            full_name="Single Insert Tester",
             phone_number="9876543210",
-            address="123 Test St",
+            address="123 Deterministic St",
             products=cart,
-            total_amount=50.0
+            total_amount=50.0,
+            city="Bangalore"
         )
         assert success is True
         assert order_id is not None
 
+    # Assert exactly 1 INSERT INTO orders occurred in persist_order
+    order_inserts = [stmt for stmt in executed_statements if "INSERT INTO orders" in stmt]
+    assert len(order_inserts) == 1, f"Expected exactly 1 INSERT INTO orders, got {len(order_inserts)}"
+
+    # Assert zero SAVEPOINT/RELEASE/ROLLBACK statements were issued
+    savepoints = [stmt for stmt in executed_statements if "SAVEPOINT" in stmt]
+    assert len(savepoints) == 0, f"Expected 0 SAVEPOINT calls, got {savepoints}"
+
+    # Verify that the outbox event was recorded atomically for this order
     with get_db_connection() as conn:
         with conn.cursor() as cursor:
-            cursor.execute("SELECT stock FROM products WHERE product_id = %s", (pid,))
-            final_stock = cursor.fetchone()['stock']
-
-    assert final_stock == initial_stock - 2
+            cursor.execute(
+                "SELECT id, aggregate_id, event_type, payload FROM outbox_events WHERE aggregate_id = %s",
+                (str(order_id),)
+            )
+            event = cursor.fetchone()
+            assert event is not None
+            assert event['event_type'] == 'ORDER_CREATED'
+            payload = json.loads(event['payload']) if isinstance(event['payload'], str) else event['payload']
+            assert payload['order_id'] == order_id
+            assert payload['user_id'] == 1
+            assert payload['city'] == 'Bangalore'
 

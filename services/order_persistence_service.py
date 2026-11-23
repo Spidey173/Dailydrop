@@ -29,64 +29,39 @@ class OrderPersistenceService:
         delivery_duration_minutes: Optional[float] = 7.5
     ) -> int:
         """
-        Inserts the master order record, supporting extended schema with graceful fallback.
+        Inserts the master order record deterministically in a single statement.
         Returns:
             order_id (int)
         """
         target_city = city or 'Bangalore'
         duration = float(delivery_duration_minutes) if delivery_duration_minutes else 7.5
 
-        insert_variants = [
+        cursor.execute(
+            """
+            INSERT INTO orders (
+                user_id, full_name, phone_number, address, city,
+                delivery_duration_minutes, products_ordered, total_amount,
+                status, payment_method, payment_id
+            )
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            RETURNING order_id
+            """,
             (
-                """
-                INSERT INTO orders (user_id, full_name, phone_number, address, city, delivery_duration_minutes, products_ordered, total_amount, status, payment_method, payment_id)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                RETURNING order_id
-                """,
-                (user_id, full_name, phone_number, address, target_city, duration, products_json, authoritative_total, status, payment_method, payment_id)
-            ),
-            (
-                """
-                INSERT INTO orders (user_id, full_name, phone_number, address, city, products_ordered, total_amount, status, payment_method, payment_id)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                RETURNING order_id
-                """,
-                (user_id, full_name, phone_number, address, target_city, products_json, authoritative_total, status, payment_method, payment_id)
-            ),
-            (
-                """
-                INSERT INTO orders (user_id, full_name, phone_number, address, products_ordered, total_amount, status, payment_method, payment_id)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-                RETURNING order_id
-                """,
-                (user_id, full_name, phone_number, address, products_json, authoritative_total, status, payment_method, payment_id)
-            ),
-            (
-                """
-                INSERT INTO orders (user_id, full_name, phone_number, address, products_ordered, total_amount, status)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
-                RETURNING order_id
-                """,
-                (user_id, full_name, phone_number, address, products_json, authoritative_total, status)
-            ),
-        ]
-
-        order_id = None
-        for i, (query, params) in enumerate(insert_variants):
-            sp_name = f"order_insert_sp_{i}"
-            cursor.execute(f"SAVEPOINT {sp_name}")
-            try:
-                cursor.execute(query, params)
-                order_row = cursor.fetchone()
-                order_id = order_row['order_id'] if isinstance(order_row, dict) else order_row[0]
-                cursor.execute(f"RELEASE SAVEPOINT {sp_name}")
-                break
-            except Exception:
-                cursor.execute(f"ROLLBACK TO SAVEPOINT {sp_name}")
-                if i == len(insert_variants) - 1:
-                    raise
-
-        return order_id
+                user_id,
+                full_name,
+                phone_number,
+                address,
+                target_city,
+                duration,
+                products_json,
+                authoritative_total,
+                status,
+                payment_method,
+                payment_id
+            )
+        )
+        order_row = cursor.fetchone()
+        return order_row['order_id'] if isinstance(order_row, dict) else order_row[0]
 
     @classmethod
     def persist_order_items(
