@@ -6,6 +6,7 @@ import pytest
 from unittest.mock import patch
 from app import create_app
 from database import get_db_connection
+from psycopg2.extras import RealDictCursor
 from repositories.order_repository import save_pending_order
 from services.auth_service import AuthService
 from services.outbox_service import OutboxService
@@ -82,7 +83,7 @@ def test_refund_required_outbox_event_on_order_creation_failure(client, monkeypa
 
     # Check that REFUND_REQUIRED event exists in outbox_events table
     with get_db_connection() as conn:
-        with conn.cursor() as cur:
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute("SELECT * FROM outbox_events WHERE event_type = 'REFUND_REQUIRED'")
             rows = cur.fetchall()
 

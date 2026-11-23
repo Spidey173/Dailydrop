@@ -3,6 +3,7 @@ import pytest
 from app import create_app
 from services.product_service import ProductService
 from database import get_db_connection
+from psycopg2.extras import RealDictCursor
 
 try:
     from PIL import Image
@@ -71,7 +72,7 @@ def test_admin_upload_and_edit_permanent_persistence(admin_client):
 
     # 3. Direct verification in PostgreSQL
     with get_db_connection() as conn:
-        with conn.cursor() as cur:
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute("SELECT name, price, category, stock, image_path FROM products WHERE product_id = %s", (product_id,))
             row = cur.fetchone()
             assert row is not None
@@ -104,7 +105,7 @@ def test_admin_upload_and_edit_permanent_persistence(admin_client):
 
     # 5. Direct verification in PostgreSQL after edit
     with get_db_connection() as conn:
-        with conn.cursor() as cur:
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute("SELECT name, price, subcategory, stock, image_path FROM products WHERE product_id = %s", (product_id,))
             updated_row = cur.fetchone()
             assert updated_row['name'] == 'Updated Golden Dragonfruit'

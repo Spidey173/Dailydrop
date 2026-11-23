@@ -161,12 +161,15 @@ def test_payment_webhook_remains_csrf_exempt(auth_client):
 
 def test_authoritative_price_resolution_overrides_client_tampering():
     """Verify that client cannot tamper with product price in checkout."""
-    # Insert or update a known product in SQLite test DB
+    # Insert or update a known product in PostgreSQL test DB
     with get_db_connection() as conn:
         with conn.cursor() as cur:
             cur.execute("""
-                INSERT OR REPLACE INTO products (product_id, name, price, stock, category, image_path, description)
+                INSERT INTO products (product_id, name, price, stock, category, image_path, description)
                 VALUES (8888, 'Tamper Proof Oil', 400.0, 50, 'Grocery', '/static/grocery/fortune-sunlite-oil.jpeg', 'Test Product')
+                ON CONFLICT (product_id) DO UPDATE SET
+                    name = EXCLUDED.name, price = EXCLUDED.price, stock = EXCLUDED.stock,
+                    category = EXCLUDED.category, image_path = EXCLUDED.image_path, description = EXCLUDED.description
             """)
 
     # Attacker attempts to checkout with price = 0.50 instead of 400.00
@@ -248,8 +251,8 @@ def test_order_status_terminal_transition_rejection():
             cur.execute("""
                 INSERT INTO orders (user_id, full_name, phone_number, address, products_ordered, total_amount, payment_method, status)
                 VALUES (2, 'State Transition User', '9999999999', 'Road 1', '[]', 100.0, 'COD', 'Processing')
+                RETURNING order_id
             """)
-            cur.execute("SELECT last_insert_rowid()")
             order_id = cur.fetchone()[0]
 
     # Valid transition to Delivered

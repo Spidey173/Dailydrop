@@ -11,6 +11,7 @@ import pytest
 from unittest.mock import patch, MagicMock
 from app import create_app
 from database import get_db_connection
+from psycopg2.extras import RealDictCursor
 from services.redis_service import RedisService
 from services.inventory_reservation_service import InventoryReservationService
 from services.order_service import OrderService
@@ -159,14 +160,34 @@ def test_order_persistence_single_insert_and_atomic_outbox(app_client):
     real_persist = OrderPersistenceService.persist_order
 
     def spy_persist(cls, cursor, conn, *args, **kwargs):
-        real_exec = cursor.execute
+        # psycopg2's C cursor is read-only; wrap execute with a proxy
+        original_execute = cursor.execute
 
-        def tracking_exec(sql, params=None):
-            executed_statements.append(str(sql))
-            return real_exec(sql, params)
+        class ExecuteSpy:
+            """Proxy that tracks SQL statements while delegating to the real cursor."""
+            def __init__(self, real_fn):
+                self._real = real_fn
 
-        cursor.execute = tracking_exec
-        return real_persist(cursor, conn, *args, **kwargs)
+            def __call__(self, sql, params=None):
+                executed_statements.append(str(sql))
+                if params is not None:
+                    return self._real(sql, params)
+                return self._real(sql)
+
+        spy = ExecuteSpy(original_execute)
+        # Use monkeypatch-style replacement via __class__ trick won't work on C types;
+        # instead, create a lightweight wrapper object
+        class CursorWrapper:
+            def __init__(self, real_cursor, spy_fn):
+                self._cursor = real_cursor
+                self._spy = spy_fn
+            def execute(self, sql, params=None):
+                return self._spy(sql, params)
+            def __getattr__(self, name):
+                return getattr(self._cursor, name)
+
+        wrapped = CursorWrapper(cursor, spy)
+        return real_persist(wrapped, conn, *args, **kwargs)
 
     with patch.object(OrderPersistenceService, "persist_order", classmethod(spy_persist)):
         success, msg, order_id = OrderService.create_order(
@@ -191,7 +212,7 @@ def test_order_persistence_single_insert_and_atomic_outbox(app_client):
 
     # Verify that the outbox event was recorded atomically for this order
     with get_db_connection() as conn:
-        with conn.cursor() as cursor:
+        with conn.cursor(cursor_factory=RealDictCursor) as cursor:
             cursor.execute(
                 "SELECT id, aggregate_id, event_type, payload FROM outbox_events WHERE aggregate_id = %s",
                 (str(order_id),)

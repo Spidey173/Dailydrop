@@ -1,375 +1,188 @@
 """
-Pytest configuration and In-Memory SQLite Test Fixtures.
-Replaces remote Neon PostgreSQL connection pool during tests with an in-memory SQLite database,
-dropping test suite execution time from ~70s over network to ~1.5s completely offline.
-Guarantees 100% deterministic, green CI runs.
+Pytest configuration with ephemeral PostgreSQL + Redis via Testcontainers.
+Runs every test against real Postgres 16 and Redis 7 for 100% dialect fidelity.
+Requires Docker to be running.
 """
 import sys
 import os
-import re
 import json
-import sqlite3
+import logging
 import threading
 from contextlib import contextmanager
-import pytest
+from unittest.mock import MagicMock
 
+import pytest
+import psycopg2
+from psycopg2 import pool
+from psycopg2.extras import RealDictCursor
+
+from testcontainers.community.postgres import PostgresContainer
+from testcontainers.community.redis import RedisContainer
 
 # Add root project directory to sys.path
 ROOT_DIR = os.path.abspath(os.path.dirname(__file__))
 if ROOT_DIR not in sys.path:
     sys.path.insert(0, ROOT_DIR)
 
-
-class SQLiteDictRow(dict):
-    """
-    Dual-access row class supporting:
-    - dict access: row['column']
-    - tuple access: row[0]
-    - safe get: row.get('column', default)
-    - dict conversion: dict(row)
-    - membership testing: 'column' in row
-    """
-    def __init__(self, cursor, row):
-        super().__init__()
-        self._tuple = row
-        for idx, col in enumerate(cursor.description):
-            self[col[0]] = row[idx]
-
-    def __getitem__(self, item):
-        if isinstance(item, int):
-            return self._tuple[item]
-        return super().__getitem__(item)
+logger = logging.getLogger(__name__)
 
 
-def to_char(val, fmt):
-    """SQLite custom implementation of PostgreSQL TO_CHAR(date, 'HH24')."""
-    if val is None:
-        return '00'
-    val_str = str(val)
-    if ' ' in val_str:
-        time_part = val_str.split(' ')[1]
-        hour = time_part.split(':')[0]
-        return f"{int(hour):02d}"
-    if 'T' in val_str:
-        time_part = val_str.split('T')[1]
-        hour = time_part.split(':')[0]
-        return f"{int(hour):02d}"
-    return '00'
+# =============================================================================
+# Session-scoped Testcontainers: Postgres + Redis
+# =============================================================================
 
-
-class JsonAgg:
-    """SQLite aggregate implementation of PostgreSQL json_agg."""
-    def __init__(self):
-        self.items = []
-
-    def step(self, value):
-        if value is not None:
-            self.items.append(value)
-
-    def finalize(self):
-        return json.dumps(self.items)
-
-
-def translate_query(query: str) -> str:
-    """Translate PostgreSQL-specific SQL syntax to SQLite-compatible syntax."""
-    q = query
-    # ILIKE -> LIKE
-    q = re.sub(r'\bILIKE\b', 'LIKE', q, flags=re.IGNORECASE)
-    # Strip PostgreSQL FOR UPDATE lock clause for SQLite
-    q = re.sub(r'\s+FOR\s+UPDATE\b', '', q, flags=re.IGNORECASE)
-    # SERIAL PRIMARY KEY -> INTEGER PRIMARY KEY AUTOINCREMENT
-    q = re.sub(r'\bSERIAL\s+PRIMARY\s+KEY\b', 'INTEGER PRIMARY KEY AUTOINCREMENT', q, flags=re.IGNORECASE)
-    # Strip PostgreSQL type casts (e.g., ::date, ::json, ::text)
-    q = re.sub(r'::[a-zA-Z0-9_]+', '', q)
-    # Convert CURRENT_DATE - INTERVAL 'x days'
-    q = re.sub(r"CURRENT_DATE\s*-\s*INTERVAL\s*'(\d+)\s*days'", r"date('now', '-\1 days')", q, flags=re.IGNORECASE)
-    # Convert NOW() / CURRENT_TIMESTAMP - INTERVAL 'x minutes'
-    q = re.sub(r"(?:NOW\(\)|CURRENT_TIMESTAMP)\s*-\s*INTERVAL\s*'(\d+)\s*minutes'", r"datetime('now', '-\1 minutes')", q, flags=re.IGNORECASE)
-    # Convert NOW() -> datetime('now')
-    q = re.sub(r"\bNOW\(\)", "datetime('now')", q, flags=re.IGNORECASE)
-    # Parameter placeholders: %s -> ?
-    q = q.replace("%s", "?")
-    return q
-
-
-_SQLITE_LOCK = threading.RLock()
-
-
-class SQLiteCursorWrapper:
-    """Cursor wrapper delegating to sqlite3 with query translation and dict rows."""
-    def __init__(self, raw_cursor):
-        self._cursor = raw_cursor
-
-    def execute(self, sql: str, params=None):
-        with _SQLITE_LOCK:
-            translated = translate_query(sql)
-            if '= ANY(?)' in translated and params:
-                new_params = []
-                for p in params:
-                    if isinstance(p, (list, tuple)):
-                        if len(p) == 0:
-                            translated = translated.replace('= ANY(?)', 'IN (NULL)')
-                        else:
-                            placeholders = ', '.join(['?'] * len(p))
-                            translated = translated.replace('= ANY(?)', f'IN ({placeholders})')
-                            new_params.extend(p)
-                    else:
-                        new_params.append(p)
-                params = tuple(new_params)
-
-            statements = [s.strip() for s in translated.split(';') if s.strip()]
-            if not statements:
-                return self
-            if len(statements) == 1:
-                if params is None:
-                    self._cursor.execute(statements[0])
-                else:
-                    self._cursor.execute(statements[0], params)
-            else:
-                for stmt in statements:
-                    try:
-                        self._cursor.execute(stmt)
-                    except Exception:
-                        pass
-            return self
-
-    def fetchone(self):
-        with _SQLITE_LOCK:
-            row = self._cursor.fetchone()
-            if row is None:
-                return None
-            return SQLiteDictRow(self._cursor, row)
-
-    def fetchall(self):
-        with _SQLITE_LOCK:
-            rows = self._cursor.fetchall()
-            return [SQLiteDictRow(self._cursor, r) for r in rows]
-
-
-    def fetchmany(self, size=None):
-        rows = self._cursor.fetchmany(size)
-        return [SQLiteDictRow(self._cursor, r) for r in rows]
-
-    @property
-    def rowcount(self):
-        return self._cursor.rowcount
-
-    @property
-    def description(self):
-        return self._cursor.description
-
-    def close(self):
-        pass
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        pass
-
-
-class SQLiteConnectionWrapper:
-    """Connection wrapper mimicking psycopg2 connection semantics."""
-    def __init__(self, raw_conn):
-        self._conn = raw_conn
-        self.autocommit = False
-
-    def cursor(self, cursor_factory=None):
-        return SQLiteCursorWrapper(self._conn.cursor())
-
-    def commit(self):
-        with _SQLITE_LOCK:
-            self._conn.commit()
-
-    def rollback(self):
-        with _SQLITE_LOCK:
-            self._conn.rollback()
-
-    @property
-    def closed(self):
-        return False
-
-    def close(self):
-        pass
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        if exc_type is not None:
-            self.rollback()
-        else:
-            self.commit()
-
-
-class MockPool:
-    """Mock connection pool mimicking psycopg2.pool.ThreadedConnectionPool."""
-    def __init__(self, raw_conn):
-        self._raw_conn = raw_conn
-        self.closed = False
-
-    def getconn(self):
-        return SQLiteConnectionWrapper(self._raw_conn)
-
-    def putconn(self, conn):
-        pass
-
-    def closeall(self):
-        self.closed = True
-
-
-# Initialize shared memory SQLite connection once for test session
-_SHARED_SQLITE_CONN = sqlite3.connect(
-    'file:dailydrop_test_mem?mode=memory&cache=shared',
-    uri=True,
-    check_same_thread=False
-)
-_SHARED_SQLITE_CONN.execute("PRAGMA foreign_keys = ON;")
-_SHARED_SQLITE_CONN.create_function("TO_CHAR", 2, to_char)
-_SHARED_SQLITE_CONN.create_function("to_char", 2, to_char)
-_SHARED_SQLITE_CONN.create_aggregate("json_agg", 1, JsonAgg)
-
-
-def _seed_test_database():
-    """Create all tables and seed catalog & default users in shared SQLite memory."""
-    from werkzeug.security import generate_password_hash
-    cur = _SHARED_SQLITE_CONN.cursor()
-
-    cur.executescript('''
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name VARCHAR(255) NOT NULL,
-            email VARCHAR(255) UNIQUE NOT NULL,
-            password TEXT NOT NULL,
-            role VARCHAR(50) DEFAULT 'customer',
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
-        CREATE TABLE IF NOT EXISTS products (
-            product_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name VARCHAR(255) NOT NULL,
-            price NUMERIC(10, 2) NOT NULL,
-            category VARCHAR(100) NOT NULL,
-            subcategory VARCHAR(100),
-            image_path TEXT NOT NULL,
-            description TEXT,
-            stock INTEGER DEFAULT 50
-        );
-        CREATE TABLE IF NOT EXISTS orders (
-            order_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-            full_name VARCHAR(255) NOT NULL,
-            phone_number VARCHAR(50) NOT NULL,
-            address TEXT NOT NULL,
-            city VARCHAR(100) DEFAULT 'Bangalore',
-            delivery_duration_minutes NUMERIC(4, 1) DEFAULT 7.5,
-            products_ordered TEXT NOT NULL,
-            total_amount NUMERIC(10, 2) NOT NULL,
-            status VARCHAR(50) DEFAULT 'Processing',
-            payment_method VARCHAR(50) DEFAULT 'COD',
-            payment_id VARCHAR(255),
-            order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
-        CREATE TABLE IF NOT EXISTS order_items (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            order_id INTEGER NOT NULL REFERENCES orders(order_id) ON DELETE CASCADE,
-            product_id INTEGER REFERENCES products(product_id) ON DELETE SET NULL,
-            product_name VARCHAR(255) NOT NULL,
-            price NUMERIC(10, 2) NOT NULL,
-            quantity INTEGER NOT NULL DEFAULT 1,
-            image_path TEXT,
-            subtotal NUMERIC(10, 2) NOT NULL
-        );
-        CREATE TABLE IF NOT EXISTS pending_orders (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            razorpay_order_id VARCHAR(255) UNIQUE NOT NULL,
-            user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-            full_name VARCHAR(255) NOT NULL,
-            phone_number VARCHAR(50) NOT NULL,
-            address TEXT NOT NULL,
-            city VARCHAR(100) DEFAULT 'Bangalore',
-            products_data TEXT NOT NULL,
-            total_amount NUMERIC(10, 2) NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
-        CREATE TABLE IF NOT EXISTS contact_messages (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
-            name VARCHAR(255) NOT NULL,
-            email VARCHAR(255) NOT NULL,
-            phone VARCHAR(50),
-            subject VARCHAR(255) NOT NULL,
-            message TEXT NOT NULL,
-            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
-        CREATE TABLE IF NOT EXISTS wishlist (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-            product_id INTEGER NOT NULL REFERENCES products(product_id) ON DELETE CASCADE,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            UNIQUE(user_id, product_id)
-        );
-        CREATE TABLE IF NOT EXISTS outbox_events (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            event_id VARCHAR(64) UNIQUE NOT NULL,
-            event_type VARCHAR(100) NOT NULL,
-            aggregate_type VARCHAR(100) NOT NULL,
-            aggregate_id VARCHAR(100) NOT NULL,
-            payload TEXT NOT NULL,
-            status VARCHAR(50) DEFAULT 'PENDING',
-            retry_count INTEGER DEFAULT 0,
-            error_message TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            processed_at TIMESTAMP,
-            claimed_at TIMESTAMP
-        );
-    ''')
-
-    # Seed Admin and Demo users
-    admin_pass = generate_password_hash('Dailydrop@173')
-    cur.execute(
-        "INSERT OR IGNORE INTO users (name, email, password, role) VALUES (?, ?, ?, ?)",
-        ('Admin User', 'admin_dailydrop@gmail.com', admin_pass, 'admin')
+@pytest.fixture(scope="session")
+def _postgres_container():
+    """Start a Postgres 16 container once per test session."""
+    container = PostgresContainer(
+        image="postgres:16-alpine",
+        username="test_user",
+        password="test_password",
+        dbname="dailydrop_test",
     )
-    demo_pass = generate_password_hash('Demouser@123')
-    cur.execute(
-        "INSERT OR IGNORE INTO users (name, email, password, role) VALUES (?, ?, ?, ?)",
-        ('Demo Customer', 'demo_dailydrop@gmail.com', demo_pass, 'customer')
-    )
+    container.start()
+    yield container
+    container.stop()
 
-    # Seed catalog products from seeds/products.json
-    json_seed = os.path.join(ROOT_DIR, 'seeds', 'products.json')
-    js_file = os.path.join(ROOT_DIR, 'static', 'js', 'products.js')
-    seed_file = json_seed if os.path.exists(json_seed) else js_file
-    if os.path.exists(seed_file):
+
+@pytest.fixture(scope="session")
+def _redis_container():
+    """Start a Redis 7 container once per test session."""
+    container = RedisContainer(image="redis:7-alpine")
+    container.start()
+    yield container
+    container.stop()
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _setup_test_infrastructure(_postgres_container, _redis_container):
+    """
+    Session-level autouse fixture:
+    1. Points database module at the Postgres testcontainer via a real ThreadedConnectionPool.
+    2. Runs all migrations via migrations.runner (single source of truth for schema).
+    3. Seeds users and products via seed.py.
+    4. Points RedisService at the Redis testcontainer.
+    5. Mocks TaskService.get_queue for offline task dispatch.
+    """
+    pg = _postgres_container
+    redis_ctr = _redis_container
+
+    # Build DSN for psycopg2
+    pg_url = pg.get_connection_url()
+    # testcontainers returns a SQLAlchemy-style URL; convert to psycopg2 DSN
+    # e.g. postgresql+psycopg2://user:pass@host:port/db -> postgresql://user:pass@host:port/db
+    dsn = pg_url.replace("postgresql+psycopg2://", "postgresql://")
+
+    # Set env vars so config.py and other modules pick them up
+    os.environ["DATABASE_URL"] = dsn
+    os.environ["FLASK_ENV"] = "testing"
+    os.environ["SECRET_KEY"] = "test-mock-secret-key-32bytes-secure-pytest"
+
+    # Redis URL
+    redis_host = redis_ctr.get_container_host_ip()
+    redis_port = redis_ctr.get_exposed_port(6379)
+    redis_url = f"redis://{redis_host}:{redis_port}/0"
+    os.environ["REDIS_URL"] = redis_url
+    os.environ["REDIS_ENABLED"] = "true"
+
+    # --- Initialize database module with real Postgres pool ---
+    import database
+    # Close any existing pool
+    if database._db_pool and not database._db_pool.closed:
         try:
-            with open(seed_file, 'r', encoding='utf-8') as f:
-                c = f.read()
-            if seed_file.endswith('.json'):
-                raw_prods = json.loads(c)
-            else:
-                start = c.find('[')
-                end = c.rfind(']') + 1
-                raw_prods = json.loads(c[start:end]) if (start != -1 and end != -1) else []
-            for pid, p in enumerate(raw_prods, start=1):
-                unique_stock = 30 + ((pid * 7) % 65)
-                cur.execute('''
-                    INSERT OR IGNORE INTO products (product_id, name, price, category, subcategory, image_path, description, stock)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                ''', (
-                    pid,
-                    p.get('title', 'Product'),
-                    float(p.get('price', 0)),
-                    p.get('category', 'Grocery'),
-                    p.get('subcategory', ''),
-                    p.get('image', '/static/product-placeholder.svg'),
-                    p.get('description', ''),
-                    unique_stock
-                ))
-        except Exception as e:
-            print(f"Warning: could not seed catalog products in SQLite: {e}")
+            database._db_pool.closeall()
+        except Exception:
+            pass
 
-    # Seed specific catalog products referenced in integration tests with valid images
+    test_pool = pool.ThreadedConnectionPool(
+        minconn=2,
+        maxconn=15,
+        dsn=dsn,
+    )
+    database._db_pool = test_pool
+    database._IS_DB_INITIALIZED = True
+    database.get_pool = lambda: test_pool
+
+    # --- Run all migrations (single source of truth for schema) ---
+    from migrations.runner import run_migrations
+    count, versions = run_migrations()
+    logger.info(f"Migrations applied: {count} ({versions})")
+
+    # --- Seed users and products ---
+    from seed import seed_database
+    seed_database()
+
+    # Seed extra test-specific products
+    _seed_test_products()
+
+    # --- Configure RedisService to use real Redis container ---
+    import redis as redis_lib
+    from services.redis_service import RedisService, _LUA_DECREMENT_STOCK, _LUA_ROLLBACK_STOCK
+
+    redis_pool = redis_lib.ConnectionPool.from_url(
+        redis_url, decode_responses=True, max_connections=20
+    )
+    redis_client = redis_lib.Redis(connection_pool=redis_pool)
+    redis_client.ping()
+
+    raw_pool = redis_lib.ConnectionPool.from_url(
+        redis_url, decode_responses=False, max_connections=20
+    )
+    raw_client = redis_lib.Redis(connection_pool=raw_pool)
+
+    # Save original methods so tests can access them (e.g. test_redis_service_unmocked_methods)
+    RedisService._real_get_client = RedisService.get_client
+    RedisService._real_get_raw_client = RedisService.get_raw_client
+
+    RedisService._pool = redis_pool
+    RedisService._client = redis_client
+    RedisService._raw_pool = raw_pool
+    RedisService._raw_client = raw_client
+    RedisService._decr_script = redis_client.register_script(_LUA_DECREMENT_STOCK)
+    RedisService._rollback_script = redis_client.register_script(_LUA_ROLLBACK_STOCK)
+    RedisService._last_failure_time = 0.0
+    RedisService.get_client = classmethod(lambda cls: redis_client)
+    RedisService.get_raw_client = classmethod(lambda cls: raw_client)
+    RedisService.is_available = classmethod(lambda cls: True)
+
+    # --- Mock TaskService queue (no real RQ worker needed) ---
+    from services.task_service import TaskService
+    mock_job = MagicMock()
+    mock_job.id = "mock_job_test_7777"
+    mock_rq_queue = MagicMock()
+    mock_rq_queue.enqueue.return_value = mock_job
+    TaskService.get_queue = classmethod(lambda cls: mock_rq_queue)
+
+    # Pre-warm caches
+    try:
+        from repositories.product_repository import clear_product_cache, get_all_products
+        from repositories.user_repository import clear_user_cache, get_user_by_email
+        from repositories.analytics_repository import clear_analytics_cache
+        clear_product_cache()
+        clear_user_cache()
+        clear_analytics_cache()
+        get_all_products()
+        get_user_by_email('admin_dailydrop@gmail.com')
+        get_user_by_email('demo_dailydrop@gmail.com')
+    except Exception as e:
+        logger.warning(f"Warning pre-warming cache: {e}")
+
+    yield
+
+    # Teardown: close pools
+    try:
+        test_pool.closeall()
+    except Exception:
+        pass
+    try:
+        redis_client.close()
+    except Exception:
+        pass
+
+
+def _seed_test_products():
+    """Seed extra products referenced by integration tests."""
+    from database import get_db_connection
     test_products = [
         ('Organic Tomatoes', 3.99, 'Vegetables', 'Fresh', 50, '/static/fruits-vegetables/tomato.jpg'),
         ('Whole Milk', 4.50, 'Dairy', 'Milk', 50, '/static/dairy-breakfast/milk.jpg'),
@@ -383,177 +196,156 @@ def _seed_test_database():
         ('Brown Bread', 40.00, 'Bakery', 'Bread', 50, '/static/dairy-breakfast/bread.jpg'),
         ('Tamper Proof Oil', 400.00, 'Grocery', 'Oils', 50, '/static/grocery/fortune-sunlite-oil.jpeg'),
     ]
-    for p_name, p_price, p_cat, p_sub, p_stk, p_img in test_products:
-        cur.execute('''
-            INSERT OR IGNORE INTO products (name, price, category, subcategory, image_path, description, stock)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        ''', (p_name, p_price, p_cat, p_sub, p_img, 'Test catalog product', p_stk))
-
-    _SHARED_SQLITE_CONN.commit()
-
-
-
-USE_REAL_POSTGRES = os.environ.get("TEST_USE_REAL_POSTGRES", "").lower() in ("true", "1", "yes")
-
-if not USE_REAL_POSTGRES:
-    # Seed SQLite database immediately upon conftest load
-    _seed_test_database()
-    _MOCK_POOL = MockPool(_SHARED_SQLITE_CONN)
-
-
-    @contextmanager
-    def _sqlite_get_db_connection():
-        """Context manager yielding SQLiteConnectionWrapper with re-entrant thread safety."""
-        with _SQLITE_LOCK:
-            wrapper = SQLiteConnectionWrapper(_SHARED_SQLITE_CONN)
-            try:
-                yield wrapper
-                wrapper.commit()
-            except Exception as e:
-                wrapper.rollback()
-                raise e
-
-
-    # Immediately patch database module at conftest load time so app imports never hit Neon
-    import database
-    database._IS_DB_INITIALIZED = True
-    database._db_pool = _MOCK_POOL
-    database.get_pool = lambda: _MOCK_POOL
-    database.get_db_connection = _sqlite_get_db_connection
-
-    # Pre-warm catalog and user caches in database module
     try:
-        from repositories.product_repository import clear_product_cache, get_all_products
-        from repositories.user_repository import clear_user_cache, get_user_by_email
+        with get_db_connection() as conn:
+            with conn.cursor() as cursor:
+                for p_name, p_price, p_cat, p_sub, p_stk, p_img in test_products:
+                    cursor.execute(
+                        """
+                        INSERT INTO products (name, price, category, subcategory, image_path, description, stock)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s)
+                        ON CONFLICT DO NOTHING
+                        """,
+                        (p_name, p_price, p_cat, p_sub, p_img, 'Test catalog product', p_stk)
+                    )
+    except Exception as e:
+        logger.warning(f"Warning seeding test products: {e}")
+
+
+# =============================================================================
+# Per-test isolation: truncate all tables + flush Redis
+# =============================================================================
+
+# Tables in dependency-safe truncation order (children before parents)
+_ALL_TABLES = [
+    "outbox_events",
+    "wishlist",
+    "order_items",
+    "pending_orders",
+    "orders",
+    "contact_messages",
+    "products",
+    "users",
+]
+
+
+@pytest.fixture(autouse=True)
+def _isolate_test():
+    """
+    Before each test: truncate all data tables and re-seed.
+    Uses TRUNCATE ... RESTART IDENTITY CASCADE for speed and correctness.
+    Redis is flushed to clear stock cache and idempotency keys.
+    """
+    from database import get_db_connection
+    from services.redis_service import RedisService
+
+    # Truncate all data tables (not schema_migrations)
+    with get_db_connection() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                "TRUNCATE TABLE {} RESTART IDENTITY CASCADE".format(
+                    ", ".join(_ALL_TABLES)
+                )
+            )
+
+    # Flush Redis
+    client = RedisService.get_client()
+    if client:
+        try:
+            client.flushdb()
+        except Exception:
+            pass
+
+    # Re-seed minimal fixtures
+    _reseed_fixtures()
+
+    # Clear caches so tests start fresh
+    try:
+        from repositories.product_repository import clear_product_cache
+        from repositories.user_repository import clear_user_cache
         from repositories.analytics_repository import clear_analytics_cache
         clear_product_cache()
         clear_user_cache()
         clear_analytics_cache()
-        get_all_products()
-        get_user_by_email('admin_dailydrop@gmail.com')
-        get_user_by_email('demo_dailydrop@gmail.com')
-    except Exception as e:
-        print(f"Warning pre-warming in-memory cache: {e}")
+    except Exception:
+        pass
 
-
-@pytest.fixture(scope="session", autouse=True)
-def setup_in_memory_sqlite_db():
-    """Session-level autouse fixture verifying SQLite in-memory backend."""
     yield
-    if not USE_REAL_POSTGRES:
-        _MOCK_POOL.closeall()
+
+
+def _reseed_fixtures():
+    """Re-seed users and products for each test."""
+    from database import get_db_connection
+    from werkzeug.security import generate_password_hash
+
+    admin_pass = generate_password_hash('Dailydrop@173')
+    demo_pass = generate_password_hash('Demouser@123')
+
+    with get_db_connection() as conn:
+        with conn.cursor() as cursor:
+            # Users
+            cursor.execute(
+                "INSERT INTO users (name, email, password, role) VALUES (%s, %s, %s, %s) ON CONFLICT (email) DO NOTHING",
+                ('Admin User', 'admin_dailydrop@gmail.com', admin_pass, 'admin')
+            )
+            cursor.execute(
+                "INSERT INTO users (name, email, password, role) VALUES (%s, %s, %s, %s) ON CONFLICT (email) DO NOTHING",
+                ('Demo Customer', 'demo_dailydrop@gmail.com', demo_pass, 'customer')
+            )
+
+    # Seed products from seed file + test-specific products
+    _seed_products_from_file()
+    _seed_test_products()
+
+
+def _seed_products_from_file():
+    """Seed catalog products from seeds/products.json."""
+    from database import get_db_connection
+    json_seed = os.path.join(ROOT_DIR, 'seeds', 'products.json')
+    js_file = os.path.join(ROOT_DIR, 'static', 'js', 'products.js')
+    seed_file = json_seed if os.path.exists(json_seed) else js_file
+    if not os.path.exists(seed_file):
+        return
+    try:
+        with open(seed_file, 'r', encoding='utf-8') as f:
+            c = f.read()
+        if seed_file.endswith('.json'):
+            raw_prods = json.loads(c)
+        else:
+            start = c.find('[')
+            end = c.rfind(']') + 1
+            raw_prods = json.loads(c[start:end]) if (start != -1 and end != -1) else []
+
+        with get_db_connection() as conn:
+            with conn.cursor() as cursor:
+                for pid, p in enumerate(raw_prods, start=1):
+                    unique_stock = 30 + ((pid * 7) % 65)
+                    cursor.execute(
+                        """
+                        INSERT INTO products (product_id, name, price, category, subcategory, image_path, description, stock)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                        ON CONFLICT (product_id) DO NOTHING
+                        """,
+                        (
+                            pid,
+                            p.get('title', 'Product'),
+                            float(p.get('price', 0)),
+                            p.get('category', 'Grocery'),
+                            p.get('subcategory', ''),
+                            p.get('image', '/static/product-placeholder.svg'),
+                            p.get('description', ''),
+                            unique_stock
+                        )
+                    )
+                # Reset sequence to max product_id
+                cursor.execute(
+                    "SELECT setval(pg_get_serial_sequence('products', 'product_id'), COALESCE(MAX(product_id), 1)) FROM products"
+                )
+    except Exception as e:
+        logger.warning(f"Warning seeding catalog products: {e}")
 
 
 @pytest.fixture(autouse=True)
-def check_db_availability(request):
-    """
-    Check DB availability: In-memory SQLite fixture is always active and available.
-    """
+def check_db_availability():
+    """DB availability check: Testcontainer is always available."""
     return
-
-
-# =============================================================================
-# In-Memory Redis Mock Fixture for 100% Deterministic, Offline Test Execution
-# =============================================================================
-class MockRedisClient:
-    """
-    In-memory Redis mock supporting string operations, TTLs, and atomic Lua scripts.
-    Eliminates external Redis daemon dependency during CI/CD and offline test suites.
-    Thread-safe to prevent race conditions during concurrent test simulations.
-    """
-    def __init__(self):
-        self._store = {}
-        self._ttls = {}
-        self._lock = threading.RLock()
-
-    def ping(self):
-        return True
-
-    def get(self, key):
-        with self._lock:
-            return self._store.get(str(key))
-
-    def set(self, key, value, ex=None, nx=False):
-        with self._lock:
-            key_str = str(key)
-            if nx and key_str in self._store:
-                return None
-            self._store[key_str] = str(value)
-            return True
-
-    def delete(self, *keys):
-        with self._lock:
-            count = 0
-            for k in keys:
-                if str(k) in self._store:
-                    del self._store[str(k)]
-                    count += 1
-            return count
-
-    def keys(self, pattern='*'):
-        import fnmatch
-        with self._lock:
-            return [k for k in self._store.keys() if fnmatch.fnmatch(k, pattern)]
-
-    def scan(self, cursor=0, match=None, count=10):
-        import fnmatch
-        with self._lock:
-            matched = [k for k in self._store.keys() if (not match or fnmatch.fnmatch(k, match))]
-            return 0, matched
-
-    def register_script(self, script_str):
-        if 'decrby' in script_str:
-            def decr(keys, args):
-                with self._lock:
-                    k = str(keys[0])
-                    qty = int(args[0])
-                    if k not in self._store:
-                        return -1
-                    cur = int(self._store[k])
-                    if cur >= qty:
-                        self._store[k] = str(cur - qty)
-                        return 1
-                    return 0
-            return decr
-        elif 'incrby' in script_str:
-            def incr(keys, args):
-                with self._lock:
-                    k = str(keys[0])
-                    qty = int(args[0])
-                    if k in self._store:
-                        self._store[k] = str(int(self._store[k]) + qty)
-                        return 1
-                    return 0
-            return incr
-        return lambda keys, args: 1
-
-    def flushall(self):
-        with self._lock:
-            self._store.clear()
-
-    def close(self):
-        pass
-
-
-from unittest.mock import MagicMock
-from services.redis_service import RedisService, _LUA_DECREMENT_STOCK, _LUA_ROLLBACK_STOCK
-from services.task_service import TaskService
-
-_MOCK_REDIS = MockRedisClient()
-RedisService._real_get_client = RedisService.get_client
-RedisService._real_get_raw_client = RedisService.get_raw_client
-RedisService._client = _MOCK_REDIS
-RedisService._raw_client = _MOCK_REDIS
-RedisService._decr_script = _MOCK_REDIS.register_script(_LUA_DECREMENT_STOCK)
-RedisService._rollback_script = _MOCK_REDIS.register_script(_LUA_ROLLBACK_STOCK)
-RedisService.get_client = classmethod(lambda cls: _MOCK_REDIS)
-RedisService.get_raw_client = classmethod(lambda cls: _MOCK_REDIS)
-RedisService.is_available = classmethod(lambda cls: True)
-
-# Mock TaskService queue for offline deterministic task dispatch
-_MOCK_JOB = MagicMock()
-_MOCK_JOB.id = "mock_job_test_7777"
-_MOCK_RQ_QUEUE = MagicMock()
-_MOCK_RQ_QUEUE.enqueue.return_value = _MOCK_JOB
-TaskService.get_queue = classmethod(lambda cls: _MOCK_RQ_QUEUE)
-

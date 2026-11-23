@@ -162,7 +162,6 @@ def test_insufficient_stock_rollback():
 
 # ==================== 4. Concurrent Checkout Atomicity ====================
 
-@pytest.mark.postgres
 def test_concurrent_checkout_stock_protection():
     """Simulate two racing threads buying the last unit of stock: exactly one succeeds."""
     prod_id = add_product(
@@ -173,9 +172,14 @@ def test_concurrent_checkout_stock_protection():
     )
 
     results = []
+    barrier = threading.Barrier(2)
 
     def attempt_checkout(thread_id):
         cart = [{"product_id": prod_id, "name": "Last Bottle of Saffron", "price": 300.0, "quantity": 1}]
+        try:
+            barrier.wait(timeout=5)
+        except Exception:
+            pass
         s, m, o = OrderService.create_order(
             user_id=1,
             full_name=f"Racer {thread_id}",
