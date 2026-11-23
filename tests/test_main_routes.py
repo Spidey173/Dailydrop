@@ -82,3 +82,46 @@ def test_verification_endpoints(client):
         assert res_admin.status_code == 200
         assert b'Admin' in res_admin.data
 
+
+def test_root_route_authenticated_vs_guest(client):
+    """
+    Ensure root / displays intro to guests, but renders the storefront for logged-in customers
+    and redirects admins to the admin dashboard.
+    """
+    # 1. Guest -> intro page
+    res_guest = client.get('/')
+    assert res_guest.status_code == 200
+    assert b'Everything You Need' in res_guest.data
+    assert b'Shop Now' in res_guest.data
+
+    # 2. Customer logged in -> storefront index.html
+    with client.session_transaction() as sess:
+        sess['user_id'] = 1
+        sess['user_role'] = 'customer'
+        sess['name'] = 'Customer One'
+        sess['email'] = 'customer@example.com'
+
+    res_customer = client.get('/')
+    assert res_customer.status_code == 200
+    # Storefront should display categories and products, not intro hero
+    assert b'Explore by Category' in res_customer.data or b'Shop by Category' in res_customer.data or b'DailyDrop' in res_customer.data
+    assert b'Everything You Need' not in res_customer.data
+
+    # 3. /index, /store, /shop should also render storefront directly
+    for path in ['/index', '/store', '/shop']:
+        res_store = client.get(path)
+        assert res_store.status_code == 200
+        assert b'DailyDrop' in res_store.data
+
+    # 4. Admin logged in -> redirects to admin_dashboard
+    with client.session_transaction() as sess:
+        sess['user_id'] = 2
+        sess['user_role'] = 'admin'
+        sess['name'] = 'Admin One'
+        sess['email'] = 'admin@example.com'
+
+    res_admin = client.get('/')
+    assert res_admin.status_code == 302
+    assert '/admin/dashboard' in res_admin.headers['Location']
+
+

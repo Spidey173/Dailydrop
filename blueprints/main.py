@@ -14,12 +14,20 @@ main_bp = Blueprint('main', __name__)
 
 
 @main_bp.route('/', endpoint='intro')
+@main_bp.route('/intro', endpoint='intro_page')
 def intro() -> str:
-    """Render the introductory page."""
+    """Render the introductory page for guests, or storefront for authenticated customers."""
+    if session.get('user_role') == 'admin':
+        return redirect(url_for('admin.admin_dashboard'))
+    if 'user_id' in session and session.get('user_role') == 'customer':
+        products = ProductService.get_products_by_category(limit=16)
+        return render_template('index.html', products=products)
     return render_template('intro.html')
 
 
 @main_bp.route('/index', endpoint='index')
+@main_bp.route('/store', endpoint='store')
+@main_bp.route('/shop', endpoint='shop')
 def index() -> str:
     """Render the home page with featured products."""
     products = ProductService.get_products_by_category(limit=16)

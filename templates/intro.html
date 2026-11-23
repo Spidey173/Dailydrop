@@ -497,12 +497,21 @@
                 </a>
 
                 <div class="intro-nav-actions">
-                    <a href="{{ url_for('auth.login') }}" class="btn-nav-outline" id="nav-login-btn">
-                        <i class="fas fa-sign-in-alt"></i> Login
-                    </a>
-                    <a href="{{ url_for('main.index') }}" class="btn-nav-primary" id="nav-shop-btn">
-                        <i class="fas fa-shopping-bag"></i> Shop Now
-                    </a>
+                    {% if session.get('user_id') %}
+                        <a href="{{ url_for('main.index') }}" class="btn-nav-primary" id="nav-shop-btn">
+                            <i class="fas fa-shopping-bag"></i> Go to Store
+                        </a>
+                        <a href="{{ url_for('auth.logout') }}" class="btn-nav-outline" id="nav-logout-btn">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    {% else %}
+                        <a href="{{ url_for('auth.login') }}" class="btn-nav-outline" id="nav-login-btn">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </a>
+                        <a href="{{ url_for('main.index') }}" class="btn-nav-primary" id="nav-shop-btn">
+                            <i class="fas fa-shopping-bag"></i> Shop Now
+                        </a>
+                    {% endif %}
                 </div>
             </div>
         </div>
