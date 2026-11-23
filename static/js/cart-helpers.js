@@ -120,28 +120,37 @@ function reconcileCartWithCatalog() {
 async function ensureCatalogAndReconcileCart() {
   if (!window.productsDB || window.productsDB.length === 0) {
     try {
-      const res = await fetch('/api/v1/products?per_page=100');
-      if (res.ok) {
+      let page = 1;
+      let totalPages = 1;
+      let allProducts = [];
+
+      while (page <= totalPages) {
+        const res = await fetch(`/api/v1/products?page=${page}&per_page=500`);
+        if (!res.ok) break;
         const data = await res.json();
         const prods = (data && (data.products || (Array.isArray(data) ? data : []))) || [];
-        if (prods.length > 0) {
-          window.productsDB = prods.map(p => ({
-            id: p.product_id || p.id,
-            product_id: p.product_id || p.id,
-            title: p.name || p.title,
-            name: p.name || p.title,
-            category: p.category,
-            subcategory: p.subcategory || '',
-            price: parseFloat(p.price || 0),
-            image: p.image_path || p.image || '/static/product-placeholder.svg',
-            description: p.description || ''
-          }));
-          document.dispatchEvent(new CustomEvent('productsSynced', { detail: window.productsDB }));
-          if (reconcileCartWithCatalog()) {
-            updateCartCount();
-            if (typeof loadCart === 'function') loadCart();
-            if (typeof updateProductButtons === 'function') updateProductButtons();
-          }
+        allProducts = allProducts.concat(prods);
+        totalPages = (data && data.pages) ? data.pages : 1;
+        page++;
+      }
+
+      if (allProducts.length > 0) {
+        window.productsDB = allProducts.map(p => ({
+          id: p.product_id || p.id,
+          product_id: p.product_id || p.id,
+          title: p.name || p.title,
+          name: p.name || p.title,
+          category: p.category,
+          subcategory: p.subcategory || '',
+          price: parseFloat(p.price || 0),
+          image: p.image_path || p.image || '/static/product-placeholder.svg',
+          description: p.description || ''
+        }));
+        document.dispatchEvent(new CustomEvent('productsSynced', { detail: window.productsDB }));
+        if (reconcileCartWithCatalog()) {
+          updateCartCount();
+          if (typeof loadCart === 'function') loadCart();
+          if (typeof updateProductButtons === 'function') updateProductButtons();
         }
       }
     } catch (e) {

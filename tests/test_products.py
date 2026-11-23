@@ -137,3 +137,53 @@ def test_strict_product_id_resolution():
             assert "not found in catalog" in err
 
 
+def test_products_api_returns_all_items_across_pages(client):
+    """
+    Verify creating >100 products and that the frontend-facing API
+    (/api/v1/products) successfully returns all of them across multiple pages.
+    """
+    from repositories.product_repository import add_product, clear_product_cache
+
+    created_ids = []
+    # Create 105 distinct products in a dedicated category
+    for i in range(1, 106):
+        pid = add_product(
+            name=f"Bulk Product {i}",
+            price=10.0 + i,
+            category="BulkTest",
+            subcategory="Testing",
+            stock=50
+        )
+        assert pid is not None
+        created_ids.append(pid)
+
+    clear_product_cache()
+
+    # 1. Verify single request with per_page=500 returns all >100 products in one pass
+    res_large = client.get('/api/v1/products?category=BulkTest&per_page=500')
+    assert res_large.status_code == 200
+    data_large = res_large.get_json()
+    assert data_large['success'] is True
+    assert data_large['total'] == 105
+    assert len(data_large['products']) == 105
+    assert data_large['pages'] == 1
+
+    # 2. Verify frontend pagination loop across multiple pages (e.g. per_page=25, 5 pages)
+    collected_products = []
+    page = 1
+    total_pages = 1
+    while page <= total_pages:
+        res_page = client.get(f'/api/v1/products?category=BulkTest&page={page}&per_page=25')
+        assert res_page.status_code == 200
+        page_data = res_page.get_json()
+        assert page_data['success'] is True
+        collected_products.extend(page_data['products'])
+        total_pages = page_data['pages']
+        page += 1
+
+    assert len(collected_products) == 105
+    collected_ids = {p['product_id'] for p in collected_products}
+    assert collected_ids == set(created_ids)
+
+
+

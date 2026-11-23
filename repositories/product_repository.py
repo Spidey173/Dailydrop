@@ -413,7 +413,7 @@ def get_products_paginated(
     """
     import math
     page = max(1, int(page))
-    per_page = max(1, min(100, int(per_page)))
+    per_page = max(1, min(500, int(per_page)))
 
     all_products = get_all_products(category=category)
     if search:
