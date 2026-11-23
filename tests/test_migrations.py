@@ -36,6 +36,33 @@ def test_migration_runner_idempotency():
     assert applied_second == []
 
 
+def test_migration_runner_applies_only_pending_migration_on_populated_db():
+    """Verify that when 001-006 are marked applied, runner applies only 007 idempotently."""
+    with get_db_connection() as conn:
+        with conn.cursor() as cursor:
+            # Temporarily simulate state where 001-006 are applied but 007 is pending
+            cursor.execute("DELETE FROM schema_migrations WHERE version = '007_sync_missing_indexes_and_pending_orders_city.sql'")
+            for v in [
+                '001_initial_schema.sql',
+                '002_add_order_items_and_pending_orders.sql',
+                '003_add_outbox_events_and_indexes.sql',
+                '004_state_machine_and_inventory_checks.sql',
+                '005_add_city_and_delivery_duration_to_orders.sql',
+                '006_add_claimed_at_to_outbox_events.sql'
+            ]:
+                cursor.execute("INSERT INTO schema_migrations (version) VALUES (%s) ON CONFLICT (version) DO NOTHING", (v,))
+
+    # Run migrations
+    count, applied = run_migrations()
+    assert count == 1
+    assert applied == ['007_sync_missing_indexes_and_pending_orders_city.sql']
+
+    # Subsequent run must be no-op
+    count2, applied2 = run_migrations()
+    assert count2 == 0
+    assert applied2 == []
+
+
 def test_seed_database_idempotent():
     """Verify seed_database creates accounts and products idempotently."""
     seed_database()

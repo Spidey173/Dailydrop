@@ -3,6 +3,7 @@ Seed script for Daily Drop database.
 Populates initial administrative accounts, demo customer accounts, and catalog products.
 
 Usage:
+    DATABASE_URL=<neon-direct-url> python seed.py
     python seed.py
     python -m seed
 """

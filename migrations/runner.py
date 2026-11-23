@@ -5,6 +5,7 @@ Tracks and applies incremental SQL migration scripts stored in the migrations/ d
 Guarantees idempotent, transactional execution and maintains the `schema_migrations` audit table.
 
 Usage:
+    DATABASE_URL=<neon-direct-url> python -m migrations.runner
     python -m migrations.runner
 """
 
