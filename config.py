@@ -65,7 +65,8 @@ class Config:
 
     # Flask settings
     SECRET_KEY = os.getenv('SECRET_KEY', '')
-    SESSION_COOKIE_SECURE = not DEBUG
+    # SECURE is True only when deployed on Vercel (or when explicitly enabled via env var), never on plain-http localhost
+    SESSION_COOKIE_SECURE = bool(os.getenv('VERCEL') or os.getenv('SESSION_COOKIE_SECURE', 'false').lower() in ('true', '1', 'yes'))
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'
     PERMANENT_SESSION_LIFETIME = timedelta(days=7)
@@ -152,7 +153,8 @@ class ProductionConfig(Config):
 
     DEBUG = False
     TESTING = False
-    SESSION_COOKIE_SECURE = True
+    # SECURE is True only on Vercel / HTTPS, never on plain-http localhost even with FLASK_ENV=production
+    SESSION_COOKIE_SECURE = bool(os.getenv('VERCEL') or os.getenv('SESSION_COOKIE_SECURE', 'false').lower() in ('true', '1', 'yes'))
 
 
 class TestingConfig(Config):

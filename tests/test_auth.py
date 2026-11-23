@@ -97,3 +97,108 @@ def test_logout_redirects_to_intro(client):
     assert res.status_code == 302
     assert res.headers['Location'] == '/'
 
+
+def test_signup_and_login_session_persistence_dev_http():
+    """
+    Regression Test: Ensure that in dev-like config over plain http,
+    signing up, logging in, and accessing protected pages preserves session cookies
+    without redirecting back to the login page.
+    """
+    app = create_app('testing')
+    app.config['WTF_CSRF_ENABLED'] = False
+    app.config['SESSION_COOKIE_SECURE'] = False
+    client = app.test_client()
+
+    email = 'dev_persist_user@example.com'
+    password = 'Password@123'
+    name = 'Dev Persist User'
+
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("DELETE FROM users WHERE email = %s", (email,))
+    clear_user_cache(email)
+
+    try:
+        # 1. Signup with follow_redirects
+        signup_res = client.post('/signup', data={
+            'name': name,
+            'email': email,
+            'password': password
+        }, base_url='http://localhost:5000', follow_redirects=True)
+        assert signup_res.status_code == 200
+
+        # 2. Login with follow_redirects
+        login_res = client.post('/login', data={
+            'email': email,
+            'password': password
+        }, base_url='http://localhost:5000', follow_redirects=True)
+        assert login_res.status_code == 200
+
+        # 3. Access protected page /orders
+        orders_res = client.get('/orders', base_url='http://localhost:5000', follow_redirects=True)
+        assert orders_res.status_code == 200
+        # Must NOT be redirected to /login
+        assert 'login' not in orders_res.headers.get('Location', '').lower()
+        with client.session_transaction() as sess:
+            assert sess.get('user_id') is not None
+            assert sess.get('email') == email
+    finally:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("DELETE FROM users WHERE email = %s", (email,))
+        clear_user_cache(email)
+
+
+def test_signup_and_login_session_persistence_prod_https():
+    """
+    Regression Test: Ensure that in production-like config over HTTPS (Vercel),
+    signing up, logging in, and accessing protected pages preserves secure session cookies
+    without redirecting back to the login page.
+    """
+    app = create_app('testing')
+    app.config['WTF_CSRF_ENABLED'] = False
+    app.config['SESSION_COOKIE_SECURE'] = True
+    app.config['ENV'] = 'production'
+    client = app.test_client()
+
+    email = 'prod_persist_user@example.com'
+    password = 'Password@123'
+    name = 'Prod Persist User'
+
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("DELETE FROM users WHERE email = %s", (email,))
+    clear_user_cache(email)
+
+    try:
+        # 1. Signup with follow_redirects over HTTPS
+        signup_res = client.post('/signup', data={
+            'name': name,
+            'email': email,
+            'password': password
+        }, base_url='https://dailydrop18.vercel.app', follow_redirects=True)
+        assert signup_res.status_code == 200
+
+        # 2. Login with follow_redirects over HTTPS
+        login_res = client.post('/login', data={
+            'email': email,
+            'password': password
+        }, base_url='https://dailydrop18.vercel.app', follow_redirects=True)
+        assert login_res.status_code == 200
+
+        # 3. Access protected page /orders over HTTPS
+        orders_res = client.get('/orders', base_url='https://dailydrop18.vercel.app', follow_redirects=True)
+        assert orders_res.status_code == 200
+        # Must NOT be redirected to /login
+        assert 'login' not in orders_res.headers.get('Location', '').lower()
+        assert b'orders' in orders_res.data.lower()
+        with client.session_transaction(base_url='https://dailydrop18.vercel.app') as sess:
+            assert sess.get('user_id') is not None
+            assert sess.get('email') == email
+    finally:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("DELETE FROM users WHERE email = %s", (email,))
+        clear_user_cache(email)
+
+

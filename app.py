@@ -46,6 +46,21 @@ def create_app(config_name: Optional[str] = None) -> Flask:
     config_cls = config_dict.get(env, config_dict['default'])
     app.config.from_object(config_cls)
 
+    # Dynamic secure session cookie: secure only over https or when VERCEL is set, never over plain http
+    class DynamicSessionInterface(app.session_interface.__class__):
+        def get_cookie_secure(self, app):
+            if bool(os.getenv('VERCEL')):
+                return True
+            explicit = app.config.get('SESSION_COOKIE_SECURE')
+            if explicit is False:
+                return False
+            try:
+                return request.is_secure
+            except Exception:
+                return bool(explicit)
+
+    app.session_interface = DynamicSessionInterface()
+
     # Validate configuration (fails fast in production if required secrets/configs are missing)
     config_cls.validate_config(env)
 
@@ -122,10 +137,12 @@ def create_app(config_name: Optional[str] = None) -> Flask:
             response.headers.pop('Vary', None)
             return response
 
+        is_secure = bool(os.getenv('VERCEL')) or request.is_secure
+        cookie_secure = bool(app.config.get('SESSION_COOKIE_SECURE', False) and is_secure)
         if 'user_id' in session:
-            response.set_cookie('is_logged_in', 'true', samesite='Lax', path='/')
+            response.set_cookie('is_logged_in', 'true', samesite='Lax', secure=cookie_secure, path='/')
         else:
-            response.set_cookie('is_logged_in', 'false', samesite='Lax', path='/')
+            response.set_cookie('is_logged_in', 'false', samesite='Lax', secure=cookie_secure, path='/')
 
         # Defensive HTTP Security Headers
         response.headers['X-Content-Type-Options'] = 'nosniff'

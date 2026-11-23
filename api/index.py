@@ -22,28 +22,28 @@ if project_root not in sys.path:
 from flask import Flask, render_template_string, jsonify
 
 def _init_serverless_app():
-    # Secure serverless initialization: DATABASE_URL is injected via Vercel Environment Variables
+    # Secure serverless initialization: DATABASE_URL & SECRET_KEY injected via Vercel Environment Variables
     import secrets
     from config import INSECURE_SECRET_KEYS, Config, ProductionConfig
 
-    target_env = os.getenv('FLASK_ENV', 'production').lower()
-    is_production = bool(os.getenv('VERCEL')) and target_env not in ('development', 'testing')
+    os.environ['VERCEL'] = '1'
+    os.environ['DISABLE_FILE_UPLOADS'] = 'true'
 
-    current_key = os.getenv('SECRET_KEY', '')
+    target_env = os.getenv('FLASK_ENV', 'production').lower()
+    is_production = target_env not in ('development', 'testing')
+
+    current_key = os.getenv('SECRET_KEY', '').strip()
     if not current_key or len(current_key) < 16 or current_key in INSECURE_SECRET_KEYS:
         if is_production:
             raise ValueError(
                 "CRITICAL SECURITY CONFIGURATION ERROR: Production on Vercel requires a strong, unique SECRET_KEY environment variable. "
-                "Deriving keys from DATABASE_URL or using placeholder keys is prohibited."
+                "Deriving keys from DATABASE_URL or using placeholder/random keys per process in production is prohibited."
             )
         os.environ['SECRET_KEY'] = secrets.token_hex(32)
-    
-    if os.getenv('SECRET_KEY'):
-        Config.SECRET_KEY = os.environ['SECRET_KEY']
-        ProductionConfig.SECRET_KEY = os.environ['SECRET_KEY']
+        current_key = os.environ['SECRET_KEY']
 
-    os.environ['DISABLE_FILE_UPLOADS'] = 'true'
-    os.environ['VERCEL'] = '1'
+    Config.SECRET_KEY = current_key
+    ProductionConfig.SECRET_KEY = current_key
 
     # Auto-sanitize REDIS_URL in environment if present, else disable Redis on Vercel
     if os.getenv('REDIS_URL'):
