@@ -1,7 +1,7 @@
 # DailyDrop 🛒 — Full-Stack Quick-Commerce Web Application
 
 [![CI Pipeline](https://github.com/Spidey173/Dailydrop/actions/workflows/ci.yml/badge.svg)](https://github.com/Spidey173/Dailydrop/actions)
-[![Tests](https://img.shields.io/badge/Pytest-108%20Passed-brightgreen?style=flat-square&logo=pytest)](tests/)
+[![Tests](https://img.shields.io/badge/Pytest-110%20Passed-brightgreen?style=flat-square&logo=pytest)](tests/)
 [![Backend](https://img.shields.io/badge/Backend-Python%203.11%20%7C%20Flask%203-blue?style=flat-square&logo=python)](app.py)
 [![Database](https://img.shields.io/badge/Database-PostgreSQL%20(Neon%20%7C%20Docker)-336791?style=flat-square&logo=postgresql&logoColor=white)](database.py)
 [![Cache](https://img.shields.io/badge/Cache-Redis%20(Fallback%20Safe)-DC382D?style=flat-square&logo=redis&logoColor=white)](services/redis_service.py)
@@ -176,27 +176,29 @@ python seed.py
 
 ---
 
-## 🧪 Testing Suite: Fast Offline Tests vs. Native PostgreSQL
+## 🧪 Testing Suite: Ephemeral Real PostgreSQL 16 & Redis 7 (Testcontainers)
 
-The test suite contains **108 automated Pytests** covering unit logic, financial precision, domain repositories, payment FSM, and high-concurrency race protection.
+The test suite contains **110 automated Pytests** covering unit logic, financial precision, domain repositories, payment FSM, and high-concurrency race protection with 100% dialect fidelity.
 
-### Fast Offline Unit Tests (In-Memory SQLite)
-Runs 102 offline tests in ~2.5s using a thread-safe, in-memory SQLite wrapper in `conftest.py`:
+### Requirements
+- **Docker** must be running (Docker Desktop, OrbStack, or standard Linux Docker daemon).
+
+### Running Tests
+Every test runs against real, ephemeral PostgreSQL 16 and Redis 7 containers managed automatically via `testcontainers-python`:
 ```bash
-pytest -m "not postgres" -v
+pytest
 ```
+Expected runtime: ~45–55s for the complete 110-test suite (including container bootstrap, migrations, and seeding).
 
-### PostgreSQL Concurrency Tests
-Runs the concurrency and atomic decrement tests against a real PostgreSQL instance:
-```bash
-# Ensure PostgreSQL is running on port 5432 and migrated
-TEST_USE_REAL_POSTGRES=true DATABASE_URL="postgresql://test_user:test_password@localhost:5432/dailydrop_test" pytest -m "postgres" -v
-```
+### Why Real PostgreSQL (100% Dialect Fidelity)?
+Previously, a custom SQLite translation layer was used, but SQLite lacks key production features:
+- **Row-level locking**: `FOR UPDATE` and `FOR UPDATE SKIP LOCKED` for concurrency and transactional outbox.
+- **Postgres array operators**: `product_id = ANY(%s)` for N+1 batched queries.
+- **Native JSON aggregation**: `json_agg()` for structured analytics.
+- **Window functions**: `NTILE(5)` for RFM customer segmentation.
+- **Atomic upserts & triggers**: Native `ON CONFLICT DO UPDATE`, savepoints, and real sequence generation.
 
-### Run Entire Suite
-```bash
-pytest -v
-```
+Testcontainers guarantees that every test executes against the exact PostgreSQL and Redis engines used in production.
 
 ---
 
@@ -259,7 +261,7 @@ DailyDrop/
 │   └── js/admin/               # Feature-split admin JS (tabs, charts, catalog, sqllab, etc.)
 ├── templates/                  # Jinja2 HTML templates
 │   └── admin/partials/         # Admin dashboard modular Jinja partials
-└── tests/                      # 108 automated Pytests
+└── tests/                      # 110 automated Pytests
 ```
 
 ---
