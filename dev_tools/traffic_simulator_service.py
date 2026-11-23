@@ -1,7 +1,9 @@
 """
-Autonomous Quick-Commerce Traffic & Order Simulator Service.
-Maintains continuous realistic order volume, 10-minute SLA delivery metrics,
-and revenue velocity across Neon PostgreSQL so analytics always remain vibrant.
+Autonomous Quick-Commerce Traffic & Order Simulator Service (Local Development Tool).
+Maintains realistic order volume, 10-minute SLA delivery metrics,
+and revenue velocity across Neon PostgreSQL for local demo and analytics evaluation.
+
+WARNING: Never run in production.
 """
 
 import json
@@ -214,13 +216,6 @@ class TrafficSimulatorService:
                         # Persist line items
                         OrderPersistenceService.persist_order_items(cursor, order_id, resolved_items)
 
-                        # Gently replenish stock if low so catalog never runs dry
-                        for p in chosen_prods:
-                            cursor.execute(
-                                "UPDATE products SET stock = stock + 30 WHERE product_id = %s AND stock < 10",
-                                (p['product_id'],)
-                            )
-
                         conn.commit()
 
                         results.append({
@@ -280,10 +275,8 @@ class TrafficSimulatorService:
 
                 for day_offset in range(1, catchup_days):
                     target_date = latest_date + timedelta(days=day_offset)
-                    # 6 to 10 realistic orders for missed day
                     day_orders_count = random.randint(6, 10)
                     for _ in range(day_orders_count):
-                        # Distribute realistically: morning rush, lunch, evening dinner peak
                         rush_window = random.choices(['morning', 'afternoon', 'evening'], weights=[0.35, 0.20, 0.45])[0]
                         if rush_window == 'morning':
                             hour = random.randint(8, 10)
@@ -306,7 +299,6 @@ class TrafficSimulatorService:
                     today_row = cursor.fetchone()
                     today_orders = int(today_row['cnt'] if isinstance(today_row, dict) else today_row[0]) if today_row else 0
 
-            # Target today's count based on current hour
             current_hour = now.hour
             if current_hour < 8:
                 target_today = 0
@@ -320,7 +312,6 @@ class TrafficSimulatorService:
             if today_orders < target_today:
                 orders_to_add = target_today - today_orders
                 for _ in range(orders_to_add):
-                    # Pick an hour between 8 AM and current hour
                     start_h = 8 if current_hour >= 8 else current_hour
                     h = random.randint(start_h, current_hour)
                     m = random.randint(0, 59 if h < current_hour else now.minute)
@@ -337,14 +328,12 @@ class TrafficSimulatorService:
     @classmethod
     def check_heartbeat_on_request(cls) -> None:
         """
-        Lightweight check called during web requests.
-        Disabled in serverless environments (Vercel) to keep request latency sub-millisecond.
+        Lightweight check called during web requests in local dev.
         """
         if os.getenv('VERCEL') or os.getenv('AWS_LAMBDA_FUNCTION_NAME'):
             return
 
         now = time.time()
-        # Only run if 30 minutes have elapsed since last check
         if now - cls._last_activity_check > 1800:
             cls._last_activity_check = now
             threading.Thread(target=cls.ensure_daily_activity, daemon=True, name="traffic-catchup-worker").start()
@@ -353,10 +342,10 @@ class TrafficSimulatorService:
     def start_daemon(cls, app: Optional[Any] = None) -> None:
         """
         Starts the background autonomous quick-commerce traffic generator daemon thread.
-        Disabled in serverless environments where background threads cause latency & freeze.
+        Never run in production.
         """
-        if os.getenv('VERCEL') or os.getenv('AWS_LAMBDA_FUNCTION_NAME'):
-            logger.info("⚡ Serverless runtime detected (Vercel). Autonomous traffic daemon disabled.")
+        if os.getenv('VERCEL') or os.getenv('AWS_LAMBDA_FUNCTION_NAME') or os.getenv('FLASK_ENV') == 'production':
+            logger.info("Traffic simulator daemon is disabled in production environments.")
             return
 
         with cls._daemon_lock:
@@ -365,8 +354,7 @@ class TrafficSimulatorService:
             cls._daemon_started = True
 
         def _worker_loop():
-            logger.info("⚡ Autonomous Quick-Commerce Traffic Daemon started.")
-            # Run initial catch-up check after short delay
+            logger.info("⚡ Autonomous Quick-Commerce Traffic Daemon started (dev tool only).")
             time.sleep(5)
             try:
                 cls.ensure_daily_activity()
@@ -375,15 +363,11 @@ class TrafficSimulatorService:
 
             while True:
                 try:
-                    # Sleep 15 minutes between periodic traffic checks
                     time.sleep(900)
-
                     now = datetime.now()
                     hour = now.hour
 
-                    # Active retail operating hours: 08:00 AM to 22:30 PM
                     if 8 <= hour <= 22:
-                        # Higher probability during breakfast & dinner rushes
                         is_rush = (8 <= hour <= 10) or (18 <= hour <= 21)
                         prob = 0.85 if is_rush else 0.50
 

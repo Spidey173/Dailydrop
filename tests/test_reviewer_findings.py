@@ -73,9 +73,9 @@ def test_order_status_get_is_read_only(test_client):
 
 def test_traffic_simulator_daemon_disabled_by_default():
     """
-    7b: By default, TrafficSimulatorService.start_daemon must NOT be called on boot.
+    7b: By default, TrafficSimulatorService daemon must NOT be called on app boot.
     """
-    with patch("services.traffic_simulator_service.TrafficSimulatorService.start_daemon") as mock_start:
+    with patch("dev_tools.traffic_simulator_service.TrafficSimulatorService.start_daemon") as mock_start:
         app = create_app('development')
         mock_start.assert_not_called()
 

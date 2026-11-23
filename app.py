@@ -152,18 +152,6 @@ def create_app(config_name: Optional[str] = None) -> Flask:
         try:
             init_database()
             logger.info("Neon PostgreSQL Database initialized successfully")
-            enable_simulator = app.config.get('ENABLE_TRAFFIC_SIMULATOR', False)
-            is_prod = (
-                app.config.get('ENV') == 'production' or
-                os.getenv('FLASK_ENV') == 'production' or
-                bool(os.getenv('VERCEL')) or
-                bool(os.getenv('AWS_LAMBDA_FUNCTION_NAME'))
-            )
-            if enable_simulator and not is_prod and not app.config.get('TESTING') and os.getenv('FLASK_ENV') != 'testing':
-                from services.traffic_simulator_service import TrafficSimulatorService
-                TrafficSimulatorService.start_daemon(app)
-            elif enable_simulator and is_prod:
-                logger.warning("ENABLE_TRAFFIC_SIMULATOR is set but traffic simulator is blocked in production environments.")
         except DatabaseError as e:
             logger.error(f"Failed to initialize Neon PostgreSQL database: {e}")
 

@@ -112,7 +112,6 @@ class Config:
     RAZORPAY_KEY_SECRET = os.getenv('RAZORPAY_KEY_SECRET', '')
     RAZORPAY_WEBHOOK_SECRET = os.getenv('RAZORPAY_WEBHOOK_SECRET', os.getenv('RAZORPAY_KEY_SECRET', ''))
     DEMO_PAYMENTS = os.getenv('DEMO_PAYMENTS', 'false').lower() in ('true', '1', 'yes')
-    ENABLE_TRAFFIC_SIMULATOR = os.getenv('ENABLE_TRAFFIC_SIMULATOR', 'false').lower() in ('true', '1', 'yes')
 
     @classmethod
     def validate_config(cls, env_name: Optional[str] = None) -> bool:

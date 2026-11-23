@@ -3,7 +3,7 @@ Tests for TrafficSimulatorService: Autonomous order generation & daily activity 
 """
 import pytest
 from app import create_app
-from services.traffic_simulator_service import TrafficSimulatorService
+from dev_tools.traffic_simulator_service import TrafficSimulatorService
 from database import get_db_connection
 
 

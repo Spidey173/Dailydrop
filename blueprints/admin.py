@@ -24,11 +24,6 @@ admin_bp = Blueprint('admin', __name__)
 @admin_required
 def admin_dashboard():
     """Render the Admin Portal dashboard with sub-millisecond in-memory cache responses."""
-    is_serverless = bool(os.getenv('VERCEL') or os.getenv('AWS_LAMBDA_FUNCTION_NAME'))
-    if not is_serverless:
-        from services.traffic_simulator_service import TrafficSimulatorService
-        TrafficSimulatorService.check_heartbeat_on_request()
-
     analytics = OrderService.get_analytics(days=30)
     products = ProductService.get_products_by_category()
     low_stock = ProductService.get_low_stock(threshold=10)
@@ -414,8 +409,12 @@ def api_delete_product(product_id: int):
 @admin_bp.route('/api/v1/admin/traffic/pulse', methods=['POST'], endpoint='api_traffic_pulse')
 @admin_required
 def api_traffic_pulse():
-    """API endpoint to spawn one or more realistic quick-commerce orders on demand."""
-    from services.traffic_simulator_service import TrafficSimulatorService
+    """API endpoint to spawn one or more realistic quick-commerce orders on demand (dev tool only)."""
+    try:
+        from dev_tools.traffic_simulator_service import TrafficSimulatorService
+    except ImportError:
+        return jsonify({'success': False, 'error': 'Traffic simulator is a dev tool not available in production'}), 404
+
     data = request.get_json(silent=True) or {}
     try:
         count = int(data.get('count', 1))
@@ -438,8 +437,12 @@ def api_traffic_pulse():
 @admin_bp.route('/api/v1/admin/traffic/catchup', methods=['POST'], endpoint='api_traffic_catchup')
 @admin_required
 def api_traffic_catchup():
-    """API endpoint to force daily activity catchup across missing dates."""
-    from services.traffic_simulator_service import TrafficSimulatorService
+    """API endpoint to force daily activity catchup across missing dates (dev tool only)."""
+    try:
+        from dev_tools.traffic_simulator_service import TrafficSimulatorService
+    except ImportError:
+        return jsonify({'success': False, 'error': 'Traffic simulator is a dev tool not available in production'}), 404
+
     total = TrafficSimulatorService.ensure_daily_activity()
     return jsonify({
         'success': True,
