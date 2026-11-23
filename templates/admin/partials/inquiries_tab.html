@@ -1,0 +1,92 @@
+<!-- ==================================================================== -->
+        <!-- TAB 3: CUSTOMER CONTACT INQUIRIES & SUPPORT FEED                     -->
+        <!-- ==================================================================== -->
+        <div class="tab-pane" id="tabPaneInquiries">
+            <div class="catalog-card">
+                <div class="catalog-toolbar">
+                    <div>
+                        <h2 style="font-size: 1.25rem; font-weight: 700; color: #FFFFFF; display: flex; align-items: center; gap: 10px;">
+                            <i class="fa-solid fa-envelope-open-text" style="color: var(--accent-sunset);"></i> Customer Contact Submissions
+                            <span class="tab-badge" style="background: rgba(255, 107, 74, 0.2); color: var(--accent-sunset);">
+                                <span id="inquiriesTableCount">{{ contact_messages|default([])|length }}</span> Total
+                            </span>
+                        </h2>
+                        <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 2px;">
+                            Direct inquiries, feedback, and delivery assistance tickets submitted via Contact Us.
+                        </p>
+                    </div>
+                    <div class="input-group" style="max-width: 300px;">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="msgSearchInput" class="input-control" placeholder="Search inquiries..." onkeyup="filterMessages()">
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="product-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 70px;">S.No</th>
+                                <th style="width: 240px;">Customer Info</th>
+                                <th style="width: 200px;">Subject</th>
+                                <th>Message</th>
+                                <th style="width: 170px;">Submitted On</th>
+                                <th style="width: 110px; text-align: right;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="messagesTableBody">
+                            {% for msg in contact_messages|default([]) %}
+                            <tr id="msg-row-{{ msg.id }}" data-search="{{ msg.name|lower }} {{ msg.email|lower }} {{ msg.subject|lower }} {{ msg.message|lower }}">
+                                <td style="color: var(--text-muted); font-weight: 700; font-family: 'JetBrains Mono', monospace;">#{{ loop.index }}</td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <div style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, rgba(255, 107, 74, 0.25), rgba(244, 63, 94, 0.15)); border: 1px solid rgba(255, 107, 74, 0.35); display: flex; align-items: center; justify-content: center; color: var(--accent-peach); font-weight: 700; font-size: 0.85rem; flex-shrink: 0;">
+                                            {{ msg.name[:1]|upper if msg.name else 'U' }}
+                                        </div>
+                                        <div>
+                                            <strong style="display: block; font-size: 0.92rem; color: #FFFFFF;">{{ msg.name }}</strong>
+                                            <span style="font-size: 0.78rem; color: var(--text-muted); display: block;">
+                                                <a href="mailto:{{ msg.email }}" style="color: var(--accent-peach); text-decoration: none;">{{ msg.email }}</a>
+                                            </span>
+                                            {% if msg.phone %}
+                                            <span style="font-size: 0.74rem; color: var(--text-muted); display: block;">
+                                                📞 {{ msg.phone }}
+                                            </span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span style="display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; background: rgba(255, 107, 74, 0.12); color: var(--accent-peach); border: 1px solid rgba(255, 107, 74, 0.25);">
+                                        {{ msg.subject }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div style="font-size: 0.88rem; color: #E5E7EB; line-height: 1.4; background: rgba(0, 0, 0, 0.25); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.05); word-break: break-word;">
+                                        "{{ msg.message }}"
+                                    </div>
+                                </td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 6px; color: var(--text-muted); font-size: 0.82rem; font-weight: 500;">
+                                        <i class="fa-regular fa-calendar" style="color: var(--accent-peach);"></i>
+                                        <span>{{ msg.timestamp|string|truncate(16, True, '') }}</span>
+                                    </div>
+                                </td>
+                                <td style="text-align: right;">
+                                    <button class="btn btn-danger btn-sm" onclick="deleteMessage({{ msg.id }}, this)" title="Dismiss inquiry">
+                                        <i class="fa-solid fa-trash-can"></i> Dismiss
+                                    </button>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr id="emptyMsgRow">
+                                <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                                    <i class="fa-regular fa-comments" style="font-size: 2.2rem; color: rgba(16, 185, 129, 0.3); display: block; margin-bottom: 10px;"></i>
+                                    No customer contact inquiries received yet.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>

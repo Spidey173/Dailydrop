@@ -1,0 +1,12 @@
+<script id="customer-audience-json" type="application/json">{{ rfm_customers|default([])|tojson|safe }}</script>
+
+    <script id="sales-revenue-data" type="application/json">{{ sales_info | tojson | safe }}</script>
+    <script id="category-revenue-data" type="application/json">{{ category_revenue | tojson | safe }}</script>
+    <script id="hourly-distribution-data" type="application/json">{{ hourly_distribution | tojson | safe }}</script>
+    <script id="rfm-summary-data" type="application/json">{{ rfm_summary | tojson | safe }}</script>
+    <script id="abc-summary-data" type="application/json">{{ abc_summary | tojson | safe }}</script>
+    <script id="city-sla-data" type="application/json">{{ city_sla | tojson | safe }}</script>
+    <script id="cohort-matrix-data" type="application/json">{{ cohort_matrix | tojson | safe }}</script>
+    <script id="market-basket-data" type="application/json">{{ market_basket | tojson | safe }}</script>
+
+    <script id="admin-stats-data" type="application/json">{{ stats | tojson | safe }}</script>

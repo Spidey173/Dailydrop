@@ -1,0 +1,35 @@
+<div class="hero-banner">
+            <div>
+                <span class="hero-eyebrow"><i class="fa-solid fa-sun" style="color: var(--accent-amber);"></i> SUNSET LIVE METRICS &bull; 10-MINUTE QUICK COMMERCE</span>
+                <h1>
+                    Executive Command Center
+                </h1>
+                <p>Real-time sales tracking, 10-minute delivery performance, customer loyalty analytics, and catalog controls.</p>
+            </div>
+            <div class="hero-cta-group">
+                <button class="btn btn-outline" onclick="exportBIDossierCSV()" title="Download Full Executive BI Report as CSV">
+                    <i class="fa-solid fa-file-csv" style="color: var(--accent-peach);"></i> Export CSV Report
+                </button>
+                <button class="btn btn-outline" onclick="exportAnalyticsJSON()" title="Export Raw Analytics JSON for External BI Tools">
+                    <i class="fa-solid fa-file-code"></i> JSON Export
+                </button>
+                <button class="btn btn-primary" onclick="openAddModal()">
+                    <i class="fa-solid fa-plus-circle"></i> Add New Product
+                </button>
+            </div>
+        </div>
+
+        <!-- Tab Header Switcher Strip -->
+        <div class="tabs-header-strip">
+            <button class="tab-btn active" id="tabBtnOverview" onclick="switchAdminTab('overview')">
+                <i class="fa-solid fa-chart-pie"></i> Performance Overview
+            </button>
+            <button class="tab-btn" id="tabBtnCatalog" onclick="switchAdminTab('catalog')">
+                <i class="fa-solid fa-boxes-stacked"></i> Product Catalog &amp; Prices
+                <span class="tab-badge" id="catalogBadge">{{ products|length }}</span>
+            </button>
+            <button class="tab-btn" id="tabBtnInquiries" onclick="switchAdminTab('inquiries')">
+                <i class="fa-solid fa-envelope-open-text"></i> Customer Inquiries
+                <span class="tab-badge" id="inquiriesBadge">{{ contact_messages|default([])|length }}</span>
+            </button>
+        </div>

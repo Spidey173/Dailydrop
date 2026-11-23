@@ -1,0 +1,137 @@
+<!-- ==================================================================== -->
+        <!-- TAB 2: CATALOG & LIVE PRICING CONTROL                                -->
+        <!-- ==================================================================== -->
+        <div class="tab-pane" id="tabPaneCatalog">
+            <div class="catalog-card">
+                <div class="catalog-toolbar">
+                    <div class="search-filter-cluster">
+                        <div class="input-group">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" id="searchInput" class="input-control"
+                                placeholder="Search catalog by name or ID..." onkeyup="filterProducts()">
+                        </div>
+                        <select id="categoryFilter" class="select-control" onchange="filterProducts()">
+                            <option value="">All Categories ({{ products|length }})</option>
+                            <option value="Fruits & Vegetables">Fruits & Vegetables</option>
+                            <option value="Dairy & Breakfast">Dairy & Breakfast</option>
+                            <option value="Grocery">Grocery</option>
+                            <option value="Snacks">Snacks</option>
+                            <option value="Beverages">Beverages</option>
+                            <option value="Personal Care">Personal Care</option>
+                            <option value="Household">Household</option>
+                            <option value="Frozen Foods">Frozen Foods</option>
+                            <option value="Baby Care">Baby Care</option>
+                            <option value="Home & Kitchen">Home & Kitchen</option>
+                        </select>
+                        <button class="btn btn-outline" id="lowStockBtn" onclick="toggleLowStockFilter(this)"
+                            style="border-color: rgba(245, 158, 11, 0.35); color: var(--warning);">
+                            <i class="fa-solid fa-triangle-exclamation"></i> Low Stock (≤ 10)
+                        </button>
+                    </div>
+                    <div style="font-size: 0.82rem; color: var(--text-muted); display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-bolt" style="color: var(--accent-peach);"></i> Double-click any price cell to edit live
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="product-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 70px;">S.No</th>
+                                <th>Product Details</th>
+                                <th>Category</th>
+                                <th>Price (₹) <span style="font-weight:normal; text-transform:none; color: var(--accent-peach);">(Click to Edit)</span></th>
+                                <th style="width: 220px;">Inventory Level</th>
+                                <th style="text-align: right; width: 180px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productTableBody">
+                            {% for p in products %}
+                            <tr id="product-row-{{ p.product_id }}" data-name="{{ p.name|lower }}"
+                                data-category="{{ p.category }}"
+                                data-product-id="{{ p.product_id }}"
+                                data-product-name="{{ p.name|e }}"
+                                data-price="{{ p.price }}"
+                                data-subcategory="{{ (p.subcategory or '')|e }}"
+                                data-stock="{{ p.stock|default(50) }}"
+                                data-image="{{ p.image_path|e }}">
+                                <td class="row-index" style="color: var(--text-muted); font-weight: 700; font-family: 'JetBrains Mono', monospace;">
+                                    #{{ loop.index }}
+                                </td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <img src="{{ p.image_path }}" alt="{{ p.name }}" class="product-thumb"
+                                            onerror="this.onerror=null; this.src='/static/product-placeholder.svg'">
+                                        <div>
+                                            <strong style="display: block; font-size: 0.94rem; color: #FFFFFF;">{{ p.name }}</strong>
+                                            <span style="font-size: 0.76rem; color: var(--text-muted);">
+                                                {{ p.subcategory or 'Standard' }} • <code style="color: var(--accent-peach); font-family: 'JetBrains Mono', monospace;">ID: #{{ p.product_id }}</code>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="cat-tag">{{ p.category }}</span>
+                                </td>
+                                <td>
+                                    <div class="price-wrapper"
+                                        onclick="enablePriceEdit(this, {{ p.product_id }}, {{ p.price }})">
+                                        <span class="price-value">₹{{ "%.2f"|format(p.price|float) }}</span>
+                                        <i class="fa-solid fa-pen price-edit-icon"></i>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="stock-control-cell" id="stock-cell-{{ p.product_id }}">
+                                        <span class="stock-badge-pill {% if p.stock|default(50) < 5 %}badge-critical{% elif p.stock|default(50) <= 10 %}badge-low{% else %}badge-healthy{% endif %}" id="stock-badge-{{ p.product_id }}">
+                                            {% if p.stock|default(50) < 5 %}
+                                                <i class="fa-solid fa-triangle-exclamation me-1"></i> CRITICAL: {{ p.stock|default(50) }}
+                                            {% elif p.stock|default(50) <= 10 %}
+                                                <i class="fa-solid fa-circle-exclamation me-1"></i> LOW: {{ p.stock|default(50) }}
+                                            {% else %}
+                                                <i class="fa-solid fa-circle-check me-1"></i> {{ p.stock|default(50) }} units
+                                            {% endif %}
+                                        </span>
+                                        <input type="range" class="admin-stock-slider" min="0" max="100" value="{{ p.stock|default(50) }}"
+                                               oninput="onStockSliderChange({{ p.product_id }}, this.value)"
+                                               id="stock-slider-{{ p.product_id }}" title="Drag to adjust stock live">
+                                    </div>
+                                </td>
+                                <td style="text-align: right; white-space: nowrap;">
+                                    <button class="btn btn-outline btn-sm me-2" style="border-color: rgba(255, 107, 74, 0.4); color: #FF9E7D;" onclick="openEditModalFromRow({{ p.product_id }})">
+                                        <i class="fa-solid fa-pen-to-square"></i> Edit
+                                    </button>
+                                    <button class="btn btn-danger btn-sm" onclick="deleteProduct({{ p.product_id }}, this)">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                                    No products found in catalog.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Client-Side Pagination Strip -->
+                <div class="pagination-strip">
+                    <div style="font-size: 0.82rem; color: var(--text-muted);" id="paginationInfo">
+                        Showing <span id="visibleRange">1 - 25</span> of <span id="totalProductsCount">{{ products|length }}</span> catalog items
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="page-btn" id="prevPageBtn" onclick="changePage(-1)">
+                            <i class="fa-solid fa-chevron-left"></i> Prev
+                        </button>
+                        <span id="pageIndicator" style="display: inline-flex; align-items: center; padding: 0 10px; font-size: 0.82rem; font-weight: 700; color: var(--accent-peach);">
+                            Page 1
+                        </span>
+                        <button class="page-btn" id="nextPageBtn" onclick="changePage(1)">
+                            Next <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>

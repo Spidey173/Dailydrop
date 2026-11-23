@@ -1,0 +1,27 @@
+<!-- Executive Navigation Bar -->
+    <nav class="admin-nav">
+        <div class="brand-container">
+            <img src="{{ url_for('static', filename='logo1.webp') }}" alt="Daily Drop Logo" class="brand-logo"
+                onerror="this.src='https://images.unsplash.com/photo-1542838132-92c53300491e?w=100'">
+            <div class="brand-text">
+                <span class="brand-title">Daily Drop</span>
+                <span class="db-pulse">
+                    <span class="pulse-dot"></span> Live Neon PostgreSQL • {{ "{:,}".format(stats.total_orders|default(0)|int) }} Orders
+                </span>
+            </div>
+        </div>
+        <div class="nav-actions">
+            <button class="btn btn-mint" onclick="openSqlLabModal()" title="Inspect the Advanced SQL queries powering this dashboard">
+                <i class="fa-solid fa-code"></i> SQL Analytics Lab
+            </button>
+            <a href="{{ url_for('admin_orders') }}" class="btn btn-primary" title="View Customer Orders & Delivery Tracking">
+                <i class="fa-solid fa-truck-fast"></i> Customer Orders (<span id="navOrderCount">{{ stats.total_orders|default(0) }}</span>)
+            </a>
+            <a href="/" class="btn btn-outline" target="_blank" title="Open Customer Storefront">
+                <i class="fa-solid fa-store"></i> Storefront ↗
+            </a>
+            <a href="/logout" class="btn btn-outline" style="color: #F87171; border-color: rgba(239, 68, 68, 0.35);">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </a>
+        </div>
+    </nav>
