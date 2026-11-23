@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background Radial Gradient -->
+    <radialGradient id="bgGrad" cx="35%" cy="30%" r="80%">
+      <stop offset="0%" stop-color="#0e2a1b"/>
+      <stop offset="50%" stop-color="#05150d"/>
+      <stop offset="100%" stop-color="#020805"/>
+    </radialGradient>
+
+    <!-- Neon Glow Gradient -->
+    <linearGradient id="neonGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00F5D4"/>
+      <stop offset="45%" stop-color="#34D399"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+
+    <!-- Drop Highlight Gradient -->
+    <linearGradient id="dropGrad" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.95"/>
+      <stop offset="25%" stop-color="#A7F3D0"/>
+      <stop offset="70%" stop-color="#00F5D4"/>
+      <stop offset="100%" stop-color="#10B981"/>
+    </linearGradient>
+
+    <!-- Basket Body Gradient -->
+    <linearGradient id="basketGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#34D399"/>
+      <stop offset="40%" stop-color="#10B981"/>
+      <stop offset="100%" stop-color="#047857"/>
+    </linearGradient>
+
+    <!-- Glow Filter -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Squircle Base -->
+  <rect x="20" y="20" width="472" height="472" rx="118" fill="url(#bgGrad)"/>
+  <rect x="20" y="20" width="472" height="472" rx="118" fill="none" stroke="url(#neonGrad)" stroke-width="6" stroke-opacity="0.5"/>
+  <rect x="26" y="26" width="460" height="460" rx="112" fill="none" stroke="#34D399" stroke-width="1.5" stroke-opacity="0.25"/>
+
+  <!-- Top Glass Highlight Sheen -->
+  <path d="M 65 140 C 65 75 95 45 160 45 L 352 45 C 417 45 447 75 447 140 C 375 165 137 165 65 140 Z" fill="#FFFFFF" opacity="0.04"/>
+
+  <g filter="url(#glow)">
+    <!-- Basket Handles -->
+    <path d="M 148 245 C 135 150 195 110 240 105" fill="none" stroke="url(#neonGrad)" stroke-width="14" stroke-linecap="round"/>
+    <path d="M 364 245 C 377 150 317 110 272 105" fill="none" stroke="url(#neonGrad)" stroke-width="14" stroke-linecap="round"/>
+
+    <!-- Speed Droplet (DailyDrop Mascot) -->
+    <path d="M 256 110 C 256 110 216 172 216 204 C 216 226 234 244 256 244 C 278 244 296 226 296 204 C 296 172 256 110 256 110 Z" fill="url(#dropGrad)"/>
+    
+    <!-- Droplet Glint -->
+    <path d="M 242 178 C 238 188 238 198 240 206 C 242 208 245 206 246 204 C 248 198 249 190 252 182 C 253 178 248 172 244 174 C 243 175 242 176 242 178 Z" fill="#FFFFFF" opacity="0.85"/>
+
+    <!-- Basket Rim -->
+    <rect x="110" y="240" width="292" height="20" rx="10" fill="url(#neonGrad)"/>
+
+    <!-- Basket Body -->
+    <path d="M 126 266 L 152 386 C 154 396 163 404 174 404 L 338 404 C 349 404 358 396 360 386 L 386 266 Z" fill="url(#basketGrad)"/>
+
+    <!-- Speed / Air Vents on Basket (Obsidian Cutouts) -->
+    <rect x="249" y="278" width="14" height="108" rx="7" fill="#020805"/>
+    <rect x="206" y="278" width="14" height="104" rx="7" fill="#020805"/>
+    <rect x="292" y="278" width="14" height="104" rx="7" fill="#020805"/>
+    <rect x="164" y="278" width="13" height="94" rx="6.5" fill="#020805"/>
+    <rect x="335" y="278" width="13" height="94" rx="6.5" fill="#020805"/>
+  </g>
+</svg>
