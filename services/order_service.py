@@ -7,8 +7,9 @@ from typing import Optional, List, Dict, Any, Tuple
 import json
 import logging
 from datetime import datetime
-from database import (
-    get_db_connection, DatabaseError, get_all_orders_with_user_info,
+from database import get_db_connection, DatabaseError
+from repositories.order_repository import get_all_orders_with_user_info
+from repositories.analytics_repository import (
     clear_analytics_cache, get_unified_analytics, get_customer_audiences
 )
 from utils import validate_order_data, sanitize_string
@@ -101,7 +102,7 @@ class OrderService:
         if not items_list:
             return False, 'Cart cannot be empty', None
 
-        from database import clear_product_cache
+        from repositories.product_repository import clear_product_cache
         from services.catalog_validation_service import CatalogValidationService
         from services.inventory_reservation_service import InventoryReservationService
         from services.order_persistence_service import OrderPersistenceService

@@ -15,7 +15,8 @@ import time
 from datetime import datetime, timedelta, date
 from typing import Any, Dict, List, Optional, Tuple
 
-from database import get_db_connection, clear_analytics_cache
+from database import get_db_connection
+from repositories.analytics_repository import clear_analytics_cache
 from services.order_persistence_service import OrderPersistenceService
 
 logger = logging.getLogger(__name__)

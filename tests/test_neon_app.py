@@ -1,9 +1,8 @@
 import pytest
 from app import create_app
-from database import (
-    get_all_products, get_user_by_email,
-    get_dashboard_stats
-)
+from repositories.product_repository import get_all_products
+from repositories.user_repository import get_user_by_email
+from repositories.analytics_repository import get_dashboard_stats
 
 @pytest.fixture
 def client():

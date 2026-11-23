@@ -419,12 +419,15 @@ if not USE_REAL_POSTGRES:
 
     # Pre-warm catalog and user caches in database module
     try:
-        database.clear_product_cache()
-        database.clear_user_cache()
-        database.clear_analytics_cache()
-        database.get_all_products()
-        database.get_user_by_email('admin_dailydrop@gmail.com')
-        database.get_user_by_email('demo_dailydrop@gmail.com')
+        from repositories.product_repository import clear_product_cache, get_all_products
+        from repositories.user_repository import clear_user_cache, get_user_by_email
+        from repositories.analytics_repository import clear_analytics_cache
+        clear_product_cache()
+        clear_user_cache()
+        clear_analytics_cache()
+        get_all_products()
+        get_user_by_email('admin_dailydrop@gmail.com')
+        get_user_by_email('demo_dailydrop@gmail.com')
     except Exception as e:
         print(f"Warning pre-warming in-memory cache: {e}")
 

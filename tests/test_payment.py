@@ -194,7 +194,7 @@ def test_api_verify_payment_validation():
             hashlib.sha256
         ).hexdigest()
 
-        from database import save_pending_order
+        from repositories.order_repository import save_pending_order
         save_pending_order(
             razorpay_order_id=order_id,
             user_id=1,
@@ -280,7 +280,7 @@ def test_razorpay_webhook_signature_and_idempotency():
 def test_razorpay_webhook_client_disconnect_recovery():
     """Verify webhook recovers pending order and completes order placement if client disconnects."""
     import json
-    from database import save_pending_order, get_pending_order
+    from repositories.order_repository import save_pending_order, get_pending_order
     from services.order_service import OrderService
     app = create_app('testing')
     key_secret = "test_webhook_recovery_secret_789"

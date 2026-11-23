@@ -8,7 +8,8 @@ import pytest
 from datetime import datetime, timedelta, timezone
 from unittest.mock import patch, MagicMock
 from app import create_app
-from database import get_db_connection, get_unified_analytics, clear_analytics_cache
+from database import get_db_connection
+from repositories.analytics_repository import get_unified_analytics, clear_analytics_cache
 from services.order_service import OrderService
 from services.auth_service import AuthService
 

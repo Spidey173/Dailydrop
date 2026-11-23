@@ -5,7 +5,8 @@ import pytest
 from app import create_app
 from services.auth_service import AuthService
 from services.order_service import OrderService
-from database import get_db_connection, clear_user_cache
+from database import get_db_connection
+from repositories.user_repository import clear_user_cache
 
 
 import uuid
@@ -93,7 +94,7 @@ def test_place_order_endpoint(client):
 
 def test_normalized_order_items(test_user):
     """Verify orders persist normalized relational rows into order_items table."""
-    from database import get_order_items
+    from repositories.order_repository import get_order_items
     items = [
         {"name": "Farm Fresh Red Hybrid Tomatoes (1 kg)", "price": 35.0, "quantity": 2, "image": "/static/fruits-vegetables/tomato.jpg"},
         {"name": "Amul Taaza Homogenised Toned Milk (1 L)", "price": 54.0, "quantity": 1, "image": "/static/dairy-breakfast/milk.jpg"}
@@ -130,7 +131,7 @@ def test_normalized_order_items(test_user):
 
 def test_atomic_inventory_decrement_and_race_prevention(test_user):
     """Verify UPDATE products SET stock = stock - %s WHERE stock >= %s atomically decrements and prevents overselling."""
-    from database import add_product, get_product_by_id, delete_product
+    from repositories.product_repository import add_product, get_product_by_id, delete_product
 
     # Create a product with initial stock of 10
     product_id = add_product(

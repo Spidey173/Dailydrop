@@ -137,7 +137,7 @@ def api_create_order() -> Tuple[Any, int]:
     # Persist pending checkout in database to safeguard against customer disconnects
     if rzp_order and rzp_order.get('id'):
         try:
-            from database import save_pending_order
+            from repositories.order_repository import save_pending_order
             save_pending_order(
                 razorpay_order_id=rzp_order.get('id'),
                 user_id=session.get('user_id'),
@@ -233,7 +233,8 @@ def api_verify_payment() -> Tuple[Any, int]:
         }), 400
 
     # 4. Check if order was already recorded (idempotent retry from client or webhook)
-    from database import get_db_connection, get_pending_order, delete_pending_order
+    from database import get_db_connection
+    from repositories.order_repository import get_pending_order, delete_pending_order
     from psycopg2.extras import RealDictCursor
 
     try:
@@ -428,7 +429,8 @@ def api_razorpay_webhook() -> Tuple[Any, int]:
     """
     import json
     from services.payment_service import PaymentService
-    from database import get_db_connection, get_pending_order, delete_pending_order
+    from database import get_db_connection
+    from repositories.order_repository import get_pending_order, delete_pending_order
     from psycopg2.extras import RealDictCursor
 
     signature = request.headers.get('X-Razorpay-Signature', '')

@@ -22,9 +22,8 @@ import threading
 import pytest
 from app import create_app
 from config import Config
-from database import (
-    add_product, get_product_by_id, save_pending_order
-)
+from repositories.product_repository import add_product, get_product_by_id
+from repositories.order_repository import save_pending_order
 from services.order_service import OrderService
 from services.payment_service import PaymentService
 from utils import SanitizingLogFormatter
@@ -87,7 +86,7 @@ def test_forged_prices_overridden_by_catalog():
     assert success is True
     assert order_id is not None
 
-    from database import get_order_items
+    from repositories.order_repository import get_order_items
     items = get_order_items(order_id)
     assert len(items) == 1
     assert items[0]['price'] == 250.00
@@ -222,7 +221,7 @@ def test_verify_payment_invalid_signature(auth_client):
 
 def test_verify_payment_mismatched_user(test_app):
     """Payment verification must reject if pending order belongs to a different user (HTTP 403)."""
-    from database import get_user_by_email
+    from repositories.user_repository import get_user_by_email
     key_secret = "test_key_secret_for_mismatch"
     Config.RAZORPAY_KEY_SECRET = key_secret
 

@@ -5,7 +5,8 @@ import json
 import pytest
 from unittest.mock import patch
 from app import create_app
-from database import get_db_connection, save_pending_order
+from database import get_db_connection
+from repositories.order_repository import save_pending_order
 from services.auth_service import AuthService
 from services.outbox_service import OutboxService
 from services.order_service import OrderService

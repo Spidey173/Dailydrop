@@ -3,10 +3,11 @@ Product service managing catalog retrieval, inventory updates, and product admin
 """
 from typing import Optional, List, Dict, Any, Tuple
 import logging
-from database import (
+from database import DatabaseError
+from repositories.product_repository import (
     get_all_products, get_product_by_id, get_product_by_name, update_product_price,
     update_product_stock, update_product, add_product, delete_product, get_low_stock_products,
-    DatabaseError
+    clear_product_cache
 )
 
 logger = logging.getLogger(__name__)

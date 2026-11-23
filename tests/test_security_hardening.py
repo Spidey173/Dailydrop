@@ -195,7 +195,7 @@ def test_authoritative_price_resolution_overrides_client_tampering():
     assert success is True
     assert order_id is not None
 
-    from database import get_order_items
+    from repositories.order_repository import get_order_items
     items = get_order_items(order_id)
     assert len(items) == 1
     assert float(items[0]['price']) == 400.0
