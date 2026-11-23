@@ -1,0 +1,86 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: dailydrop-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: dailydrop
+      POSTGRES_USER: dailydrop
+      POSTGRES_PASSWORD: dailydrop_dev_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dailydrop -d dailydrop"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:alpine
+    container_name: dailydrop-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  migrate:
+    build: .
+    container_name: dailydrop-migrate
+    environment:
+      DATABASE_URL: postgresql://dailydrop:dailydrop_dev_password@postgres:5432/dailydrop
+    command: ["python", "-m", "migrations.runner"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  web:
+    build: .
+    container_name: dailydrop-web
+    restart: unless-stopped
+    environment:
+      FLASK_ENV: production
+      DATABASE_URL: postgresql://dailydrop:dailydrop_dev_password@postgres:5432/dailydrop
+      REDIS_URL: redis://redis:6379/0
+      REDIS_ENABLED: "true"
+      SECRET_KEY: ${SECRET_KEY:-dev_secret_key_daily_drop_secure_hash_32chars}
+      PORT: 5000
+    ports:
+      - "5000:5000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
+  worker:
+    build: .
+    container_name: dailydrop-worker
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://dailydrop:dailydrop_dev_password@postgres:5432/dailydrop
+      REDIS_URL: redis://redis:6379/0
+      REDIS_ENABLED: "true"
+    command: ["python", "worker.py"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
+volumes:
+  postgres_data:
+  redis_data:
