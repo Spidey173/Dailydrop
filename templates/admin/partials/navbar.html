@@ -17,7 +17,7 @@
             <a href="{{ url_for('admin_orders') }}" class="btn btn-primary" title="View Customer Orders & Delivery Tracking">
                 <i class="fa-solid fa-truck-fast"></i> Customer Orders (<span id="navOrderCount">{{ stats.total_orders|default(0) }}</span>)
             </a>
-            <a href="/" class="btn btn-outline" target="_blank" title="Open Customer Storefront">
+            <a href="/store" class="btn btn-outline" target="_blank" title="Open Customer Storefront">
                 <i class="fa-solid fa-store"></i> Storefront ↗
             </a>
             <a href="/logout" class="btn btn-outline" style="color: #F87171; border-color: rgba(239, 68, 68, 0.35);">
