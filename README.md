@@ -37,11 +37,9 @@
 
 ## 📸 Screenshots
 
-> _To add screenshots: place image files in `static/screenshots/` (e.g., `storefront.png`, `admin-dashboard.png`) and update the image paths below._
-
 | Storefront & Catalog | Admin Analytics Dashboard |
 | :---: | :---: |
-| `![Storefront](static/screenshots/storefront.png)` | `![Admin Dashboard](static/screenshots/admin-dashboard.png)` |
+| ![Storefront](static/screenshots/storefront.png) | ![Admin Dashboard](static/screenshots/admin-dashboard.png) |
 
 ---
 
