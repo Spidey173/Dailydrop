@@ -175,7 +175,7 @@ def health_check():
             'type': 'PostgreSQL',
             'latency_ms': db_latency_ms
         }
-    except Exception as dbe:
+    except Exception:
         health_status['status'] = 'degraded'
         health_status['components']['database'] = {
             'status': 'disconnected',

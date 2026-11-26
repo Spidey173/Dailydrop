@@ -7,14 +7,10 @@ import sys
 import os
 import json
 import logging
-import threading
-from contextlib import contextmanager
 from unittest.mock import MagicMock
 
 import pytest
-import psycopg2
 from psycopg2 import pool
-from psycopg2.extras import RealDictCursor
 
 from testcontainers.community.postgres import PostgresContainer
 from testcontainers.community.redis import RedisContainer

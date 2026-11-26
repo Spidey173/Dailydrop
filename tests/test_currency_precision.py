@@ -7,7 +7,6 @@ from decimal import Decimal
 import pytest
 from services.currency_service import CurrencyService
 from services.payment_service import PaymentService
-from services.catalog_validation_service import CatalogValidationService
 
 
 def test_currency_service_to_decimal():

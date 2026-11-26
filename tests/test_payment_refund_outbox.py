@@ -9,8 +9,6 @@ from database import get_db_connection
 from psycopg2.extras import RealDictCursor
 from repositories.order_repository import save_pending_order
 from services.auth_service import AuthService
-from services.outbox_service import OutboxService
-from services.order_service import OrderService
 
 
 @pytest.fixture

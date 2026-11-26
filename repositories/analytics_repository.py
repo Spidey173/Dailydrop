@@ -7,9 +7,9 @@ import json
 import time
 import logging
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Tuple
 from psycopg2.extras import RealDictCursor
-from database import get_db_connection, DatabaseError
+from database import get_db_connection
 from .product_repository import get_all_products
 from .order_repository import get_all_orders_with_user_info
 

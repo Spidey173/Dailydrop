@@ -8,7 +8,6 @@ and 10-minute quick-commerce delivery SLA tracking.
 import os
 import json
 import random
-import math
 from datetime import datetime, timedelta
 import pandas as pd
 import numpy as np
@@ -172,7 +171,6 @@ def generate_orders_and_items(products_df, customers_df, num_orders=2500, start_
     order_items = []
     item_counter = 1
 
-    total_days = (end_date - start_date).days
     customers_list = customers_df.to_dict('records')
 
     # Assign target order count based on persona

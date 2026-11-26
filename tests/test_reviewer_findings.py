@@ -6,7 +6,7 @@ Tests verifying and testing fixes for Task 7 reviewer findings:
 """
 import pytest
 from datetime import datetime, timedelta, timezone
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from app import create_app
 from database import get_db_connection
 from repositories.analytics_repository import get_unified_analytics, clear_analytics_cache
@@ -77,7 +77,7 @@ def test_traffic_simulator_daemon_disabled_by_default():
     7b: By default, TrafficSimulatorService daemon must NOT be called on app boot.
     """
     with patch("dev_tools.traffic_simulator_service.TrafficSimulatorService.start_daemon") as mock_start:
-        app = create_app('development')
+        create_app('development')
         mock_start.assert_not_called()
 
 

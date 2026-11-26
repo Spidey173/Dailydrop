@@ -2,10 +2,8 @@
 Tests for RFM Segmentation Analytics and dynamic timestamp calculations.
 """
 import pytest
-from datetime import datetime, timezone, timedelta
 from app import create_app
 from database import get_db_connection
-from repositories.analytics_repository import _get_fallback_rfm_customers
 
 
 @pytest.fixture

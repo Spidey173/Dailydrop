@@ -9,7 +9,6 @@ import logging
 from typing import Optional
 from contextlib import contextmanager
 from psycopg2 import pool
-from psycopg2.extras import RealDictCursor
 from config import Config
 
 logger = logging.getLogger(__name__)

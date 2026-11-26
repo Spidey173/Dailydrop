@@ -5,11 +5,9 @@ Validates:
 2. runner.py execution is idempotent (second run applies zero migrations).
 3. seed.py idempotently provisions users and catalog products without duplication.
 """
-import pytest
-from unittest.mock import patch, MagicMock
 from database import get_db_connection
 from migrations.runner import run_migrations, get_applied_migrations
-from seed import seed_users, seed_products, seed_database
+from seed import seed_database
 
 
 def test_schema_migrations_table_and_retrieval():

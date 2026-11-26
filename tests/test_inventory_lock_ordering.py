@@ -2,9 +2,8 @@
 Tests for deterministic lock ordering during inventory reservation to prevent database deadlocks.
 """
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock
 from app import create_app
-from database import get_db_connection
 from services.inventory_reservation_service import InventoryReservationService
 
 

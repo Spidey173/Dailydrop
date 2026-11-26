@@ -8,7 +8,7 @@ Validates:
 """
 import json
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from app import create_app
 from database import get_db_connection
 from psycopg2.extras import RealDictCursor
@@ -38,7 +38,6 @@ def test_failure_between_cache_mutation_and_db_commit_rolls_back_cache(app_clien
             cursor.execute("SELECT product_id, stock FROM products WHERE stock >= 10 LIMIT 1")
             prod = cursor.fetchone()
             pid = prod['product_id'] if isinstance(prod, dict) else prod[0]
-            initial_stock = prod['stock'] if isinstance(prod, dict) else prod[1]
 
     # Pre-warm Redis cache with current database authoritative stock
     RedisService.set_stock(pid, initial_stock)
@@ -152,7 +151,6 @@ def test_order_persistence_single_insert_and_atomic_outbox(app_client):
             cursor.execute("SELECT product_id, stock FROM products WHERE stock >= 10 LIMIT 1")
             prod = cursor.fetchone()
             pid = prod['product_id'] if isinstance(prod, dict) else prod[0]
-            initial_stock = prod['stock'] if isinstance(prod, dict) else prod[1]
 
     cart = [{"product_id": pid, "quantity": 1}]
     executed_statements = []

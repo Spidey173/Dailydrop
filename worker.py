@@ -33,7 +33,7 @@ def main():
         from rq import Queue
         from rq.worker.worker_classes import SimpleWorker, Worker
         from rq.registry import FailedJobRegistry
-    except (ImportError, ModuleNotFoundError) as err:
+    except (ImportError, ModuleNotFoundError):
         logger.error(
             "Cannot start worker: Required dependency 'rq' is not installed in the active Python environment.\n"
             "Please activate the virtual environment and install dependencies:\n"

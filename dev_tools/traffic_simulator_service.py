@@ -12,8 +12,8 @@ import os
 import random
 import threading
 import time
-from datetime import datetime, timedelta, date
-from typing import Any, Dict, List, Optional, Tuple
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
 
 from database import get_db_connection
 from repositories.analytics_repository import clear_analytics_cache

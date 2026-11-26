@@ -115,7 +115,7 @@ def save_pending_order(razorpay_order_id: str, user_id: Optional[int], full_name
                                 total_amount = EXCLUDED.total_amount
                         ''', (razorpay_order_id, validated_user_id, full_name, phone_number, address, products_json, total_amount))
                     cursor.execute("RELEASE SAVEPOINT save_pending_sp")
-                except Exception as query_err:
+                except Exception:
                     try:
                         cursor.execute("ROLLBACK TO SAVEPOINT save_pending_sp")
                     except Exception:
