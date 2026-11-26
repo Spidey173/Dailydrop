@@ -38,6 +38,7 @@ def test_failure_between_cache_mutation_and_db_commit_rolls_back_cache(app_clien
             cursor.execute("SELECT product_id, stock FROM products WHERE stock >= 10 LIMIT 1")
             prod = cursor.fetchone()
             pid = prod['product_id'] if isinstance(prod, dict) else prod[0]
+            initial_stock = prod['stock'] if isinstance(prod, dict) else prod[1]
 
     # Pre-warm Redis cache with current database authoritative stock
     RedisService.set_stock(pid, initial_stock)
