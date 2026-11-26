@@ -14,7 +14,7 @@ import logging
 import time
 from typing import Optional, Any, Tuple
 import redis
-from config import Config
+from core.config import Config
 
 logger = logging.getLogger(__name__)
 

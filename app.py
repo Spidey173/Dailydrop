@@ -21,11 +21,11 @@ mimetypes.add_type('image/png', '.png')
 mimetypes.add_type('image/svg+xml', '.svg')
 
 
-from config import config_dict
-from database import init_database, DatabaseError
-from extensions import csrf, limiter
+from core.config import config_dict
+from core.database import init_database, DatabaseError
+from core.extensions import csrf, limiter
 from blueprints import register_blueprints
-from utils import configure_structured_logging
+from core.utils import configure_structured_logging
 
 # Configure sanitized structured logging
 configure_structured_logging()

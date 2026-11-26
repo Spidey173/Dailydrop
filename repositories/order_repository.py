@@ -7,7 +7,7 @@ import json
 import logging
 from typing import Any, Dict, List, Optional
 from psycopg2.extras import RealDictCursor
-from database import get_db_connection, DatabaseError
+from core.database import get_db_connection, DatabaseError
 
 logger = logging.getLogger("dailydrop.repositories.order")
 

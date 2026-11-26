@@ -55,7 +55,7 @@ class OutboxService:
     @staticmethod
     def fetch_pending_events(limit: int = 50) -> List[Dict[str, Any]]:
         """Fetch unhandled outbox events ready for dispatch (read-only inspection)."""
-        from database import get_db_connection
+        from core.database import get_db_connection
         from psycopg2.extras import RealDictCursor
 
         try:
@@ -106,7 +106,7 @@ class OutboxService:
         to 'IN_PROGRESS' within the SAME database transaction before row locks are released.
         Guarantees that multiple concurrent workers never process the same event twice.
         """
-        from database import get_db_connection
+        from core.database import get_db_connection
         from psycopg2.extras import RealDictCursor
 
         try:
@@ -168,7 +168,7 @@ class OutboxService:
     @staticmethod
     def mark_processed(event_id: str) -> bool:
         """Mark an outbox event as successfully processed/relayed."""
-        from database import get_db_connection
+        from core.database import get_db_connection
         try:
             with get_db_connection() as conn:
                 with conn.cursor() as cursor:
@@ -188,7 +188,7 @@ class OutboxService:
     @staticmethod
     def mark_failed(event_id: str, error_message: str) -> bool:
         """Record failure and increment retry counter."""
-        from database import get_db_connection
+        from core.database import get_db_connection
         try:
             with get_db_connection() as conn:
                 with conn.cursor() as cursor:

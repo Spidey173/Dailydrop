@@ -116,7 +116,7 @@ def test_api_v1_products_filters(client):
 def test_strict_product_id_resolution():
     """Verify CatalogValidationService rejects missing or unknown product IDs with 400-level error."""
     from services.catalog_validation_service import CatalogValidationService
-    from database import get_db_connection
+    from core.database import get_db_connection
 
     with get_db_connection() as conn:
         with conn.cursor() as cur:

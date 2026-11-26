@@ -5,7 +5,7 @@ import json
 import pytest
 from unittest.mock import patch
 from app import create_app
-from database import get_db_connection
+from core.database import get_db_connection
 from psycopg2.extras import RealDictCursor
 from repositories.order_repository import save_pending_order
 from services.auth_service import AuthService

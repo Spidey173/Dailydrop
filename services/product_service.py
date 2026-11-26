@@ -3,7 +3,7 @@ Product service managing catalog retrieval, inventory updates, and product admin
 """
 from typing import Optional, List, Dict, Any, Tuple
 import logging
-from database import DatabaseError
+from core.database import DatabaseError
 from repositories.product_repository import (
     get_all_products, get_product_by_id, get_product_by_name, update_product_price,
     update_product_stock, update_product, add_product, delete_product, get_low_stock_products
@@ -129,7 +129,7 @@ class ProductService:
         if not query:
             return []
         try:
-            from database import get_db_connection
+            from core.database import get_db_connection
             from psycopg2.extras import RealDictCursor
             with get_db_connection() as conn:
                 with conn.cursor(cursor_factory=RealDictCursor) as cursor:

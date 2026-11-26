@@ -4,7 +4,7 @@ Unit and integration tests for Main Blueprint, static informational views, and c
 import pytest
 from app import create_app
 from services.contact_service import ContactService
-from database import get_db_connection
+from core.database import get_db_connection
 
 
 @pytest.fixture

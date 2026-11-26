@@ -11,7 +11,7 @@ from services.product_service import ProductService
 from services.order_service import OrderService
 from services.contact_service import ContactService
 from blueprints.helpers import admin_required
-from utils import sanitize_string
+from core.utils import sanitize_string
 from repositories.product_repository import normalize_category, clear_product_cache
 
 logger = logging.getLogger(__name__)

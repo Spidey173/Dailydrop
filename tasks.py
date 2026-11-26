@@ -47,7 +47,7 @@ def check_low_stock_alerts_task(product_ids: List[int]) -> List[Dict[str, Any]]:
     if not product_ids:
         return []
 
-    from database import get_db_connection
+    from core.database import get_db_connection
     from psycopg2.extras import RealDictCursor
 
     alerts = []

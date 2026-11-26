@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import List, Dict, Any, Tuple, Optional
 import logging
 from psycopg2.extras import RealDictCursor
-from database import get_db_connection, DatabaseError
+from core.database import get_db_connection, DatabaseError
 
 logger = logging.getLogger(__name__)
 

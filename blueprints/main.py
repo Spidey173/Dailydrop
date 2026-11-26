@@ -146,7 +146,7 @@ def health_check():
     Returns HTTP 200 if healthy, HTTP 503 if primary database is degraded.
     """
     import time
-    from database import get_db_connection
+    from core.database import get_db_connection
     from services.redis_service import RedisService
     from flask import current_app, jsonify
 

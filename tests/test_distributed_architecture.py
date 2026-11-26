@@ -15,7 +15,7 @@ from services.idempotency_service import IdempotencyService
 from services.outbox_service import OutboxService
 from services.task_service import TaskService
 from app import create_app
-from database import get_db_connection
+from core.database import get_db_connection
 from repositories.product_repository import (
     get_all_products, get_product_by_id, update_product_stock, clear_product_cache
 )
@@ -31,7 +31,7 @@ def client():
 
 def test_redis_service_unmocked_methods_have_no_name_error():
     """Verify that unmocked get_client() and get_raw_client() do not raise NameError due to missing imports."""
-    from config import Config
+    from core.config import Config
     from services.redis_service import RedisService
 
     orig_enabled = Config.REDIS_ENABLED

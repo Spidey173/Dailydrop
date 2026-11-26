@@ -4,7 +4,7 @@ Unit and integration tests for Authentication Blueprint & AuthService.
 import pytest
 from app import create_app
 from services.auth_service import AuthService
-from database import get_db_connection
+from core.database import get_db_connection
 from repositories.user_repository import clear_user_cache
 from werkzeug.security import check_password_hash
 

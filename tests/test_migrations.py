@@ -5,7 +5,7 @@ Validates:
 2. runner.py execution is idempotent (second run applies zero migrations).
 3. seed.py idempotently provisions users and catalog products without duplication.
 """
-from database import get_db_connection
+from core.database import get_db_connection
 from migrations.runner import run_migrations, get_applied_migrations
 from seed import seed_database
 

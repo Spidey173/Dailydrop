@@ -6,10 +6,10 @@ import time
 from typing import Tuple, Any
 import logging
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify
-from config import Config
+from core.config import Config
 from services.order_service import OrderService
 from blueprints.helpers import require_login
-from extensions import csrf
+from core.extensions import csrf
 
 logger = logging.getLogger(__name__)
 
@@ -233,7 +233,7 @@ def api_verify_payment() -> Tuple[Any, int]:
         }), 400
 
     # 4. Check if order was already recorded (idempotent retry from client or webhook)
-    from database import get_db_connection
+    from core.database import get_db_connection
     from repositories.order_repository import get_pending_order, delete_pending_order
     from psycopg2.extras import RealDictCursor
 
@@ -429,7 +429,7 @@ def api_razorpay_webhook() -> Tuple[Any, int]:
     """
     import json
     from services.payment_service import PaymentService
-    from database import get_db_connection
+    from core.database import get_db_connection
     from repositories.order_repository import get_pending_order, delete_pending_order
     from psycopg2.extras import RealDictCursor
 

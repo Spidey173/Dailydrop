@@ -7,12 +7,12 @@ from typing import Optional, List, Dict, Any, Tuple
 import json
 import logging
 from datetime import datetime
-from database import get_db_connection, DatabaseError
+from core.database import get_db_connection, DatabaseError
 from repositories.order_repository import get_all_orders_with_user_info
 from repositories.analytics_repository import (
     clear_analytics_cache, get_unified_analytics, get_customer_audiences
 )
-from utils import validate_order_data, sanitize_string
+from core.utils import validate_order_data, sanitize_string
 
 logger = logging.getLogger(__name__)
 

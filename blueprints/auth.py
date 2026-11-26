@@ -5,7 +5,7 @@ import logging
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify
 from services.auth_service import AuthService
 from blueprints.helpers import is_safe_url
-from extensions import limiter
+from core.extensions import limiter
 
 logger = logging.getLogger(__name__)
 

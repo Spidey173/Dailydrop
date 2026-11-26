@@ -5,7 +5,7 @@ import pytest
 from app import create_app
 from services.auth_service import AuthService
 from services.wishlist_service import WishlistService
-from database import get_db_connection
+from core.database import get_db_connection
 from repositories.user_repository import clear_user_cache
 
 

@@ -24,7 +24,7 @@ from flask import Flask, render_template_string, jsonify
 def _init_serverless_app():
     # Secure serverless initialization: DATABASE_URL & SECRET_KEY injected via Vercel Environment Variables
     import secrets
-    from config import INSECURE_SECRET_KEYS, Config, ProductionConfig
+    from core.config import INSECURE_SECRET_KEYS, Config, ProductionConfig
 
     os.environ['VERCEL'] = '1'
     os.environ['DISABLE_FILE_UPLOADS'] = 'true'
@@ -47,7 +47,7 @@ def _init_serverless_app():
 
     # Auto-sanitize REDIS_URL in environment if present, else disable Redis on Vercel
     if os.getenv('REDIS_URL'):
-        from config import sanitize_redis_url
+        from core.config import sanitize_redis_url
         clean_redis = sanitize_redis_url(os.environ['REDIS_URL'])
         os.environ['REDIS_URL'] = clean_redis
         Config.REDIS_URL = clean_redis

@@ -9,7 +9,7 @@ import logging
 from typing import Optional
 from contextlib import contextmanager
 from psycopg2 import pool
-from config import Config
+from core.config import Config
 
 logger = logging.getLogger(__name__)
 

@@ -4,7 +4,7 @@ Tests for TrafficSimulatorService: Autonomous order generation & daily activity 
 import pytest
 from app import create_app
 from dev_tools.traffic_simulator_service import TrafficSimulatorService
-from database import get_db_connection
+from core.database import get_db_connection
 
 
 @pytest.fixture

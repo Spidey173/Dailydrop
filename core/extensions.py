@@ -6,7 +6,7 @@ import logging
 from flask_wtf.csrf import CSRFProtect
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-from config import sanitize_redis_url
+from core.config import sanitize_redis_url
 
 logger = logging.getLogger(__name__)
 

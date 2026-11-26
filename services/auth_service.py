@@ -4,9 +4,9 @@ Authentication service handling user registration, password hashing, and login v
 from typing import Optional, Dict, Any, Tuple
 import logging
 from werkzeug.security import generate_password_hash, check_password_hash
-from database import get_db_connection, DatabaseError
+from core.database import get_db_connection, DatabaseError
 from repositories.user_repository import get_user_by_email, get_user_by_id, clear_user_cache
-from utils import validate_user_input, is_valid_email, sanitize_string
+from core.utils import validate_user_input, is_valid_email, sanitize_string
 
 logger = logging.getLogger(__name__)
 

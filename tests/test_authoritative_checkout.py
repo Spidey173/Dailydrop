@@ -21,12 +21,12 @@ import json
 import threading
 import pytest
 from app import create_app
-from config import Config
+from core.config import Config
 from repositories.product_repository import add_product, get_product_by_id
 from repositories.order_repository import save_pending_order
 from services.order_service import OrderService
 from services.payment_service import PaymentService
-from utils import SanitizingLogFormatter
+from core.utils import SanitizingLogFormatter
 import logging
 
 

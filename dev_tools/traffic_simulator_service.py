@@ -15,7 +15,7 @@ import time
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
-from database import get_db_connection
+from core.database import get_db_connection
 from repositories.analytics_repository import clear_analytics_cache
 from services.order_persistence_service import OrderPersistenceService
 

@@ -10,7 +10,7 @@ import json
 import pytest
 from unittest.mock import patch
 from app import create_app
-from database import get_db_connection
+from core.database import get_db_connection
 from psycopg2.extras import RealDictCursor
 from services.redis_service import RedisService
 from services.inventory_reservation_service import InventoryReservationService

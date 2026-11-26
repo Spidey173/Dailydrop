@@ -13,7 +13,7 @@ import json
 import logging
 from typing import Optional
 from werkzeug.security import generate_password_hash
-from database import get_db_connection, DatabaseError
+from core.database import get_db_connection, DatabaseError
 
 logger = logging.getLogger("dailydrop.seed")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")

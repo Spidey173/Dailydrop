@@ -3,7 +3,7 @@ Tests for RFM Segmentation Analytics and dynamic timestamp calculations.
 """
 import pytest
 from app import create_app
-from database import get_db_connection
+from core.database import get_db_connection
 
 
 @pytest.fixture

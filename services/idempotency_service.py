@@ -13,7 +13,7 @@ import logging
 from typing import Optional, Tuple, Dict, Any
 from flask import request
 
-from config import Config
+from core.config import Config
 from services.redis_service import RedisService
 
 import time

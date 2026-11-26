@@ -2,7 +2,7 @@ import io
 import pytest
 from app import create_app
 from services.product_service import ProductService
-from database import get_db_connection
+from core.database import get_db_connection
 from psycopg2.extras import RealDictCursor
 
 try:

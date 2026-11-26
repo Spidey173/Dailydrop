@@ -13,7 +13,7 @@ import os
 import glob
 import logging
 from typing import List, Tuple
-from database import get_db_connection, DatabaseError
+from core.database import get_db_connection, DatabaseError
 
 logger = logging.getLogger("dailydrop.migrations")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")

@@ -3,7 +3,7 @@ Tests verifying elimination of N+1 database queries during cart validation and i
 """
 import pytest
 from app import create_app
-from database import get_db_connection
+from core.database import get_db_connection
 from services.catalog_validation_service import CatalogValidationService
 from services.inventory_reservation_service import InventoryReservationService
 

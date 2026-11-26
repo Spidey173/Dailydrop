@@ -3,8 +3,8 @@ Contact service managing contact message processing and saving.
 """
 from typing import Optional, Tuple
 import logging
-from database import get_db_connection, DatabaseError
-from utils import validate_contact_data, sanitize_string
+from core.database import get_db_connection, DatabaseError
+from core.utils import validate_contact_data, sanitize_string
 
 logger = logging.getLogger(__name__)
 

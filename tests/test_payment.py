@@ -5,7 +5,7 @@ import hmac
 import hashlib
 from app import create_app
 from services.payment_service import PaymentService
-from config import Config
+from core.config import Config
 
 
 def test_payment_authoritative_calculation_free_delivery():

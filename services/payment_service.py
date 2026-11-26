@@ -9,7 +9,7 @@ import hmac
 import logging
 from typing import Optional, Dict, Any, Tuple, List
 import requests
-from config import Config
+from core.config import Config
 from services.currency_service import CurrencyService
 
 logger = logging.getLogger(__name__)

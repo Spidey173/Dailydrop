@@ -82,7 +82,7 @@ def _setup_test_infrastructure(_postgres_container, _redis_container):
     os.environ["REDIS_ENABLED"] = "true"
 
     # --- Initialize database module with real Postgres pool ---
-    import database
+    from core import database
     # Close any existing pool
     if database._db_pool and not database._db_pool.closed:
         try:
@@ -178,7 +178,7 @@ def _setup_test_infrastructure(_postgres_container, _redis_container):
 
 def _seed_test_products():
     """Seed extra products referenced by integration tests."""
-    from database import get_db_connection
+    from core.database import get_db_connection
     test_products = [
         ('Organic Tomatoes', 3.99, 'Vegetables', 'Fresh', 50, '/static/fruits-vegetables/tomato.jpg'),
         ('Whole Milk', 4.50, 'Dairy', 'Milk', 50, '/static/dairy-breakfast/milk.jpg'),
@@ -232,7 +232,7 @@ def _isolate_test():
     Uses TRUNCATE ... RESTART IDENTITY CASCADE for speed and correctness.
     Redis is flushed to clear stock cache and idempotency keys.
     """
-    from database import get_db_connection
+    from core.database import get_db_connection
     from services.redis_service import RedisService
 
     # Truncate all data tables (not schema_migrations)
@@ -271,7 +271,7 @@ def _isolate_test():
 
 def _reseed_fixtures():
     """Re-seed users and products for each test."""
-    from database import get_db_connection
+    from core.database import get_db_connection
     from werkzeug.security import generate_password_hash
 
     admin_pass = generate_password_hash('Dailydrop@173')
@@ -296,7 +296,7 @@ def _reseed_fixtures():
 
 def _seed_products_from_file():
     """Seed catalog products from seeds/products.json."""
-    from database import get_db_connection
+    from core.database import get_db_connection
     json_seed = os.path.join(ROOT_DIR, 'seeds', 'products.json')
     js_file = os.path.join(ROOT_DIR, 'static', 'js', 'products.js')
     seed_file = json_seed if os.path.exists(json_seed) else js_file

@@ -12,11 +12,11 @@ Verifies:
 import io
 import pytest
 from app import create_app
-from config import ProductionConfig
+from core.config import ProductionConfig
 from services.payment_service import PaymentService
 from services.order_service import OrderService
 from services.idempotency_service import IdempotencyService
-from database import get_db_connection
+from core.database import get_db_connection
 
 
 @pytest.fixture
@@ -97,7 +97,7 @@ def test_serverless_dev_uses_random_key_when_missing():
     """Verify that in dev/test, a missing SECRET_KEY falls back to a random per-process key."""
     import os
     from api.index import _init_serverless_app
-    from config import Config, ProductionConfig
+    from core.config import Config, ProductionConfig
     old_env = dict(os.environ)
     orig_cfg_secret = Config.SECRET_KEY
     orig_prod_secret = ProductionConfig.SECRET_KEY
