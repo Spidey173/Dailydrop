@@ -3,7 +3,7 @@
 [![CI Pipeline](https://github.com/Spidey173/Dailydrop/actions/workflows/ci.yml/badge.svg)](https://github.com/Spidey173/Dailydrop/actions)
 [![Tests](https://img.shields.io/badge/Pytest-110%20Passed-brightgreen?style=flat-square&logo=pytest)](tests/)
 [![Backend](https://img.shields.io/badge/Python%203.11-Flask%203-blue?style=flat-square&logo=python)](app.py)
-[![Database](https://img.shields.io/badge/PostgreSQL-16-336791?style=flat-square&logo=postgresql&logoColor=white)](database.py)
+[![Database](https://img.shields.io/badge/PostgreSQL-16-336791?style=flat-square&logo=postgresql&logoColor=white)](core/database.py)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=flat-square&logo=docker&logoColor=white)](docker-compose.yml)
 [![License](https://img.shields.io/badge/License-MIT-lightgrey?style=flat-square)](LICENSE)
 
@@ -16,7 +16,7 @@
 ## ✨ Features
 
 - **User Authentication:** Secure registration, login, and session management for customers and admins.
-- **Product Browsing & Categories:** Browse 241 seeded grocery items with category filtering and search.
+- **Product Browsing & Categories:** Browse 241 seeded grocery items with category filtering and search (`/api/v1/products`).
 - **Shopping Cart & Pricing:** Add/update items with server-side price calculation and delivery fee rules.
 - **Order Placement & Tracking:** End-to-end checkout flow with order history and status progression.
 - **Payment Integration:** Razorpay checkout with server-side signature verification and demo payment support.
@@ -27,11 +27,11 @@
 
 ## 🛠️ Tech Stack
 
-- **Backend:** Python 3.11, Flask 3, Gunicorn
+- **Backend:** Python 3.11+, Flask 3, Gunicorn
 - **Database & Cache:** PostgreSQL 16 (Neon / Docker), Redis (with in-memory fallback)
 - **Frontend:** Jinja2 Templates, HTML5, CSS3, Vanilla JavaScript, Chart.js
 - **Payments & Background Jobs:** Razorpay API, RQ (Redis Queue)
-- **DevOps & Testing:** Docker, Docker Compose, Vercel, GitHub Actions, Pytest, Testcontainers
+- **DevOps & Quality:** Docker, Docker Compose, Vercel, GitHub Actions, Pytest, Testcontainers, Ruff, Black
 
 ---
 
@@ -43,18 +43,26 @@
 
 ---
 
-## 🏗️ Architecture Overview
+## 🏗️ Architecture
 
-DailyDrop follows a layered Flask architecture to keep routes, business logic, and database queries cleanly separated:
+```mermaid
+flowchart LR
+    Client["Browser / Client"] --> Web["app.py (Flask Blueprints)"]
+    Web --> Services["services/ (Business Logic)"]
+    Services --> Repos["repositories/ (SQL Queries)"]
+    Services --> Redis["Redis (Cache & RQ Queue)"]
+    Repos --> PG[("PostgreSQL 16")]
+    Redis --> Worker["worker.py (RQ Worker)"]
+```
 
-- **Blueprints (`blueprints/`):** Handle HTTP routes for auth, products, cart, storefront, and admin views.
-- **Services (`services/`):** Encapsulate core business logic including order processing, pricing validation, stock reservation, and Razorpay verification.
-- **Repositories (`repositories/`):** Manage PostgreSQL queries for users, products, orders, and analytics.
-- **Cache & Worker (`redis_service.py`, `worker.py`):** Use Redis for caching and RQ for asynchronous background tasks.
+- **`core/`:** Configuration (`config.py`), PostgreSQL connection pool (`database.py`), Flask extensions (`extensions.py`), and shared utilities (`utils.py`).
+- **`blueprints/`:** HTTP route handlers (`main`, `auth`, `products`, `cart`, `admin`).
+- **`services/` & `repositories/`:** Layered business logic and parameterized PostgreSQL access.
+- **API Endpoints:** Product catalog REST endpoint at `/api/v1/products` and health probe at `/healthz`.
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Setup & Running
 
 ### Option 1: Docker Compose (Recommended)
 ```bash
@@ -71,17 +79,32 @@ docker-compose up --build
 git clone https://github.com/Spidey173/Dailydrop.git
 cd Dailydrop
 python3 -m venv venv && source venv/bin/activate
-pip install -r requirements.txt
+pip install -r requirements.txt -r requirements-dev.txt
 cp .env.example .env
-python -m migrations.runner
-python seed.py
-python app.py
+make migrate
+make seed
+make run
 ```
 
-### Running Tests
-The project includes **110 automated Pytest tests** running against ephemeral PostgreSQL and Redis containers via `testcontainers` (requires Docker running):
+### Environment Variables
+See [`.env.example`](.env.example) for all supported keys:
+- `DATABASE_URL` — PostgreSQL connection string
+- `SECRET_KEY` — Flask session & CSRF secret
+- `FLASK_ENV` — `development`, `testing`, or `production`
+- `REDIS_URL` / `REDIS_ENABLED` — Optional Redis connection (falls back to in-memory if unavailable)
+- `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET` / `RAZORPAY_WEBHOOK_SECRET` — Optional Razorpay credentials
+
+---
+
+## 🧪 Testing & Linting
+
 ```bash
-pytest
+# Run full Pytest suite (requires Docker for PostgreSQL/Redis testcontainers)
+make test
+
+# Run Ruff linter & Black formatter
+make lint
+make format
 ```
 
 ---
@@ -99,35 +122,22 @@ pytest
 
 ```text
 Dailydrop/
-├── app.py              # Flask application factory & blueprint registration
-├── blueprints/         # Route handlers (auth, products, cart, admin, main)
-├── services/           # Business logic (orders, payments, inventory, Redis)
-├── repositories/       # PostgreSQL data access & analytics queries
-├── migrations/         # Versioned SQL schema migrations
-├── seeds/              # Initial 241-item product catalog
-├── static/ & templates/# Frontend assets & Jinja2 HTML templates
-├── tests/              # 110 automated Pytest integration & unit tests
-├── worker.py           # Background RQ worker
-└── docker-compose.yml  # Multi-container local setup
+├── api/index.py          # Vercel serverless entry point
+├── app.py                # Flask application factory & WSGI entry point
+├── worker.py             # RQ background worker
+├── core/                 # Config, database pool, extensions, utilities
+├── blueprints/           # Route controllers (auth, products, cart, admin, main)
+├── services/             # Business logic (orders, payments, inventory, Redis)
+├── repositories/         # PostgreSQL data access & analytics queries
+├── migrations/           # Versioned SQL schema migrations
+├── seeds/                # Canonical 241-item catalog & seed script
+├── scripts/              # Helper scripts (run.sh, run_tests.sh)
+├── analytics/            # Offline BI scripts, SQL queries, CSVs, notebook
+├── static/ & templates/  # Frontend assets & Jinja2 HTML templates
+├── tests/                # 110 automated Pytest tests
+├── Makefile              # Common run, test, lint, and format commands
+└── pyproject.toml        # Project metadata, Ruff, and Black configuration
 ```
-
----
-
-## 📚 What I Learned
-
-- Designing a layered Flask backend separating routes, services, and SQL repositories.
-- Preventing stock overselling and handling server-side pricing validation in PostgreSQL transactions.
-- Integrating Razorpay payments with webhook/signature verification.
-- Writing integration tests against real PostgreSQL and Redis instances using Docker and Testcontainers.
-- Containerizing a multi-service Python app with Docker Compose and deploying serverless Flask apps to Vercel.
-
----
-
-## 🔮 Future Improvements
-
-- Real-time delivery tracking updates using WebSockets or Server-Sent Events.
-- Automated email/SMS order notifications.
-- Role-based access control for dark-store managers.
 
 ---
 
