@@ -64,27 +64,38 @@ flowchart LR
 
 ## 🚀 Setup & Running
 
-### Option 1: Docker Compose (Recommended)
+### Option 1: Docker Compose (Recommended — Windows, macOS & Linux)
 ```bash
 git clone https://github.com/Spidey173/Dailydrop.git
 cd Dailydrop
-cp .env.example .env
-docker-compose up --build
+cp .env.example .env      # Windows CMD: copy .env.example .env
+docker compose up --build
 ```
 - Storefront: `http://localhost:5000`
 - Health Check: `http://localhost:5000/healthz`
 
-### Option 2: Local Python Setup
+### Option 2: Local Python Setup (Windows, macOS & Linux)
 ```bash
 git clone https://github.com/Spidey173/Dailydrop.git
 cd Dailydrop
-python3 -m venv venv && source venv/bin/activate
+
+# 1. Create & activate virtual environment
+python -m venv venv
+# macOS / Linux:  source venv/bin/activate
+# Windows (CMD):  venv\Scripts\activate.bat
+# Windows (PS):   .\venv\Scripts\Activate.ps1
+
+# 2. Install dependencies & configure env
 pip install -r requirements.txt -r requirements-dev.txt
-cp .env.example .env
-make migrate
-make seed
-make run
+cp .env.example .env      # Windows CMD: copy .env.example .env
+
+# 3. Migrate, seed, and start server
+python -m migrations.runner
+python seed.py
+python app.py
 ```
+
+> _On macOS/Linux, you can also use `make migrate`, `make seed`, and `make run`._
 
 ### Environment Variables
 See [`.env.example`](.env.example) for all supported keys:
@@ -102,12 +113,12 @@ See [`.env.example`](.env.example) for all supported keys:
 # Install dev & test dependencies (includes pytest, testcontainers, ruff, black)
 pip install -r requirements-dev.txt
 
-# Run full Pytest suite (110 tests; requires Docker for PostgreSQL/Redis testcontainers)
-make test
+# Run full Pytest suite (110 tests; requires Docker running on Windows/macOS/Linux)
+pytest -v
 
-# Run Ruff linter & Black formatter
-make lint
-make format
+# Run Ruff linter & Black formatter (works on all OS; or `make lint` / `make format` on macOS/Linux)
+ruff check .
+black .
 ```
 
 ---
