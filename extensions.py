@@ -2,34 +2,15 @@
 Flask extensions initialized independently to prevent circular imports.
 """
 import os
-import re
 import logging
 from flask_wtf.csrf import CSRFProtect
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from config import sanitize_redis_url
 
 logger = logging.getLogger(__name__)
 
 csrf = CSRFProtect()
-
-
-def _sanitize_url(raw_url: str) -> str:
-    """Extract clean URL from possible CLI commands."""
-    if not raw_url:
-        return ""
-    url = raw_url.strip().strip('\'\"')
-    if 'redis-cli' in url:
-        has_tls = '--tls' in url
-        match = re.search(r'-u\s+([^\s\'\"]+)', url)
-        if match:
-            url = match.group(1).strip('\'\"')
-        else:
-            match = re.search(r'(rediss?://[^\s\'\"]+)', url)
-            if match:
-                url = match.group(1).strip('\'\"')
-        if has_tls and url.startswith('redis://'):
-            url = 'rediss://' + url[8:]
-    return url
 
 
 def _get_limiter_storage() -> str:
@@ -37,7 +18,7 @@ def _get_limiter_storage() -> str:
     try:
         custom_uri = os.getenv("RATELIMIT_STORAGE_URI")
         if custom_uri:
-            clean = _sanitize_url(custom_uri)
+            clean = sanitize_redis_url(custom_uri)
             if clean.startswith(('redis://', 'rediss://', 'memory://')):
                 return clean
 
@@ -47,7 +28,7 @@ def _get_limiter_storage() -> str:
 
         # Use Redis in non-testing environments if Redis is enabled and configured
         if redis_enabled and redis_url and flask_env != "testing":
-            clean = _sanitize_url(redis_url)
+            clean = sanitize_redis_url(redis_url)
             if clean.startswith(('redis://', 'rediss://')):
                 return clean
     except Exception as e:
