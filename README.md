@@ -99,7 +99,10 @@ See [`.env.example`](.env.example) for all supported keys:
 ## 🧪 Testing & Linting
 
 ```bash
-# Run full Pytest suite (requires Docker for PostgreSQL/Redis testcontainers)
+# Install dev & test dependencies (includes pytest, testcontainers, ruff, black)
+pip install -r requirements-dev.txt
+
+# Run full Pytest suite (110 tests; requires Docker for PostgreSQL/Redis testcontainers)
 make test
 
 # Run Ruff linter & Black formatter
