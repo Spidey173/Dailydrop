@@ -14,10 +14,10 @@ def test_app():
 
 
 def test_no_hardcoded_date_in_database_and_sql():
-    """Verify that no hardcoded '2026-11-01' remains in database.py or sql analytics."""
-    with open("database.py", "r") as f:
+    """Verify that no hardcoded '2026-11-01' remains in core/database.py or sql analytics."""
+    with open("core/database.py", "r") as f:
         content = f.read()
-    assert "2026-11-01" not in content, "Found hardcoded '2026-11-01' in database.py"
+    assert "2026-11-01" not in content, "Found hardcoded '2026-11-01' in core/database.py"
 
     with open("analytics/sql/02_customer_rfm_segmentation.sql", "r") as f:
         sql_content = f.read()
